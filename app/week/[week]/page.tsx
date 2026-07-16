@@ -31,6 +31,100 @@ const details = [
   "驗證：能用輸出、測試或圖表證明設計符合預期。",
 ];
 
+const week2Lectures = [
+  {
+    title:"資料型別、運算子與控制流程",
+    lead:"Python 程式執行時，每一個值都是物件。資料型別決定一個值能進行哪些操作；運算子用來組合與比較資料；控制流程則決定哪些敘述會執行、執行幾次。",
+    sections:[
+      {title:"1. 內建基本型別",items:["int 表示任意精度整數，例如 42、-7；float 表示浮點數，例如 3.14。浮點數採二進位近似表示，不適合直接用 == 判斷計算結果。","bool 只有 True 與 False。比較運算、成員判斷與邏輯運算都會產生布林值。","str 是不可變的 Unicode 字串，可使用索引、切片、split、strip、replace 與 f-string。","None 表示「沒有值」或「尚未取得結果」，判斷時使用 value is None，而不是 value == None。","type(value) 可觀察實際型別；isinstance(value, int) 能同時考量繼承關係，通常更適合程式判斷。"]},
+      {title:"2. 運算子與優先順序",items:["算術運算子包含 +、-、*、/、//、%、**；/ 一律產生 float，// 是向負無限方向取整的整除。","比較運算子可串接，例如 0 <= score <= 100，比使用兩次 and 更接近數學寫法。","and 與 or 具有短路求值：結果已能確定時，右側運算式不會執行。","in 與 not in 檢查成員；is 與 is not 比較是否為同一物件，不能拿來取代值相等比較。","運算式過長時應使用括號表達意圖，不要要求讀者背誦所有優先順序。"]},
+      {title:"3. 條件判斷",items:["if 處理第一個條件，elif 處理互斥的其他情況，else 處理剩餘情況。","Python 以縮排表示程式區塊；同一區塊必須維持一致縮排，慣例使用四個空白。","空字串、數字 0、空容器與 None 在條件中視為 False；其他物件通常視為 True。","條件應表達業務意圖，例如 if not cart，而不是 if len(cart) == 0。","多層巢狀 if 可透過提早 return、拆分函式或合併條件降低複雜度。"]},
+      {title:"4. 迴圈與流程控制",items:["for 逐一取得 iterable 的元素，適合已知資料集合；while 適合條件成立期間持續執行。","range(start, stop, step) 不包含 stop；enumerate 同時取得索引與元素；zip 可平行走訪多個 iterable。","break 結束最內層迴圈；continue 跳過本次剩餘敘述；不應過度使用而破壞流程可讀性。","for 與 while 可搭配 else；只有迴圈正常結束、沒有 break 時才執行 else。","無限迴圈必須有明確離開機制，並思考輸入錯誤、資源耗盡與停止條件。"]},
+    ],
+    demo:String.raw`score = 87
+if not 0 <= score <= 100:
+    print("分數範圍錯誤")
+elif score >= 90:
+    print("A")
+elif score >= 80:
+    print("B")
+else:
+    print("C 以下")
+
+for index, value in enumerate([10, 20, 30], start=1):
+    print(index, value)`,
+    questions:["為什麼 0.1 + 0.2 == 0.3 可能是 False？","is 與 == 的差別是什麼？","什麼情況應使用 while 而不是 for？"],
+  },
+  {
+    title:"函式、參數、作用域與回傳值",
+    lead:"函式把一段具有明確目的的處理命名，建立可重用、可測試的抽象。好的函式不是單純把長程式切短，而是用清楚的輸入與輸出表達一項責任。",
+    sections:[
+      {title:"1. 函式介面",items:["def 後接函式名稱與參數；名稱應使用動詞或動詞片語，例如 calculate_average。","參數是函式內的區域名稱；呼叫時傳入的物件會繫結到這些名稱。","return 結束函式並交回結果；沒有明確 return 時會回傳 None。","一個函式應盡量只有一個主要目的。若名稱中出現 and，可能需要拆成兩個函式。","docstring 應說明用途、參數意義、回傳結果與可能拋出的例外。"]},
+      {title:"2. 參數種類",items:["位置參數依順序配對；關鍵字參數以名稱配對，能提高呼叫可讀性。","預設參數讓呼叫端省略常用設定，但預設值在函式定義時只建立一次。","不可使用 [] 或 {} 作為可變預設值；應以 None 為預設，再於函式內建立新容器。","*args 把額外位置參數收集成 tuple；**kwargs 把額外關鍵字參數收集成 dict。","/ 左側是 positional-only；* 右側是 keyword-only，可用來設計不易誤用的 API。"]},
+      {title:"3. 作用域與名稱解析",items:["函式內指定的名稱預設屬於 local scope，函式結束後不再能從外部直接存取。","Python 依 LEGB 順序尋找名稱：Local、Enclosing、Global、Built-in。","global 允許重新繫結模組層名稱；nonlocal 允許重新繫結外層函式名稱，兩者都應謹慎使用。","讀取全域常數通常沒有問題，但修改共享全域狀態會增加測試與理解難度。","閉包能保留外層函式的狀態，但若狀態與多個行為相關，類別可能更清楚。"]},
+      {title:"4. 物件參考的傳遞",items:["Python 會把物件參考傳給函式，參數名稱與呼叫端名稱可能指向同一物件。","修改 list、dict 等可變物件的內容，呼叫端能看見變化。","在函式內重新指定參數，只會讓區域參數改指向另一物件，不會改變呼叫端名稱。","若函式不應修改輸入，可傳入不可變型別、建立副本，或在文件中明確說明。","回傳新值通常比偷偷修改輸入更容易理解與測試，但仍需依效能與語意判斷。"]},
+    ],
+    demo:String.raw`def add_item(item: str, items: list[str] | None = None) -> list[str]:
+    """回傳加入 item 後的新清單，不修改呼叫端資料。"""
+    result = [] if items is None else items.copy()
+    result.append(item)
+    return result
+
+original = ["book"]
+updated = add_item("pen", original)
+print(original)  # ['book']
+print(updated)   # ['book', 'pen']`,
+    questions:["為什麼 def f(items=[]): 可能造成跨次呼叫共享資料？","修改參數內容與重新指定參數有何不同？","函式何時應回傳 None？"],
+  },
+  {
+    title:"list、tuple、dict、set",
+    lead:"四種核心容器各自表達不同資料語意。選擇容器時，不只看語法方便，更要考慮順序、重複、可變性、查找方式與資料關係。",
+    sections:[
+      {title:"1. list：有順序、可變",items:["list 保存有順序的元素，允許重複值，適合需要新增、刪除與排序的序列。","append 加入一個元素；extend 加入另一 iterable 的所有元素；兩者不可混用。","索引從 0 開始，負索引由尾端計算；切片 list[start:stop:step] 會建立新的 list。","在迴圈中直接刪除正在走訪的 list 容易漏掉元素，應建立新 list 或走訪副本。","成員查找通常是線性時間；若主要需求是快速判斷是否存在，set 更合適。"]},
+      {title:"2. tuple：固定結構、不可變",items:["tuple 有順序且可重複，但建立後不能替換、增加或刪除元素。","適合座標、RGB、資料列等欄位數與意義固定的紀錄。","tuple 不代表內部物件一定不可變；若元素含 list，list 內容仍能修改。","函式回傳多個值實際上是回傳 tuple，可使用 unpacking 分配給多個名稱。","只有所有元素都可雜湊時，tuple 才能作為 dict key 或 set 元素。"]},
+      {title:"3. dict：鍵值對應",items:["dict 以唯一且可雜湊的 key 對應 value，適合依識別碼或名稱查找資料。","使用 mapping[key] 讀取不存在的 key 會產生 KeyError；get 可提供預設值。","keys、values、items 分別走訪鍵、值與鍵值對；items 最適合解包成 key, value。","setdefault 與 defaultdict 可簡化分組，但過度使用可能隱藏資料建立時機。","Python dict 保留插入順序，但其核心語意仍是 key 到 value 的對應。"]},
+      {title:"4. set：唯一元素集合",items:["set 不保存重複元素，適合去重、成員判斷與集合運算。","|、&、-、^ 分別表示聯集、交集、差集與對稱差集。","元素必須可雜湊，因此 list、dict、set 不能直接放入 set。","set 沒有索引，不能依位置取值；若需要穩定顯示順序，可在輸出時 sorted。","使用 set 去重會失去重複次數；若要統計次數應使用 dict 或 collections.Counter。"]},
+    ],
+    demo:String.raw`students = [
+    {"id": "S01", "skills": {"Python", "Git"}},
+    {"id": "S02", "skills": {"Python", "SQL"}},
+]
+
+by_id = {student["id"]: student for student in students}
+common = students[0]["skills"] & students[1]["skills"]
+all_skills = students[0]["skills"] | students[1]["skills"]
+
+print(by_id["S02"]["skills"])
+print(common)
+print(sorted(all_skills))`,
+    questions:["為什麼學號查詢適合 dict 而不是 list？","tuple 內含 list 時，tuple 是否完全不可變？","去重與統計次數應分別選擇什麼容器？"],
+  },
+  {
+    title:"C 與 Python 的執行模式",
+    lead:"C 與 Python 不只語法不同，型別系統、記憶體模型、建置流程與錯誤發生時間也不同。理解這些差異，才能避免把 C 的心智模型直接套用到 Python。",
+    sections:[
+      {title:"1. 建置與執行流程",items:["C 原始碼先經前處理、編譯、組譯與連結，產生平台相關的機器碼執行檔。","一般 Python 實作 CPython 會先把原始碼編譯成 bytecode，再由 Python 虛擬機器執行。","Python 也有編譯階段；稱為直譯語言不代表完全沒有編譯，而是最終通常由 VM 執行。","C 的編譯器可在執行前發現許多型別與語法問題；Python 的部分錯誤要執行到該路徑才出現。","Python 匯入模組時可能建立 __pycache__，快取 bytecode 以加速後續載入。"]},
+      {title:"2. 型別與名稱",items:["C 變數宣告包含固定型別與記憶體配置資訊，例如 int score。","Python 名稱沒有固定型別，名稱可以先後繫結到不同型別的物件。","Python 仍是強型別語言；不會自動把 '3' 與 2 相加，必須明確轉換。","型別提示不改變 Python 的動態執行特性，主要供閱讀、IDE 與靜態檢查工具使用。","動態型別提高彈性，也要求更完整的測試與清楚的介面設計。"]},
+      {title:"3. 記憶體與物件",items:["C 可直接操作位址、指標與配置／釋放記憶體，錯誤可能造成越界、懸空指標或記憶體洩漏。","Python 名稱保存物件參考，開發者通常不直接操作記憶體位址。","CPython 主要以 reference counting 管理生命週期，並搭配垃圾回收處理循環參考。","Python 的 list 是物件參考的動態陣列，不等同於 C 的固定型別陣列。","資源如檔案、鎖與網路連線應用 with 明確管理，不可只依賴垃圾回收。"]},
+      {title:"4. 效能與開發取捨",items:["C 接近硬體且編譯為機器碼，適合即時系統、驅動程式與高效能底層元件。","Python 語法精簡、標準函式庫豐富，適合快速開發、自動化、資料處理與應用整合。","效能比較必須針對實際瓶頸；Python 常透過以 C 實作的函式庫取得高效能。","先建立正確、可測試的設計，再使用 profiler 找出真正需要最佳化的位置。","實務系統可混合語言：Python 負責高階流程，C／C++／Rust 負責高成本核心。"]},
+    ],
+    demo:String.raw`# Python：名稱可以重新繫結，但操作仍受物件型別限制
+value = 10
+print(type(value).__name__)
+value = "10"
+print(type(value).__name__)
+
+try:
+    print(value + 2)
+except TypeError as error:
+    print(type(error).__name__)
+
+# 明確轉換後才能運算
+print(int(value) + 2)`,
+    questions:["為什麼 Python 是動態型別但仍稱為強型別？","bytecode 與機器碼有何不同？","哪些系統適合 C，哪些工作適合 Python？"],
+  },
+];
+
 const weekNotes: string[][] = [
   ["程序式設計把資料與處理資料的函式分開管理，流程通常由主程式控制。","物件導向將狀態與行為封裝在物件內，控制權分散到負責任的物件。","函數式設計偏好不可變資料與純函式，降低隱藏狀態造成的副作用。","從 C 轉換時，可把 struct 視為狀態，把操作 struct 的函式移入類別。","類別不是資料表；沒有行為、只放欄位的類別通常無法發揮物件導向價值。","物件之間應以方法呼叫傳遞訊息，而不是任意修改彼此內部資料。","專題評量會同時檢查功能、類別責任、物件關係、測試、文件與部署。","選擇典範時應考量問題特性，不需要把所有程式都強迫寫成類別。"],
   ["Python 名稱在執行時繫結到物件，名稱本身沒有固定型別。","bool 是 int 的子型別，但條件式應優先使用清楚的布林語意。","list 適合有順序且會變動的資料；tuple 適合固定結構或不可變紀錄。","dict 以鍵快速查找值；set 適合唯一性、交集、聯集與成員判斷。","預設參數在函式定義時建立，不可直接使用 list 或 dict 作為可變預設值。","*args 收集額外位置參數，**kwargs 收集額外關鍵字參數。","Python 的參數傳遞可理解為物件參考的傳值；函式收到新的名稱繫結。","容器推導式應保持簡短，複雜條件應改用一般迴圈提高可讀性。"],
@@ -442,7 +536,7 @@ export default async function WeekPage({params}:{params:Promise<{week:string}>})
     <section className="lesson-hero"><div><p className="eyebrow">WEEK {String(n).padStart(2,"0")} · {lesson[1]}</p><h1>{lesson[0]}</h1><p>本頁提供第 {n} 週的完整課堂講義、概念圖、實作流程與課後檢核，適合課堂投影與學生複習。</p></div><aside><b>本週學習重點</b><ol>{topics.slice(0,3).map(x=><li key={x}>{x}</li>)}</ol></aside></section>
     <div className="lesson-layout"><aside className="lesson-toc"><b>本頁目錄</b><a href="#objectives">學習目標</a><a href="#notes">詳細講義</a><a href="#diagram">概念圖</a><a href="#code">Python 範例</a><a href="#lab">實作任務</a><a href="#checklist">課後檢核</a></aside><article className="lesson-content">
       <section id="objectives" className="content-section"><p className="section-index">01 / OBJECTIVES</p><h2>本週學習目標</h2><ul className="objective-list">{topics.map(x=><li key={x}>{x}</li>)}</ul></section>
-      <section id="notes" className="content-section"><p className="section-index">02 / LECTURE NOTES</p><h2>詳細講義內容</h2><div className="note-grid">{topics.map((topic,i)=><section className="note-card" key={topic}><span>0{i+1}</span><h3>{topic}</h3><ul>{details.map((x,j)=><li key={x}>{x.replace("此概念",j===0?topic:"這項設計")}</li>)}</ul></section>)}</div><section className="deep-notes"><h3>本週必懂的核心重點</h3><ul>{weekNotes[n-1].map(x=><li key={x}>{x}</li>)}</ul></section><div className="teaching-flow"><b>建議教學流程</b><div><span>概念引導<small>20 分鐘</small></span><i>→</i><span>程式示範<small>30 分鐘</small></span><i>→</i><span>分組討論<small>20 分鐘</small></span><i>→</i><span>動手實作<small>50 分鐘</small></span></div></div></section>
+      <section id="notes" className="content-section"><p className="section-index">02 / LECTURE NOTES</p><h2>詳細講義內容</h2>{n===2?<div className="lecture-chapters">{week2Lectures.map((chapter,index)=><article className="lecture-chapter" key={chapter.title}><header><span>CHAPTER 0{index+1}</span><h3>{chapter.title}</h3><p>{chapter.lead}</p></header><div className="lecture-sections">{chapter.sections.map(section=><section key={section.title}><h4>{section.title}</h4><ul>{section.items.map(item=><li key={item}>{item}</li>)}</ul></section>)}</div><div className="mini-demo"><div><b>課堂示範程式</b><small>請學生先預測每一行輸出，再實際執行。</small></div><pre><code>{chapter.demo}</code></pre></div><div className="class-questions"><b>課堂提問</b><ol>{chapter.questions.map(question=><li key={question}>{question}</li>)}</ol></div></article>)}</div>:<div className="note-grid">{topics.map((topic,i)=><section className="note-card" key={topic}><span>0{i+1}</span><h3>{topic}</h3><ul>{details.map((x,j)=><li key={x}>{x.replace("此概念",j===0?topic:"這項設計")}</li>)}</ul></section>)}</div>}<section className="deep-notes"><h3>本週必懂的核心重點</h3><ul>{weekNotes[n-1].map(x=><li key={x}>{x}</li>)}</ul></section><div className="teaching-flow"><b>建議教學流程</b><div><span>概念引導<small>20 分鐘</small></span><i>→</i><span>程式示範<small>30 分鐘</small></span><i>→</i><span>分組討論<small>20 分鐘</small></span><i>→</i><span>動手實作<small>50 分鐘</small></span></div></div></section>
       <section id="diagram" className="content-section"><p className="section-index">03 / SVG VISUAL MODEL</p><figure className="concept-diagram"><div className="diagram-heading"><span>SCALABLE VECTOR DIAGRAM</span><h2>{lesson[0]}概念關係圖</h2></div><SvgDiagram week={n} topics={topics}/><figcaption>{[6,7,8,13,14,15,16].includes(n)?"上層為抽象或核心角色，下層為具體類別、實作或協作者。":"由左至右閱讀，呈現本週概念的處理流程與學習順序。"}</figcaption></figure></section>
       <section id="code" className="content-section code-section"><p className="section-index">04 / PYTHON EXAMPLE</p><h2>完整 Python 程式碼範例</h2><p className="code-intro">以下範例不是孤立語法片段，而是把本週概念放入可執行的小型情境。請先預測輸出，再逐行追蹤物件狀態與方法呼叫。</p><div className="example-card"><div className="example-title"><span>example_{String(n).padStart(2,"0")}.py</span><h3>{examples[n-1].title}</h3></div><pre><code>{examples[n-1].code}</code></pre><div className="example-output"><b>預期輸出／結果</b><pre>{examples[n-1].output}</pre></div><div className="example-analysis"><b>程式解讀</b><ul>{examples[n-1].points.map(x=><li key={x}>{x}</li>)}</ul></div></div></section>
       <section id="lab" className="content-section practice-panel"><p className="section-index">05 / HANDS-ON LAB</p><h2>課堂實作任務</h2><p className="lab-brief">先執行並修改上方範例，再選擇個人專題情境，運用「{topics[0]}」與「{topics[1]}」建立第二個版本。</p><ol className="lab-steps"><li><b>閱讀</b><span>預測輸出並逐行追蹤。</span></li><li><b>修改</b><span>加入一項規則與錯誤情境。</span></li><li><b>重構</b><span>改善命名、責任與重複程式。</span></li><li><b>測試</b><span>驗證正常、邊界與錯誤案例。</span></li></ol><div className="exercise-levels"><article><b>基礎題</b><p>替範例加入輸入驗證、型別提示與清楚的輸出。</p></article><article><b>進階題</b><p>增加第二種實作或物件，證明目前介面能否支援擴充。</p></article><article><b>專題題</b><p>找出專題中對應的類別或服務，套用本週技巧並提交前後差異。</p></article></div></section>
