@@ -125,6 +125,64 @@ print(int(value) + 2)`,
   },
 ];
 
+const pitfalls: string[][] = [
+  ["把所有資料包成 class 就誤以為已完成物件導向","類別只有 getter／setter，真正規則仍散落在主程式","為了重用幾行程式而建立不自然的繼承","物件彼此直接修改屬性，形成難追蹤的共享狀態"],
+  ["混用 is 與 ==，或忽略浮點數近似問題","使用可變預設參數，造成不同呼叫共享容器","未依資料語意選容器，只因熟悉 list","把 Python 當成沒有編譯與型別規則的腳本語言"],
+  ["把類別屬性誤當成每個物件獨立的資料","在 __init__ 外任意補屬性，產生不完整物件","classmethod 直接寫死類別名稱，破壞子類別相容性","staticmethod 放入需要物件狀態的行為"],
+  ["只用雙底線追求私有，卻沒有定義不變條件","setter 靜默修正非法輸入，讓錯誤難以察覺","直接回傳內部 list，讓呼叫端繞過驗證","公開過多底層欄位，使介面難以重構"],
+  ["用 is 比較數字或字串的值","誤以為 b=a 會複製物件","不知道淺複製仍共享巢狀資料","依賴 __del__ 釋放檔案或網路資源"],
+  ["把資料庫外鍵直接當成物件關係設計","過度使用雙向關聯，增加同步責任","混淆聚合與組合的生命週期語意","UML 多重性與實際程式集合限制不一致"],
+  ["只為消除重複而繼承，沒有 Is-a 關係","子類別拒絕父類別方法，違反可替換性","在多重繼承中直接呼叫父類別造成重複初始化","Mixin 太大並保存核心領域狀態"],
+  ["呼叫端以 isinstance 分支處理每個具體類別","ABC 同時承擔過多不相關能力","誤以為型別提示會自動做執行期驗證","為了介面共用而建立不自然的繼承階層"],
+  ["只背術語，無法追蹤實際物件狀態","未先畫參考關係就猜測 copy 題輸出","UML 只畫類別名稱而沒有責任與多重性","分析 MRO 時忽略 super 的協作順序"],
+  ["__repr__ 回傳非字串或包含難以除錯的資訊","可變物件實作不穩定的 __hash__","__next__ 結束時回傳 None 而非拋出 StopIteration","__exit__ 沒有保證清理或錯誤地吞掉例外"],
+  ["dataclass 使用共享的 list 預設值","把 frozen 誤認為所有巢狀內容都不可變","Enum 與一般字串混用，失去有限狀態保障","泛型只寫 Any，沒有保留輸入輸出的型別關係"],
+  ["需求中的每個名詞都直接建立類別","Controller 吸收所有規則，形成 God Object","CRC 卡只列資料欄位而沒有責任","循序圖訊息與最後方法介面不一致"],
+  ["把 SRP 解釋成每個類別只能有一個方法","為未知變化建立過多抽象與介面","子類別加強前置條件，破壞 LSP","只有依賴注入容器，卻沒有反轉依賴方向"],
+  ["為展示模式而套用模式，增加不必要類別","Observer 沒有解除訂閱或隔離訂閱者錯誤","重構同時改變行為，卻沒有測試保護","過度 Mock 內部實作，使測試阻礙重構"],
+  ["把領域規則寫在 View 或路由函式","ORM 模型直接等同領域模型，所有邏輯只剩 CRUD","Service 只轉呼叫 Repository，沒有使用案例責任","交易邊界不清，部分操作成功造成資料不一致"],
+  ["應用層直接依賴特定模型供應商 SDK","API Key 寫入原始碼或提交版本庫","沒有 timeout、重試上限與錯誤降級","部署只描述手動指令，缺乏服務、日誌與健康檢查"],
+  ["UML、程式與資料庫三者互相不一致","Manager、Utils、Controller 類別持續膨脹","只測試成功流程，忽略邊界與外部失敗","README 無法讓另一台電腦重現專題"],
+  ["專題功能很多但核心物件沒有實際行為","設計模式只出現在文件，程式並未解決相應問題","測試數量很多但沒有涵蓋主要使用案例","只有本機畫面，沒有部署或可重現啟動方式"],
+];
+
+const applications: string[][] = [
+  ["比較成績統計的程序式函式與 GradeBook 物件","將 C struct 與相關函式搬入一個 Python 類別","以純函式計算折扣並與有狀態策略物件比較","為專題列出物件、責任與傳遞的訊息"],
+  ["解析文字成數字並使用條件與迴圈統計","設計不修改輸入資料的 summarize 函式","分別以 list、dict、set 解決查找與去重","觀察 Python 型別錯誤何時在執行路徑出現"],
+  ["建立兩個 BankAccount 比較實體狀態","用類別屬性統計物件數量","以 from_csv 建立替代建構子","比較實體方法、classmethod 與 staticmethod"],
+  ["以 Product.price property 驗證價格","建立唯讀 account_number","回傳 tuple 保護交易紀錄","以 deposit／withdraw 取代直接修改 balance"],
+  ["畫出 a、b、copy 對物件的參考箭頭","比較可變 list 與不可變 tuple 的操作","修改巢狀資料觀察 shallow／deep copy","用 with 明確管理檔案生命週期"],
+  ["以 Student、Course、Enrollment 表達關聯類別","用 Engine 與 Car 表達 Composition","以方法參數展示 Dependency","把多重性規則實作成集合與驗證"],
+  ["建立 Shape、Circle、Rectangle 階層","以 super 延伸基底初始化","建立 PrintableMixin 並查看 mro()","把不適合的繼承改寫為組合"],
+  ["以 Payment Protocol 注入不同付款方式","比較 ABC 與 Protocol 的程式寫法","加入 FakePayment 驗證 Checkout","把 isinstance 條件改為多型呼叫"],
+  ["逐行追蹤 Cart 的狀態與 alias","練習 property、類別屬性與複製綜合題","由需求補完 UML 關係與多重性","先列 MRO 再預測 super 輸出"],
+  ["讓 Playlist 支援 len、repr 與迭代","比較 iterator class 與 generator function","建立可呼叫的累積器物件","以 context manager 管理暫時資源"],
+  ["建立 frozen、slots 的 Order dataclass","用 Enum 控制 Order 狀態","設計 Repository[T] 保存不同實體","用 Protocol 描述可序列化能力"],
+  ["從設備租借需求圈出名詞、動詞與規則","建立四張 CRC 卡並互換協作者","寫出主要與例外使用案例","由循序圖反推方法簽名"],
+  ["拆分同時儲存、寄信與計價的服務","以 Strategy 支援新增折扣而不改 Checkout","用小介面取代大型 Service Protocol","注入 MemoryRepository 測試高階使用案例"],
+  ["以 Factory 建立不同匯出器","把折扣條件重構為 Strategy","用 Observer 發送訂單事件","以 Adapter 包裝介面不同的外部服務"],
+  ["追蹤 Browser 到 Database 的請求流程","把容量規則移入 Course domain model","用 Service 協調註冊使用案例","以 Repository Protocol 隔離 ORM"],
+  ["建立 Cloud、Ollama、Fake 三種 Provider","在 Service 中集中 prompt 與錯誤處理","以環境變數選擇 Provider","撰寫 systemd、反向代理與健康檢查流程"],
+  ["用一句話重寫每個核心類別責任","比較 UML 與實際 import 依賴方向","替主要使用案例補正常與失敗測試","請同學依 README 在乾淨環境重建專題"],
+  ["以評分規準逐項檢查專題證據","從展示流程反查缺少的功能或文件","以 Spy／Fake 驗證外部互動","完成部署網址、版本標記與最終反思"],
+];
+
+function lectureFor(week:number, topic:string, index:number) {
+  const specific=weekNotes[week-1];
+  return {
+    title:topic,
+    lead:`本章聚焦「${topic}」。授課時應先說明它解決的問題，再從 Python 執行行為、設計選擇與錯誤案例逐步建立完整心智模型。`,
+    sections:[
+      {title:"1. 核心概念與運作方式",items:[specific[index*2],specific[index*2+1],"請學生用自己的話重新敘述概念，並指出程式執行前後有哪些狀態或依賴發生改變。"]},
+      {title:"2. Python 實作觀察",items:[applications[week-1][index],`在本週完整範例中找出與「${topic}」直接相關的類別、方法、型別提示或控制流程。`,"執行前先預測輸出，再加入 print、repr 或測試觀察物件身分、狀態與訊息傳遞。"]},
+      {title:"3. 設計判斷",items:[`先確認「${topic}」是否真的回應目前需求，而不是為了使用語法或模式而增加複雜度。`,"比較至少兩種可行寫法，從可讀性、耦合、可測試性、擴充成本與執行效能說明取捨。","把設計決策寫成一句話：因為哪一項變化或規則，所以選擇目前的責任與介面配置。"]},
+      {title:"4. 常見錯誤與診斷",items:[pitfalls[week-1][index],"要求學生建立最小反例重現問題，再修改為正確版本並比較輸出。","檢查錯誤屬於語法、執行期型別、物件狀態、責任配置或依賴方向，避免只修正表面訊息。"]},
+    ],
+    demo:`# 課堂示範：${applications[week-1][index]}\n# 1. 先執行本頁下方完整範例\n# 2. 找出與「${topic}」相關的程式行\n# 3. 修改一項輸入、狀態或具體實作\n# 4. 比較修改前後輸出並說明原因`,
+    questions:[`「${topic}」主要解決什麼問題？`,`如果不用這項設計，哪一段程式最先變得難以修改？`,`如何用輸出、測試或圖表證明目前實作正確？`],
+  };
+}
+
 const weekNotes: string[][] = [
   ["程序式設計把資料與處理資料的函式分開管理，流程通常由主程式控制。","物件導向將狀態與行為封裝在物件內，控制權分散到負責任的物件。","函數式設計偏好不可變資料與純函式，降低隱藏狀態造成的副作用。","從 C 轉換時，可把 struct 視為狀態，把操作 struct 的函式移入類別。","類別不是資料表；沒有行為、只放欄位的類別通常無法發揮物件導向價值。","物件之間應以方法呼叫傳遞訊息，而不是任意修改彼此內部資料。","專題評量會同時檢查功能、類別責任、物件關係、測試、文件與部署。","選擇典範時應考量問題特性，不需要把所有程式都強迫寫成類別。"],
   ["Python 名稱在執行時繫結到物件，名稱本身沒有固定型別。","bool 是 int 的子型別，但條件式應優先使用清楚的布林語意。","list 適合有順序且會變動的資料；tuple 適合固定結構或不可變紀錄。","dict 以鍵快速查找值；set 適合唯一性、交集、聯集與成員判斷。","預設參數在函式定義時建立，不可直接使用 list 或 dict 作為可變預設值。","*args 收集額外位置參數，**kwargs 收集額外關鍵字參數。","Python 的參數傳遞可理解為物件參考的傳值；函式收到新的名稱繫結。","容器推導式應保持簡短，複雜條件應改用一般迴圈提高可讀性。"],
@@ -536,7 +594,7 @@ export default async function WeekPage({params}:{params:Promise<{week:string}>})
     <section className="lesson-hero"><div><p className="eyebrow">WEEK {String(n).padStart(2,"0")} · {lesson[1]}</p><h1>{lesson[0]}</h1><p>本頁提供第 {n} 週的完整課堂講義、概念圖、實作流程與課後檢核，適合課堂投影與學生複習。</p></div><aside><b>本週學習重點</b><ol>{topics.slice(0,3).map(x=><li key={x}>{x}</li>)}</ol></aside></section>
     <div className="lesson-layout"><aside className="lesson-toc"><b>本頁目錄</b><a href="#objectives">學習目標</a><a href="#notes">詳細講義</a><a href="#diagram">概念圖</a><a href="#code">Python 範例</a><a href="#lab">實作任務</a><a href="#checklist">課後檢核</a></aside><article className="lesson-content">
       <section id="objectives" className="content-section"><p className="section-index">01 / OBJECTIVES</p><h2>本週學習目標</h2><ul className="objective-list">{topics.map(x=><li key={x}>{x}</li>)}</ul></section>
-      <section id="notes" className="content-section"><p className="section-index">02 / LECTURE NOTES</p><h2>詳細講義內容</h2>{n===2?<div className="lecture-chapters">{week2Lectures.map((chapter,index)=><article className="lecture-chapter" key={chapter.title}><header><span>CHAPTER 0{index+1}</span><h3>{chapter.title}</h3><p>{chapter.lead}</p></header><div className="lecture-sections">{chapter.sections.map(section=><section key={section.title}><h4>{section.title}</h4><ul>{section.items.map(item=><li key={item}>{item}</li>)}</ul></section>)}</div><div className="mini-demo"><div><b>課堂示範程式</b><small>請學生先預測每一行輸出，再實際執行。</small></div><pre><code>{chapter.demo}</code></pre></div><div className="class-questions"><b>課堂提問</b><ol>{chapter.questions.map(question=><li key={question}>{question}</li>)}</ol></div></article>)}</div>:<div className="note-grid">{topics.map((topic,i)=><section className="note-card" key={topic}><span>0{i+1}</span><h3>{topic}</h3><ul>{details.map((x,j)=><li key={x}>{x.replace("此概念",j===0?topic:"這項設計")}</li>)}</ul></section>)}</div>}<section className="deep-notes"><h3>本週必懂的核心重點</h3><ul>{weekNotes[n-1].map(x=><li key={x}>{x}</li>)}</ul></section><div className="teaching-flow"><b>建議教學流程</b><div><span>概念引導<small>20 分鐘</small></span><i>→</i><span>程式示範<small>30 分鐘</small></span><i>→</i><span>分組討論<small>20 分鐘</small></span><i>→</i><span>動手實作<small>50 分鐘</small></span></div></div></section>
+      <section id="notes" className="content-section"><p className="section-index">02 / LECTURE NOTES</p><h2>詳細講義內容</h2><div className="lecture-chapters">{(n===2?week2Lectures:topics.map((topic,index)=>lectureFor(n,topic,index))).map((chapter,index)=><article className="lecture-chapter" key={chapter.title}><header><span>CHAPTER 0{index+1}</span><h3>{chapter.title}</h3><p>{chapter.lead}</p></header><div className="lecture-sections">{chapter.sections.map(section=><section key={section.title}><h4>{section.title}</h4><ul>{section.items.map(item=><li key={item}>{item}</li>)}</ul></section>)}</div><div className="mini-demo"><div><b>課堂示範程式</b><small>請學生先預測結果，再實際執行與修改。</small></div><pre><code>{chapter.demo}</code></pre></div><div className="class-questions"><b>課堂提問</b><ol>{chapter.questions.map(question=><li key={question}>{question}</li>)}</ol></div></article>)}</div><section className="deep-notes"><h3>本週必懂的核心重點</h3><ul>{weekNotes[n-1].map(x=><li key={x}>{x}</li>)}</ul></section><div className="teaching-flow"><b>建議教學流程</b><div><span>概念引導<small>20 分鐘</small></span><i>→</i><span>程式示範<small>30 分鐘</small></span><i>→</i><span>分組討論<small>20 分鐘</small></span><i>→</i><span>動手實作<small>50 分鐘</small></span></div></div></section>
       <section id="diagram" className="content-section"><p className="section-index">03 / SVG VISUAL MODEL</p><figure className="concept-diagram"><div className="diagram-heading"><span>SCALABLE VECTOR DIAGRAM</span><h2>{lesson[0]}概念關係圖</h2></div><SvgDiagram week={n} topics={topics}/><figcaption>{[6,7,8,13,14,15,16].includes(n)?"上層為抽象或核心角色，下層為具體類別、實作或協作者。":"由左至右閱讀，呈現本週概念的處理流程與學習順序。"}</figcaption></figure></section>
       <section id="code" className="content-section code-section"><p className="section-index">04 / PYTHON EXAMPLE</p><h2>完整 Python 程式碼範例</h2><p className="code-intro">以下範例不是孤立語法片段，而是把本週概念放入可執行的小型情境。請先預測輸出，再逐行追蹤物件狀態與方法呼叫。</p><div className="example-card"><div className="example-title"><span>example_{String(n).padStart(2,"0")}.py</span><h3>{examples[n-1].title}</h3></div><pre><code>{examples[n-1].code}</code></pre><div className="example-output"><b>預期輸出／結果</b><pre>{examples[n-1].output}</pre></div><div className="example-analysis"><b>程式解讀</b><ul>{examples[n-1].points.map(x=><li key={x}>{x}</li>)}</ul></div></div></section>
       <section id="lab" className="content-section practice-panel"><p className="section-index">05 / HANDS-ON LAB</p><h2>課堂實作任務</h2><p className="lab-brief">先執行並修改上方範例，再選擇個人專題情境，運用「{topics[0]}」與「{topics[1]}」建立第二個版本。</p><ol className="lab-steps"><li><b>閱讀</b><span>預測輸出並逐行追蹤。</span></li><li><b>修改</b><span>加入一項規則與錯誤情境。</span></li><li><b>重構</b><span>改善命名、責任與重複程式。</span></li><li><b>測試</b><span>驗證正常、邊界與錯誤案例。</span></li></ol><div className="exercise-levels"><article><b>基礎題</b><p>替範例加入輸入驗證、型別提示與清楚的輸出。</p></article><article><b>進階題</b><p>增加第二種實作或物件，證明目前介面能否支援擴充。</p></article><article><b>專題題</b><p>找出專題中對應的類別或服務，套用本週技巧並提交前後差異。</p></article></div></section>
