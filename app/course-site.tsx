@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 
 const weeks = [
   { week: 1, title: "課程介紹與程式設計典範", tag: "基礎", summary: "從 C 語言的程序式思維，踏入以物件、責任與協作為核心的設計世界。", topics: ["課程目標與評量方式", "程序式、物件導向、函數式典範", "個人專題說明"], practice: "比較同一個問題的程序式與物件導向解法。" },
@@ -74,7 +75,7 @@ export function CourseSite() {
       <section className="section weeks-section" id="weeks">
         <div className="section-heading"><p className="eyebrow">Weekly syllabus</p><h2>每週課程與實作</h2><p>搜尋概念或依主題篩選；點開週次可查看學習重點與課堂實作。</p></div>
         <div className="tools"><label><span>搜尋課程</span><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="例如：UML、SOLID、測試…" /></label><div className="filters" aria-label="主題篩選">{tags.map((tag) => <button className={filter === tag ? "active" : ""} onClick={() => setFilter(tag)} key={tag}>{tag}</button>)}</div></div>
-        <div className="week-list">{visible.map((item) => <details className="week" key={item.week}><summary><span className="week-number">W{String(item.week).padStart(2, "0")}</span><span className="week-title"><small>{item.tag}</small><b>{item.title}</b><em>{item.summary}</em></span><span className="plus">＋</span></summary><div className="week-detail"><div><h4>本週重點</h4><ul>{item.topics.map((topic) => <li key={topic}>{topic}</li>)}</ul></div><div className="practice"><h4>實作任務</h4><p>{item.practice}</p></div></div></details>)}</div>
+        <div className="week-list">{visible.map((item) => <details className="week" key={item.week}><summary><span className="week-number">W{String(item.week).padStart(2, "0")}</span><span className="week-title"><small>{item.tag}</small><b>{item.title}</b><em>{item.summary}</em></span><span className="plus">＋</span></summary><div className="week-detail"><div><h4>本週重點</h4><ul>{item.topics.map((topic) => <li key={topic}>{topic}</li>)}</ul></div><div className="practice"><h4>實作任務</h4><p>{item.practice}</p><Link className="lesson-link" href={`/week/${item.week}/`}>進入第 {item.week} 週完整教材 →</Link></div></div></details>)}</div>
         {visible.length === 0 && <p className="empty">找不到符合條件的課程，請嘗試其他關鍵字。</p>}
       </section>
 
