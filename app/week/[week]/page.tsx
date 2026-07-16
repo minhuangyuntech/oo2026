@@ -52,6 +52,369 @@ const weekNotes: string[][] = [
   ["期末作品需先清楚界定問題、使用者與可驗證的功能範圍。","核心領域至少應展現封裝、責任分配與有意義的物件協作。","UML 類別圖需與最終程式一致，並標示重要關係與多重性。","至少選擇一項 SOLID 原則或設計模式，說明它解決的具體問題。","測試報告需包含測試範圍、案例、結果與尚未處理的風險。","部署需提供可瀏覽網址或可重現的完整啟動步驟。","展示應依問題、需求、設計、操作、品質證據與反思安排。","繳交內容包含原始碼、版本紀錄、README、UML、測試與個人反思。"],
 ];
 
+const examples = [
+  {title:"由程序式重構為物件協作",code:String.raw`# 程序式：資料與操作分離
+account = {"owner": "Amy", "balance": 1000}
+def withdraw(data, amount):
+    if 0 < amount <= data["balance"]:
+        data["balance"] -= amount
+
+# 物件導向：由物件維持自己的規則
+class Account:
+    def __init__(self, owner: str, balance: int = 0):
+        self.owner = owner
+        self.balance = balance
+
+    def withdraw(self, amount: int) -> None:
+        if amount <= 0:
+            raise ValueError("金額必須為正數")
+        if amount > self.balance:
+            raise ValueError("餘額不足")
+        self.balance -= amount
+
+amy = Account("Amy", 1000)
+amy.withdraw(250)
+print(amy.balance)`,output:"750",points:["資料與驗證規則移入 Account","呼叫端只需傳送 withdraw 訊息","物件保證餘額不會因提款變成負數"]},
+  {title:"容器、函式與參數設計",code:String.raw`def summarize(scores: list[int]) -> dict[str, float]:
+    if not scores:
+        return {"count": 0, "average": 0.0}
+    return {
+        "count": len(scores),
+        "average": sum(scores) / len(scores),
+        "highest": max(scores),
+    }
+
+raw = "85, 92, 76, 88"
+scores = [int(value.strip()) for value in raw.split(",")]
+result = summarize(scores)
+for key, value in result.items():
+    print(f"{key}: {value}")`,output:"count: 4\naverage: 85.25\nhighest: 92",points:["輸入轉換與統計責任分開","空集合先處理以避免除以零","型別提示清楚描述容器內容"]},
+  {title:"實體、類別與替代建構子",code:String.raw`class Student:
+    school = "YunTech"
+    count = 0
+
+    def __init__(self, student_id: str, name: str):
+        self.student_id = student_id
+        self.name = name
+        Student.count += 1
+
+    @classmethod
+    def from_csv(cls, row: str) -> "Student":
+        student_id, name = row.split(",")
+        return cls(student_id.strip(), name.strip())
+
+amy = Student.from_csv("B11301, Amy")
+bob = Student("B11302", "Bob")
+print(amy.name, amy.school, Student.count)`,output:"Amy YunTech 2",points:["name 是每個實體獨立的狀態","school 與 count 是共享類別屬性","from_csv 提供具名稱的替代建構方式"]},
+  {title:"Property 維持類別不變條件",code:String.raw`class Product:
+    def __init__(self, name: str, price: float):
+        self.name = name
+        self.price = price
+
+    @property
+    def price(self) -> float:
+        return self._price
+
+    @price.setter
+    def price(self, value: float) -> None:
+        if value < 0:
+            raise ValueError("價格不可為負數")
+        self._price = round(value, 2)
+
+book = Product("Python OOP", 580.126)
+print(book.price)`,output:"580.13",points:["所有價格寫入都經過同一驗證入口","內部使用 _price 避免 setter 遞迴","外部仍以 book.price 的自然語法操作"]},
+  {title:"Alias、淺複製與深複製",code:String.raw`from copy import copy, deepcopy
+
+order = {"items": [{"name": "Book", "qty": 1}]}
+alias = order
+shallow = copy(order)
+deep = deepcopy(order)
+
+alias["items"][0]["qty"] = 2
+print(order["items"][0]["qty"])
+print(shallow["items"][0]["qty"])
+print(deep["items"][0]["qty"])
+print(order is alias, order is shallow)`,output:"2\n2\n1\nTrue False",points:["alias 與 order 是同一物件","shallow 的外層不同但 items 仍共享","deep 的巢狀物件也已獨立"]},
+  {title:"以程式表達組合與關聯",code:String.raw`class Engine:
+    def start(self) -> str:
+        return "engine started"
+
+class Car:
+    def __init__(self, plate: str):
+        self.plate = plate
+        self._engine = Engine()       # composition
+        self.driver: Driver | None = None  # association
+
+    def assign(self, driver: "Driver") -> None:
+        self.driver = driver
+
+class Driver:
+    def __init__(self, name: str):
+        self.name = name
+
+car = Car("ABC-123")
+car.assign(Driver("Amy"))
+print(car.driver.name, car._engine.start())`,output:"Amy engine started",points:["Engine 由 Car 建立並擁有生命週期","Driver 可獨立存在並被指派給 Car","型別提示表達可選關聯"]},
+  {title:"覆寫、super 與 MRO",code:String.raw`class Logged:
+    def save(self) -> None:
+        print("write log")
+        super().save()
+
+class Repository:
+    def save(self) -> None:
+        print("save data")
+
+class StudentRepository(Logged, Repository):
+    pass
+
+repo = StudentRepository()
+repo.save()
+print([cls.__name__ for cls in StudentRepository.mro()])`,output:"write log\nsave data\n['StudentRepository', 'Logged', 'Repository', 'object']",points:["super 依 MRO 尋找下一個方法","Logged 可作為聚焦的 Mixin","各層協作而不是直接指定父類別"]},
+  {title:"Protocol 與可替換支付策略",code:String.raw`from typing import Protocol
+
+class Payment(Protocol):
+    def pay(self, amount: int) -> str: ...
+
+class CardPayment:
+    def pay(self, amount: int) -> str:
+        return f"card paid {amount}"
+
+class Checkout:
+    def __init__(self, payment: Payment):
+        self.payment = payment
+
+    def submit(self, total: int) -> str:
+        return self.payment.pay(total)
+
+print(Checkout(CardPayment()).submit(1200))`,output:"card paid 1200",points:["CardPayment 不必繼承 Protocol","Checkout 只依賴自己需要的 pay 能力","測試時可注入 FakePayment"]},
+  {title:"期中綜合：追蹤物件狀態",code:String.raw`class Cart:
+    tax_rate = 0.05
+    def __init__(self):
+        self.items: list[int] = []
+    def add(self, price: int) -> None:
+        self.items.append(price)
+    @property
+    def total(self) -> float:
+        return sum(self.items) * (1 + self.tax_rate)
+
+a = Cart()
+b = a
+c = Cart()
+a.add(100)
+c.items = a.items.copy()
+b.add(200)
+print(a.total, c.total, a is b)`,output:"315.0 105.0 True",points:["a 與 b 指向同一個 Cart","c 是另一物件且 items 已複製","property 每次依目前狀態計算總額"]},
+  {title:"特殊方法、迭代與 Context Manager",code:String.raw`class Playlist:
+    def __init__(self, songs: list[str]):
+        self.songs = songs
+    def __len__(self) -> int:
+        return len(self.songs)
+    def __iter__(self):
+        return iter(self.songs)
+    def __repr__(self) -> str:
+        return f"Playlist({self.songs!r})"
+    def __enter__(self):
+        print("start playlist")
+        return self
+    def __exit__(self, exc_type, exc, tb):
+        print("stop playlist")
+
+with Playlist(["A", "B"]) as playlist:
+    print(len(playlist), list(playlist))`,output:"start playlist\n2 ['A', 'B']\nstop playlist",points:["內建 len 與 for 會查找類別上的特殊方法","__iter__ 委派給 list iterator","with 即使發生例外也會執行 __exit__"]},
+  {title:"dataclass、Enum 與泛型 Repository",code:String.raw`from dataclasses import dataclass
+from enum import Enum, auto
+from typing import Generic, TypeVar
+
+class Status(Enum):
+    DRAFT = auto()
+    PAID = auto()
+
+@dataclass(frozen=True, slots=True)
+class Order:
+    id: int
+    total: int
+    status: Status = Status.DRAFT
+
+T = TypeVar("T")
+class Repository(Generic[T]):
+    def __init__(self):
+        self._items: list[T] = []
+    def add(self, item: T) -> None:
+        self._items.append(item)
+
+orders = Repository[Order]()
+orders.add(Order(1, 1200))
+print(orders._items[0])`,output:"Order(id=1, total=1200, status=<Status.DRAFT: 1>)",points:["dataclass 產生初始化與表示方法","Enum 限制合法狀態集合","Repository 保留實體型別資訊"]},
+  {title:"從使用案例配置物件責任",code:String.raw`class Book:
+    def __init__(self, title: str):
+        self.title = title
+        self.available = True
+    def borrow(self) -> None:
+        if not self.available:
+            raise ValueError("already borrowed")
+        self.available = False
+
+class Member:
+    def __init__(self, name: str, limit: int = 3):
+        self.name = name
+        self.limit = limit
+        self.loans: list[Book] = []
+    def borrow(self, book: Book) -> None:
+        if len(self.loans) >= self.limit:
+            raise ValueError("loan limit")
+        book.borrow()
+        self.loans.append(book)
+
+member = Member("Amy")
+member.borrow(Book("OOP"))
+print(member.loans[0].title)`,output:"OOP",points:["Book 負責自己的可借狀態","Member 負責借閱上限與持有的借閱","使用案例由物件協作完成而非集中在主程式"]},
+  {title:"DIP：高階服務依賴抽象",code:String.raw`from typing import Protocol
+
+class OrderRepository(Protocol):
+    def save(self, order: dict) -> None: ...
+
+class MemoryRepository:
+    def __init__(self):
+        self.saved: list[dict] = []
+    def save(self, order: dict) -> None:
+        self.saved.append(order)
+
+class PlaceOrder:
+    def __init__(self, repo: OrderRepository):
+        self.repo = repo
+    def execute(self, item: str, price: int) -> dict:
+        order = {"item": item, "price": price}
+        self.repo.save(order)
+        return order
+
+repo = MemoryRepository()
+PlaceOrder(repo).execute("Book", 580)
+print(repo.saved)`,output:"[{'item': 'Book', 'price': 580}]",points:["PlaceOrder 不知道資料庫細節","抽象由高階使用案例需要的 save 定義","MemoryRepository 讓測試快速且可觀察"]},
+  {title:"Strategy 與 Factory",code:String.raw`from typing import Protocol
+
+class Discount(Protocol):
+    def apply(self, total: int) -> int: ...
+
+class Regular:
+    def apply(self, total: int) -> int:
+        return total
+
+class Vip:
+    def apply(self, total: int) -> int:
+        return int(total * 0.8)
+
+def create_discount(level: str) -> Discount:
+    return Vip() if level == "vip" else Regular()
+
+class Checkout:
+    def __init__(self, discount: Discount):
+        self.discount = discount
+    def total(self, subtotal: int) -> int:
+        return self.discount.apply(subtotal)
+
+print(Checkout(create_discount("vip")).total(1000))`,output:"800",points:["Strategy 移除 Checkout 內的會員條件分支","Factory 集中具體策略的建立決策","增加新折扣不需修改 Checkout"]},
+  {title:"Domain、Service 與 Repository 分層",code:String.raw`from dataclasses import dataclass
+from typing import Protocol
+
+@dataclass
+class Course:
+    code: str
+    capacity: int
+    enrolled: int = 0
+    def enroll(self) -> None:
+        if self.enrolled >= self.capacity:
+            raise ValueError("course is full")
+        self.enrolled += 1
+
+class CourseRepo(Protocol):
+    def get(self, code: str) -> Course: ...
+    def save(self, course: Course) -> None: ...
+
+class EnrollService:
+    def __init__(self, repo: CourseRepo):
+        self.repo = repo
+    def execute(self, code: str) -> None:
+        course = self.repo.get(code)
+        course.enroll()
+        self.repo.save(course)`,output:"Service 取得課程 → Domain 執行規則 → Repository 儲存",points:["容量規則位於 Course 領域物件","Service 協調一個完整使用案例","Repository 隔離 ORM 或 SQL"]},
+  {title:"可替換的 LLM Provider",code:String.raw`from typing import Protocol
+
+class LLMProvider(Protocol):
+    def complete(self, prompt: str) -> str: ...
+
+class FakeProvider:
+    def complete(self, prompt: str) -> str:
+        return f"[fake] {prompt[:20]}"
+
+class TutorService:
+    def __init__(self, provider: LLMProvider):
+        self.provider = provider
+    def explain(self, concept: str) -> str:
+        prompt = f"以大學生程度解釋：{concept}"
+        try:
+            return self.provider.complete(prompt)
+        except TimeoutError:
+            return "服務暫時無法使用"
+
+print(TutorService(FakeProvider()).explain("polymorphism"))`,output:"[fake] 以大學生程度解釋：polymorph",points:["Service 管理提示與錯誤策略","Provider 封裝供應商實作","FakeProvider 讓測試不需要網路與 API Key"]},
+  {title:"用測試保護專題重構",code:String.raw`from dataclasses import dataclass
+
+@dataclass
+class Cart:
+    prices: list[int]
+    def subtotal(self) -> int:
+        return sum(self.prices)
+    def checkout(self, discount: float = 0) -> int:
+        if not 0 <= discount <= 1:
+            raise ValueError("invalid discount")
+        return round(self.subtotal() * (1 - discount))
+
+def test_cart_checkout():
+    cart = Cart([500, 300])
+    assert cart.subtotal() == 800
+    assert cart.checkout(0.25) == 600
+
+def test_invalid_discount():
+    try:
+        Cart([100]).checkout(1.5)
+        assert False
+    except ValueError:
+        assert True`,output:"兩個測試皆通過；重構 Cart 時可快速檢查行為是否改變。",points:["測試名稱描述行為而非方法內部細節","同時涵蓋正常與非法輸入","重構前先建立安全網"]},
+  {title:"期末專題的可測試架構",code:String.raw`from typing import Protocol
+
+class Notifier(Protocol):
+    def send(self, message: str) -> None: ...
+
+class ProjectService:
+    def __init__(self, notifier: Notifier):
+        self.notifier = notifier
+    def complete(self, project: dict) -> None:
+        required = {"code", "readme", "tests", "deployment"}
+        missing = required - project.keys()
+        if missing:
+            raise ValueError(f"missing: {sorted(missing)}")
+        self.notifier.send("project accepted")
+
+class SpyNotifier:
+    def __init__(self):
+        self.messages: list[str] = []
+    def send(self, message: str) -> None:
+        self.messages.append(message)
+
+spy = SpyNotifier()
+ProjectService(spy).complete(
+    {"code":1, "readme":1, "tests":1, "deployment":1}
+)
+print(spy.messages)`,output:"['project accepted']",points:["交付規則集中在應用服務","Notifier 介面隔離外部寄信或聊天服務","Spy 測試替身能驗證重要互動"]},
+];
+
+const references = [
+  ["Python Tutorial：Classes","https://docs.python.org/3/tutorial/classes.html"],
+  ["Python Data Model","https://docs.python.org/3/reference/datamodel.html"],
+  ["typing — Type Hints","https://docs.python.org/3/library/typing.html"],
+  ["abc — Abstract Base Classes","https://docs.python.org/3/library/abc.html"],
+];
+
 function SvgDiagram({week, topics}:{week:number;topics:readonly string[]}) {
   const hierarchy=[6,7,8,13,14,15,16].includes(week);
   const pos=hierarchy?[[350,55],[110,205],[350,205],[590,205]]:[[50,125],[250,125],[450,125],[650,125]];
@@ -75,14 +438,15 @@ export default async function WeekPage({params}:{params:Promise<{week:string}>})
   if(!lesson) notFound();
   const topics=lesson.slice(2);
   return <main className="lesson-page">
-    <header className="site-header"><Link className="brand" href="/"><span>OO</span> 物件導向程式設計</Link><nav><Link href="/">課程首頁</Link><a href="#notes">詳細講義</a><a href="#lab">課堂實作</a></nav></header>
+    <header className="site-header"><Link className="brand" href="/"><span>OO</span> 物件導向程式設計</Link><nav><Link href="/">課程首頁</Link><a href="#notes">詳細講義</a><a href="#code">程式範例</a><a href="#lab">課堂實作</a></nav></header>
     <section className="lesson-hero"><div><p className="eyebrow">WEEK {String(n).padStart(2,"0")} · {lesson[1]}</p><h1>{lesson[0]}</h1><p>本頁提供第 {n} 週的完整課堂講義、概念圖、實作流程與課後檢核，適合課堂投影與學生複習。</p></div><aside><b>本週學習重點</b><ol>{topics.slice(0,3).map(x=><li key={x}>{x}</li>)}</ol></aside></section>
-    <div className="lesson-layout"><aside className="lesson-toc"><b>本頁目錄</b><a href="#objectives">學習目標</a><a href="#notes">詳細講義</a><a href="#diagram">概念圖</a><a href="#lab">實作任務</a><a href="#checklist">課後檢核</a></aside><article className="lesson-content">
+    <div className="lesson-layout"><aside className="lesson-toc"><b>本頁目錄</b><a href="#objectives">學習目標</a><a href="#notes">詳細講義</a><a href="#diagram">概念圖</a><a href="#code">Python 範例</a><a href="#lab">實作任務</a><a href="#checklist">課後檢核</a></aside><article className="lesson-content">
       <section id="objectives" className="content-section"><p className="section-index">01 / OBJECTIVES</p><h2>本週學習目標</h2><ul className="objective-list">{topics.map(x=><li key={x}>{x}</li>)}</ul></section>
       <section id="notes" className="content-section"><p className="section-index">02 / LECTURE NOTES</p><h2>詳細講義內容</h2><div className="note-grid">{topics.map((topic,i)=><section className="note-card" key={topic}><span>0{i+1}</span><h3>{topic}</h3><ul>{details.map((x,j)=><li key={x}>{x.replace("此概念",j===0?topic:"這項設計")}</li>)}</ul></section>)}</div><section className="deep-notes"><h3>本週必懂的核心重點</h3><ul>{weekNotes[n-1].map(x=><li key={x}>{x}</li>)}</ul></section><div className="teaching-flow"><b>建議教學流程</b><div><span>概念引導<small>20 分鐘</small></span><i>→</i><span>程式示範<small>30 分鐘</small></span><i>→</i><span>分組討論<small>20 分鐘</small></span><i>→</i><span>動手實作<small>50 分鐘</small></span></div></div></section>
       <section id="diagram" className="content-section"><p className="section-index">03 / SVG VISUAL MODEL</p><figure className="concept-diagram"><div className="diagram-heading"><span>SCALABLE VECTOR DIAGRAM</span><h2>{lesson[0]}概念關係圖</h2></div><SvgDiagram week={n} topics={topics}/><figcaption>{[6,7,8,13,14,15,16].includes(n)?"上層為抽象或核心角色，下層為具體類別、實作或協作者。":"由左至右閱讀，呈現本週概念的處理流程與學習順序。"}</figcaption></figure></section>
-      <section id="lab" className="content-section practice-panel"><p className="section-index">04 / HANDS-ON LAB</p><h2>課堂實作任務</h2><p className="lab-brief">選擇一個生活或專題情境，運用「{topics[0]}」與「{topics[1]}」建立 Python 範例，並用圖或測試說明設計結果。</p><ol className="lab-steps"><li><b>分析</b><span>圈出需求中的資料、行為與限制。</span></li><li><b>設計</b><span>決定責任、介面與物件關係。</span></li><li><b>實作</b><span>以小步驟完成核心流程。</span></li><li><b>驗證</b><span>測試正常、邊界與錯誤情境。</span></li></ol></section>
-      <section id="checklist" className="content-section"><p className="section-index">05 / CHECKLIST</p><h2>課後任務與檢核</h2><ul className="deliverable-list"><li><span>✓</span>能用自己的話解釋四項核心概念</li><li><span>✓</span>完成實作並保留執行或測試證據</li><li><span>✓</span>將本週技巧套用到個人專題</li></ul><div className="reflection"><b>反思問題</b><p>本週概念解決了什麼問題？如果不使用它，程式最可能在哪裡變得難以維護？</p></div></section>
+      <section id="code" className="content-section code-section"><p className="section-index">04 / PYTHON EXAMPLE</p><h2>完整 Python 程式碼範例</h2><p className="code-intro">以下範例不是孤立語法片段，而是把本週概念放入可執行的小型情境。請先預測輸出，再逐行追蹤物件狀態與方法呼叫。</p><div className="example-card"><div className="example-title"><span>example_{String(n).padStart(2,"0")}.py</span><h3>{examples[n-1].title}</h3></div><pre><code>{examples[n-1].code}</code></pre><div className="example-output"><b>預期輸出／結果</b><pre>{examples[n-1].output}</pre></div><div className="example-analysis"><b>程式解讀</b><ul>{examples[n-1].points.map(x=><li key={x}>{x}</li>)}</ul></div></div></section>
+      <section id="lab" className="content-section practice-panel"><p className="section-index">05 / HANDS-ON LAB</p><h2>課堂實作任務</h2><p className="lab-brief">先執行並修改上方範例，再選擇個人專題情境，運用「{topics[0]}」與「{topics[1]}」建立第二個版本。</p><ol className="lab-steps"><li><b>閱讀</b><span>預測輸出並逐行追蹤。</span></li><li><b>修改</b><span>加入一項規則與錯誤情境。</span></li><li><b>重構</b><span>改善命名、責任與重複程式。</span></li><li><b>測試</b><span>驗證正常、邊界與錯誤案例。</span></li></ol><div className="exercise-levels"><article><b>基礎題</b><p>替範例加入輸入驗證、型別提示與清楚的輸出。</p></article><article><b>進階題</b><p>增加第二種實作或物件，證明目前介面能否支援擴充。</p></article><article><b>專題題</b><p>找出專題中對應的類別或服務，套用本週技巧並提交前後差異。</p></article></div></section>
+      <section id="checklist" className="content-section"><p className="section-index">06 / CHECKLIST & REFERENCES</p><h2>課後任務與檢核</h2><ul className="deliverable-list"><li><span>✓</span>能用自己的話解釋四項核心概念</li><li><span>✓</span>能在不執行程式前預測範例的主要輸出</li><li><span>✓</span>完成修改版程式並保留測試證據</li><li><span>✓</span>能說明此設計對專題維護性的影響</li></ul><div className="reflection"><b>反思問題</b><p>本週概念解決了什麼問題？如果不使用它，程式最可能在哪裡變得難以維護？</p></div><div className="reference-list"><b>延伸閱讀：Python 官方文件</b>{references.map(([label,url])=><a key={url} href={url} target="_blank" rel="noreferrer">{label} ↗</a>)}</div></section>
     </article></div>
     <nav className="lesson-pagination">{n>1?<Link href={`/week/${n-1}/`}><small>← 上一週</small><b>{lessons[n-2][0]}</b></Link>:<span/>}{n<18?<Link href={`/week/${n+1}/`}><small>下一週 →</small><b>{lessons[n][0]}</b></Link>:<Link href="/"><small>完成課程</small><b>回到課程首頁</b></Link>}</nav>
   </main>;
