@@ -3,15 +3,15 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import CourseShell from "./course-shell";
-import {chapterRanges,coursePath,laterWeeks,ui,weekInfo,weekLabel,type Language} from "../data";
+import {chapterRanges,guiInfo,guiRanges,unitRanges,coursePath,laterWeeks,ui,weekInfo,weekLabel,type UnitId,type Language} from "../data";
 
 export default function CourseHome({lang}:{lang:Language}) {
   const t=ui[lang];
-  const [resume,setResume]=useState<{week:number;chapter:number}|null>(null);
+  const [resume,setResume]=useState<{week:UnitId;chapter:number}|null>(null);
   useEffect(()=>{
     try {
       const raw=JSON.parse(localStorage.getItem("oo2026-last-read")||"null");
-      if(raw&&Number.isInteger(raw.week)&&raw.week>=1&&raw.week<=4&&Number.isInteger(raw.chapter)&&raw.chapter>=1&&raw.chapter<=chapterRanges[raw.week-1].length) {
+      if(raw&&(raw.week==="gui"||(Number.isInteger(raw.week)&&raw.week>=1&&raw.week<=6))&&Number.isInteger(raw.chapter)&&raw.chapter>=1&&raw.chapter<=unitRanges(raw.week).length) {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setResume(raw);
       }
@@ -22,11 +22,12 @@ export default function CourseHome({lang}:{lang:Language}) {
       <div className="hero-copy"><p className="kicker"><span/>{t.term} · PYTHON OOP</p><h1>{t.welcome}</h1><p className="hero-description">{t.intro}</p><div className="hero-buttons"><Link className="action-primary" href={resume?`${coursePath(lang,resume.week)}#chapter-${resume.chapter}`:coursePath(lang,1)}>{resume?t.continue:t.start}<span aria-hidden="true">→</span></Link><a className="text-action" href="#learning-materials">{t.materials} ↓</a></div>{resume&&<p className="resume-caption">{t.saved} · {weekLabel(lang,resume.week)} · {t.chapter} {resume.chapter}</p>}</div>
       <div className="object-illustration" aria-hidden="true"><div className="object-window"><div className="window-top"><span/><span/><span/><b>student.py</b></div><pre><span className="syntax-purple">class</span> <span className="syntax-mint">Student</span>:<br/>{"    "}<span className="syntax-purple">def</span> learn(self):<br/>{"        "}self.understand()<br/>{"        "}self.build()<br/>{"        "}self.improve()</pre></div><div className="object-pill">identity <span>·</span> state <span>·</span> behavior</div><div className="object-link"/><div className="instance-row"><span><i/>amy = Student()</span><span><i/>bob = Student()</span></div><div className="figure-caption">ONE CLASS. MANY POSSIBILITIES.</div></div>
     </section>
-    <div className="overview-facts"><div><strong>04</strong><span>{t.scope}</span></div><div><strong>186</strong><span>{t.slides}</span></div><div><strong>03</strong><span>{t.translation}</span></div><div><strong>Python</strong><span>3.12+</span></div></div>
+    <div className="overview-facts"><div><strong>07</strong><span>{t.scope}</span></div><div><strong>248</strong><span>{t.slides}</span></div><div><strong>03</strong><span>{t.translation}</span></div><div><strong>Python</strong><span>3.12+</span></div></div>
     <section id="learning-materials" className="materials-section"><div className="section-heading-row"><div><p className="kicker">LEARN · EXPLORE · BUILD</p><h2>{t.materials}</h2></div><span className="edition-badge">{t.updated}</span></div>
-      <div className="lesson-cards">{weekInfo[lang].map((item,i)=><article className="lesson-card" key={item.title}><div className="card-top"><span className="week-index">0{i+1}</span><span className="topic-tag">{item.tag}</span></div><h3><Link href={coursePath(lang,i+1)}>{item.title}</Link></h3><p>{item.summary}</p><div className="card-bottom"><span>{chapterRanges[i].length} {t.chapters}<i/> {[23,67,40,56][i]} {t.slides}</span><Link aria-label={`${t.read} · ${weekLabel(lang,i+1)}`} href={coursePath(lang,i+1)}>{t.read} <span aria-hidden="true">↗</span></Link></div></article>)}</div>
+      <div className="lesson-cards">{weekInfo[lang].map((item,i)=><article className="lesson-card" key={item.title}><div className="card-top"><span className="week-index">0{i+1}</span><span className="topic-tag">{item.tag}</span></div><h3><Link href={coursePath(lang,i+1)}>{item.title}</Link></h3><p>{item.summary}</p><div className="card-bottom"><span>{chapterRanges[i].length} {t.chapters}<i/> {[23,67,40,56,11,19][i]} {t.slides}</span><Link aria-label={`${t.read} · ${weekLabel(lang,i+1)}`} href={coursePath(lang,i+1)}>{t.read} <span aria-hidden="true">↗</span></Link></div></article>)}</div>
     </section>
+    <section className="gui-feature"><div><p className="kicker">DESKTOP GUI · PYTHON</p><h2>{guiInfo[lang].title}</h2><p>{guiInfo[lang].summary}</p><div className="gui-tool-tags">{["Tkinter","Qt","wxPython","Kivy","Dear PyGui"].map(tool=><span key={tool}>{tool}</span>)}</div></div><div><span>{guiRanges.length} {t.chapters} · 32 {t.slides}</span><Link className="action-primary" href={coursePath(lang,"gui")}>{t.read} ↗</Link></div></section>
     <section className="project-overview"><div><p className="kicker">FROM CONCEPT TO PRACTICE</p><h2>{t.individual}</h2><p>{t.individualNote}</p></div><div className="assessment-panel"><h3>{t.assessment}</h3>{[["30%",t.attendance],["30%",t.midterm],["40%",t.project]].map(([percent,label])=><div key={label}><span>{label}</span><strong>{percent}</strong></div>)}</div></section>
-    <section id="full-outline" className="outline-section"><div className="section-heading-row"><div><p className="kicker">COURSE ROADMAP</p><h2>{t.outline}</h2></div></div><p className="muted">{t.laterNote}</p><div className="outline-list">{laterWeeks[lang].map((title,index)=><Link key={title} href={`/week/${index+5}/`}><span className="outline-number">{String(index+5).padStart(2,"0")}</span><b>{title}</b><small>{t.original}</small><span aria-hidden="true">↗</span></Link>)}</div></section>
+    <section id="full-outline" className="outline-section"><div className="section-heading-row"><div><p className="kicker">COURSE ROADMAP</p><h2>{t.outline}</h2></div></div><p className="muted">{t.laterNote}</p><div className="outline-list">{laterWeeks[lang].slice(2).map((title,index)=><Link key={title} href={`/week/${index+7}/`}><span className="outline-number">{String(index+7).padStart(2,"0")}</span><b>{title}</b><small>{t.original}</small><span aria-hidden="true">↗</span></Link>)}</div></section>
   </main></CourseShell>;
 }

@@ -4,7 +4,9 @@ import {useEffect,useMemo,useRef,useState} from "react";
 import Link from "next/link";
 import CourseShell from "./course-shell";
 import ConceptFlow from "./concept-flow";
-import {basePath,chapterNames,chapterRanges,coursePath,ui,weekInfo,weekLabel,type BodyBlock,type Language,type Lesson} from "../data";
+import LessonDiagram from "./lesson-diagram";
+import Image from "next/image";
+import {basePath,unitInfo,unitRanges,unitChapters,coursePath,ui,weekLabel,type UnitId,type BodyBlock,type Language,type Lesson} from "../data";
 
 function LinkedText({text}:{text:string}) {
   const url=/((?:https?:\/\/|(?:docs\.python\.org|docs\.djangoproject\.com|minhuangyuntech\.github\.io|eclass\.yuntech\.edu\.tw)\/)[^\s<>]+)/g;
@@ -15,7 +17,7 @@ function ContentBlock({block}:{block:BodyBlock}) {
   if(block.type==="heading")return <h4><LinkedText text={block.text||""}/></h4>;
   return <p><LinkedText text={block.text||""}/></p>;
 }
-function CodeBlock({code,output,lang}:{code:string;output?:string;lang:Language}){
+function CodeBlock({code,output,lang,codeLanguage}:{code:string;output?:string;lang:Language;codeLanguage?:string}){
   const [status,setStatus]=useState("idle");
   const codeRef=useRef<HTMLElement>(null);
   const timer=useRef<ReturnType<typeof setTimeout>|null>(null);
@@ -31,11 +33,16 @@ function CodeBlock({code,output,lang}:{code:string;output?:string;lang:Language}
     timer.current=setTimeout(()=>setStatus("idle"),3500);
   }
   const t=ui[lang];
-  return <div className="lesson-code"><div className="lesson-code-bar"><span>{t.code}</span><button onClick={copy} aria-live="polite">{status==="copied"?`✓ ${t.copied}`:status==="failed"?t.copyFailed:t.copy}</button></div><pre tabIndex={0}><code ref={codeRef}>{code}</code></pre>{status==="failed"&&<p className="copy-help" role="status">{t.selectText}</p>}{output&&<div className="lesson-output"><span>{t.output}</span><pre>{output}</pre></div>}</div>;
+  return <div className="lesson-code"><div className="lesson-code-bar"><span>{codeLanguage==="powershell"?"PowerShell · Windows":t.code}</span><button onClick={copy} aria-live="polite">{status==="copied"?`✓ ${t.copied}`:status==="failed"?t.copyFailed:t.copy}</button></div><pre tabIndex={0}><code ref={codeRef}>{code}</code></pre>{status==="failed"&&<p className="copy-help" role="status">{t.selectText}</p>}{output&&<div className="lesson-output"><span>{t.output}</span><pre>{output}</pre></div>}</div>;
 }
 
-export default function WeekLesson({lang,week,lesson}:{lang:Language;week:number;lesson:Lesson}){
-  const t=ui[lang],info=weekInfo[lang][week-1],ranges=chapterRanges[week-1],names=chapterNames[lang][week-1];
+export default function WeekLesson({lang,week,lesson}:{lang:Language;week:UnitId;lesson:Lesson}){
+  const t=ui[lang],info=unitInfo(lang,week),ranges=unitRanges(week),names=unitChapters(lang,week);
+  const download=lesson.download||`week-${week}-${week===4?"zh":lang}.pptx`;
+  const examples=lesson.examples||(typeof week==="number"&&week>=3?`week-${week}-examples.zip`:undefined);
+  const sourceIsChinese=lesson.sourceLanguage==="zh"||week===4;
+  const previous=week==="gui"?6:week>1?week-1:undefined;
+  const next:UnitId|undefined=week==="gui"?undefined:week<6?week+1:"gui";
   const [query,setQuery]=useState("");
   const [completed,setCompleted]=useState<number[]>([]);
   const [active,setActive]=useState(1);
@@ -71,15 +78,15 @@ export default function WeekLesson({lang,week,lesson}:{lang:Language;week:number
       <section className="outcomes"><h2>{t.key}</h2><ol>{info.outcomes.map((outcome,i)=><li key={outcome}><span>0{i+1}</span>{outcome}</li>)}</ol></section>
       <div className="mobile-toc"><button aria-expanded={tocOpen} aria-controls="mobile-chapters" onClick={()=>setTocOpen(!tocOpen)}>{t.tocToggle}<span>{tocOpen?"−":"+"}</span></button>{tocOpen&&<div id="mobile-chapters">{toc}</div>}</div>
       <div className="lesson-search"><label htmlFor="lesson-search">{t.search}</label><div><span aria-hidden="true">⌕</span><input id="lesson-search" type="search" value={query} onChange={e=>setQuery(e.target.value)} placeholder={t.search}/>{query&&<button onClick={()=>setQuery("")}>{t.clear}</button>}</div></div>
-      {week>1&&<p className="excerpt-note">{t.codeNote}</p>}
+      {week!==1&&<p className="excerpt-note">{t.codeNote}</p>}
       <div aria-live="polite" className="search-status">{query&&`${chapters.reduce((sum,c)=>sum+c.slides.length,0)} ${t.topics}`}</div>
       {chapters.every(chapter=>chapter.slides.length===0)&&<p className="no-results">{t.noResults}</p>}
       {chapters.map(chapter=>chapter.slides.length>0&&<section key={chapter.index} id={`chapter-${chapter.index}`} data-chapter={chapter.index} className="lesson-chapter"><header className="chapter-heading"><span>{t.chapter} {String(chapter.index).padStart(2,"0")}</span><h2>{chapter.title}</h2></header>
-        {chapter.slides.map(slide=><article className="lesson-topic" key={slide.number} id={`slide-${slide.number}`}><div className="topic-source">{t.sourceSlide} {String(slide.number).padStart(2,"0")}</div><h3><a href={`#slide-${slide.number}`}>{slide.title}</a></h3>{week===4&&<ConceptFlow slide={slide.number} lang={lang}/>} {slide.code&&<CodeBlock code={slide.code} output={slide.output} lang={lang}/>}<div className="topic-body">{slide.body.map((block,i)=><ContentBlock block={block} key={i}/>)}</div>{!slide.code&&slide.output&&<div className="standalone-output"><b>{t.output}</b><pre>{slide.output}</pre></div>}</article>)}
+        {chapter.slides.map(slide=><article className="lesson-topic" key={slide.number} id={`slide-${slide.number}`}><div className="topic-source">{t.sourceSlide} {String(slide.number).padStart(2,"0")}</div><h3><a href={`#slide-${slide.number}`}>{slide.title}</a></h3>{week===4&&<ConceptFlow slide={slide.number} lang={lang}/>} {slide.diagram&&<LessonDiagram id={slide.diagram} lang={lang}/>} {slide.image&&<figure className="gui-screenshot"><Image src={`${basePath}${slide.image}`} alt={slide.imageAlt||""} width={640} height={480} unoptimized style={{width:"100%",height:"auto"}}/><figcaption>{slide.imageAlt}</figcaption></figure>} {slide.code&&<CodeBlock code={slide.code} output={slide.output} lang={lang} codeLanguage={slide.codeLanguage}/>}<div className="topic-body">{slide.body.map((block,i)=><ContentBlock block={block} key={i}/>)}</div>{!slide.code&&slide.output&&<div className="standalone-output"><b>{t.output}</b><pre>{slide.output}</pre></div>}</article>)}
         {!query&&<button className={`chapter-complete ${completed.includes(chapter.index)?"is-complete":""}`} aria-pressed={completed.includes(chapter.index)} onClick={()=>toggleChapter(chapter.index)}><span aria-hidden="true">{completed.includes(chapter.index)?"✓":"○"}</span>{completed.includes(chapter.index)?t.done:t.mark}</button>}
       </section>)}
-      <section id="resources" className="lesson-resources"><p className="kicker">RESOURCES</p><h2>{t.resources}</h2><p>{t.resourceNote}</p><div className="resource-links"><a className="action-primary" download href={`${basePath}/materials/week-${week}-${week===4?"zh":lang}.pptx`}>↓ {week===4&&lang!=="zh"?t.chineseSource:t.download}<small>PPTX</small></a>{week>=3&&<a className="action-secondary" download href={`${basePath}/materials/week-${week}-examples.zip`}>↓ {t.examples}</a>}</div><p className="source-filename">{t.source}: {lesson.source}</p>{week===4&&<p>{t.week4Note}</p>}<h3>{t.refs}</h3><ul><li><a href={`https://docs.python.org/${lang==="ja"?"ja/":""}3.12/tutorial/`} target="_blank" rel="noreferrer">Python 3.12 · Tutorial ↗</a></li><li><a href={`https://docs.python.org/${lang==="ja"?"ja/":""}3.12/reference/datamodel.html`} target="_blank" rel="noreferrer">Python · Data model ↗</a></li>{week===4&&<li><a href={`https://docs.djangoproject.com/${lang==="ja"?"ja":"en"}/5.2/ref/models/instances/#validating-objects`} target="_blank" rel="noreferrer">Django 5.2 · Model validation ↗</a></li>}</ul></section>
-      <nav className="week-pagination" aria-label={t.materials}>{week>1?<Link href={coursePath(lang,week-1)}><small>← {t.prev}</small><b>{weekInfo[lang][week-2].title}</b></Link>:<Link href={coursePath(lang)}><small>← {t.back}</small></Link>}{week<4?<Link href={coursePath(lang,week+1)}><small>{t.next} →</small><b>{weekInfo[lang][week].title}</b></Link>:<Link href={`${coursePath(lang)}#full-outline`}><small>{t.allWeeks} →</small><b>{t.later}</b></Link>}</nav>
+      <section id="resources" className="lesson-resources"><p className="kicker">RESOURCES</p><h2>{t.resources}</h2><p>{t.resourceNote}</p><div className="resource-links"><a className="action-primary" download href={`${basePath}/materials/${download}`}>↓ {sourceIsChinese&&lang!=="zh"?t.chineseSource:t.download}<small>PPTX</small></a>{examples&&<a className="action-secondary" download href={`${basePath}/materials/${examples}`}>↓ {t.examples}</a>}</div><p className="source-filename">{t.source}: {lesson.source}</p>{week===4&&<p>{t.week4Note}</p>}<h3>{t.refs}</h3><ul><li><a href={`https://docs.python.org/${lang==="ja"?"ja/":""}3.12/tutorial/`} target="_blank" rel="noreferrer">Python 3.12 · Tutorial ↗</a></li><li><a href={`https://docs.python.org/${lang==="ja"?"ja/":""}3.12/reference/datamodel.html`} target="_blank" rel="noreferrer">Python · Data model ↗</a></li>{week===4&&<li><a href={`https://docs.djangoproject.com/${lang==="ja"?"ja":"en"}/5.2/ref/models/instances/#validating-objects`} target="_blank" rel="noreferrer">Django 5.2 · Model validation ↗</a></li>}{week===6&&<li><a href="https://www.omg.org/spec/UML/2.5.1" target="_blank" rel="noreferrer">OMG · UML 2.5.1 ↗</a></li>}</ul></section>
+      <nav className="week-pagination" aria-label={t.materials}>{previous?<Link href={coursePath(lang,previous)}><small>← {t.prev}</small><b>{unitInfo(lang,previous).title}</b></Link>:<Link href={coursePath(lang)}><small>← {t.back}</small></Link>}{next?<Link href={coursePath(lang,next)}><small>{t.next} →</small><b>{unitInfo(lang,next).title}</b></Link>:<Link href={`${coursePath(lang)}#full-outline`}><small>{t.allWeeks} →</small><b>{t.later}</b></Link>}</nav>
     </div><aside className="week-toc">{toc}</aside></div>
   </main></CourseShell>;
 }

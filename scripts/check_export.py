@@ -32,17 +32,18 @@ class Page(HTMLParser):
         if tag == 'link' and attrs.get('rel') == 'stylesheet': self.assets.append(attrs['href'])
 
 pages = {('/'+str(file.relative_to(OUT)).replace('\\','/').removesuffix('index.html')):Page(file) for file in OUT.rglob('index.html')}
-counts = [23,67,40,56]
+lessons=json.loads((ROOT/"content/lessons.json").read_text(encoding="utf-8"))
+units=[1,2,3,4,5,6,"gui"]
 for locale, prefix, html_lang in [('zh','','zh-Hant'),('en','/en','en'),('ja','/ja','ja')]:
     home=pages[prefix+'/']
     assert home.lang == html_lang
     assert home.headings == 1
-    for week,count in enumerate(counts,1):
-        route=f'{prefix}/week/{week}/'
+    for week in units:
+        route=f'{prefix}/gui/' if week=='gui' else f'{prefix}/week/{week}/'
         page=pages[route]
         assert page.lang == html_lang,(route,page.lang)
         assert page.headings == 1,route
-        assert {f'slide-{i}' for i in range(1,count+1)} <= page.ids,route
+        assert {f'slide-{slide["number"]}' for slide in lessons[f'{locale}-{week}']['slides']} <= page.ids,route
         for url in page.links + page.assets:
             parsed=urlsplit(url)
             if parsed.scheme or parsed.netloc:continue
@@ -55,9 +56,9 @@ for locale, prefix, html_lang in [('zh','','zh-Hant'),('en','/en','en'),('ja','/
             assert target.exists(),(route,'missing file',url)
             if parsed.fragment and target.suffix=='.html':
                 assert unquote(parsed.fragment) in Page(target).ids,(route,'missing target anchor',url)
-for week in range(5,19):assert f'/week/{week}/' in pages
+for week in range(7,19):assert f'/week/{week}/' in pages
 
-manifest=json.loads((ROOT/'content/source-manifest.json').read_text(encoding='utf-8'))
+manifest=json.loads((ROOT/'content/source-manifest.json').read_text(encoding='utf-8'))+json.loads((ROOT/'content/additional-source-manifest.json').read_text(encoding='utf-8'))
 for source in manifest:
     file=ROOT/'public/materials'/source['download']
     assert hashlib.sha256(file.read_bytes()).hexdigest()==source['sha256'],source['source']
@@ -73,4 +74,31 @@ for key,deck in raw.items():
         if normalized.get('code'):
             ast.parse(normalized['code'])
             codes+=1
-print(f'PASS: 3 homepages, 12 complete localized lessons, 14 preserved later weeks, local links/assets/anchors, 10 slide checksums, and {codes} code snippets.')
+from sync_additional import normalize
+additional=json.loads((ROOT/'content/additional-slide-sources.json').read_text(encoding='utf-8'))
+for source_key,deck in additional.items():
+    for original in deck['slides']:
+        source=normalize(source_key,original)
+        unit='gui' if source_key=='gui' else 5 if source['number']<=11 else 6
+        for lang in ['zh','en','ja']:
+            slide=next(s for s in lessons[f'{lang}-{unit}']['slides'] if s['number']==source['number'])
+            assert slide.get('code')==source.get('code'),(lang,unit,slide['number'],'code changed')
+            assert slide.get('output')==source.get('output')
+            assert slide['title'] and slide['body']
+            for block in slide['body']:
+                if block['type']=='table':assert len({len(row) for row in block['rows']})==1,(lang,unit,slide['number'],'table columns')
+        if source.get('code') and source['codeLanguage']=='python':
+            code=source['code']
+            # Continuation methods are deliberately shown inside the preceding class.
+            if code.startswith('    '):code='class SlideExcerpt:\n'+code
+            ast.parse(code)
+            codes+=1
+for lang in ['zh','en','ja']:
+    for unit in [5,6,'gui']:
+        lesson=lessons[f'{lang}-{unit}']
+        route=('' if lang=='zh' else '/'+lang)+('/gui/' if unit=='gui' else f'/week/{unit}/')
+        for name in [lesson['download'],lesson['examples']]:assert f'{BASE}/materials/{name}' in pages[route].links
+        if unit=='gui':
+            assert len([s for s in lesson['slides'] if s.get('image')])==5
+            assert all(s.get('imageAlt') for s in lesson['slides'] if s.get('image'))
+print(f'PASS: 3 homepages, 21 localized lessons (744 topics), 12 preserved later weeks, links/assets/anchors, 12 deck checksums, and {codes} Python excerpts.')

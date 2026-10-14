@@ -1,0 +1,18 @@
+[
+  {
+    "unit": "week56",
+    "language": "zh",
+    "source": "OO第五六週_生命週期與UML_學生版_UML加強版.pptx",
+    "download": "week-5-6-zh.pptx",
+    "slides": 30,
+    "sha256": "7b3a9a4d750ea5f46db306107a9ba244921f2c83061049ade32e3aa5892a177d"
+  },
+  {
+    "unit": "gui",
+    "language": "zh",
+    "source": "Python桌面GUI_五種常見做法_學生版_v2.pptx",
+    "download": "gui-zh.pptx",
+    "slides": 32,
+    "sha256": "02c184849e1503c7b553a5c5b47bd9ca43c48abd7c2d550ca4e2b79e6640969a"
+  }
+]
