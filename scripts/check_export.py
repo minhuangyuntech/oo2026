@@ -33,13 +33,13 @@ class Page(HTMLParser):
 
 pages = {('/'+str(file.relative_to(OUT)).replace('\\','/').removesuffix('index.html')):Page(file) for file in OUT.rglob('index.html')}
 lessons=json.loads((ROOT/"content/lessons.json").read_text(encoding="utf-8"))
-units=[1,2,3,4,5,6,"gui"]
+units=[1,2,3,4,5,6,"gui","django"]
 for locale, prefix, html_lang in [('zh','','zh-Hant'),('en','/en','en'),('ja','/ja','ja')]:
     home=pages[prefix+'/']
     assert home.lang == html_lang
     assert home.headings == 1
     for week in units:
-        route=f'{prefix}/gui/' if week=='gui' else f'{prefix}/week/{week}/'
+        route=f'{prefix}/{week}/' if isinstance(week,str) else f'{prefix}/week/{week}/'
         page=pages[route]
         assert page.lang == html_lang,(route,page.lang)
         assert page.headings == 1,route
@@ -58,7 +58,7 @@ for locale, prefix, html_lang in [('zh','','zh-Hant'),('en','/en','en'),('ja','/
                 assert unquote(parsed.fragment) in Page(target).ids,(route,'missing target anchor',url)
 for week in range(7,19):assert f'/week/{week}/' in pages
 
-manifest=json.loads((ROOT/'content/source-manifest.json').read_text(encoding='utf-8'))+json.loads((ROOT/'content/additional-source-manifest.json').read_text(encoding='utf-8'))
+manifest=[source for name in ['source-manifest.json','additional-source-manifest.json','django-source-manifest.json'] for source in json.loads((ROOT/'content'/name).read_text(encoding='utf-8'))]
 for source in manifest:
     file=ROOT/'public/materials'/source['download']
     assert hashlib.sha256(file.read_bytes()).hexdigest()==source['sha256'],source['source']
@@ -94,11 +94,27 @@ for source_key,deck in additional.items():
             ast.parse(code)
             codes+=1
 for lang in ['zh','en','ja']:
-    for unit in [5,6,'gui']:
+    for unit in [5,6,'gui','django']:
         lesson=lessons[f'{lang}-{unit}']
-        route=('' if lang=='zh' else '/'+lang)+('/gui/' if unit=='gui' else f'/week/{unit}/')
+        route=('' if lang=='zh' else '/'+lang)+(f'/{unit}/' if isinstance(unit,str) else f'/week/{unit}/')
         for name in [lesson['download'],lesson['examples']]:assert f'{BASE}/materials/{name}' in pages[route].links
         if unit=='gui':
             assert len([s for s in lesson['slides'] if s.get('image')])==5
             assert all(s.get('imageAlt') for s in lesson['slides'] if s.get('image'))
-print(f'PASS: 3 homepages, 21 localized lessons (744 topics), 12 preserved later weeks, links/assets/anchors, 12 deck checksums, and {codes} Python excerpts.')
+django_raw=json.loads((ROOT/'content/django-slide-sources.json').read_text(encoding='utf-8'))
+for lang,deck in django_raw.items():
+    lesson=lessons[f'{lang}-django']
+    assert len(lesson['slides'])==53
+    assert len([s for s in lesson['slides'] if s.get('image')])==4
+    for source,slide in zip(deck['slides'],lesson['slides']):
+        original=[line for b in source['blocks'] if b['type']=='code' and b['y']<660 for line in b['text'].splitlines() if line.strip()]
+        transferred=[line for snippet in slide.get('snippets',[]) for line in snippet['code'].splitlines() if line.strip()]
+        assert original==transferred,(lang,slide['number'],'Django code changed')
+        for snippet in slide.get('snippets',[]):
+            if snippet['language']=='python':
+                code=snippet['code']
+                if slide['number']==24:code='class Product:\n'+code
+                if slide['number']==32:code='{\n'+code+'\n}'
+                ast.parse(code)
+                codes+=1
+print(f'PASS: 3 homepages, 24 localized lessons (903 topics), 12 preserved later weeks, links/assets/anchors, 15 deck checksums, and {codes} Python excerpts.')

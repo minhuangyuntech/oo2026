@@ -1,0 +1,26 @@
+[
+  {
+    "unit": "django",
+    "language": "zh",
+    "source": "Django_從零建立網站與檔案解析-v3.pptx",
+    "download": "django-zh.pptx",
+    "slides": 53,
+    "sha256": "3012a59148df3b7ab3646524529cec960020285b921b4742867fe4522105a37f"
+  },
+  {
+    "unit": "django",
+    "language": "en",
+    "source": "Django_Website_Setup_and_Project_Files_EN-v2.pptx",
+    "download": "django-en.pptx",
+    "slides": 53,
+    "sha256": "3b58f454f54c2364df1b75b1fa13239a6e2e3445ed734cf6ad441d3708fc8f7b"
+  },
+  {
+    "unit": "django",
+    "language": "ja",
+    "source": "Django_Website_Setup_and_Project_Files_JA-v3.pptx",
+    "download": "django-ja.pptx",
+    "slides": 53,
+    "sha256": "0ff3af9f57ed4cc4b5ace3b39e97baecbdd321b0ba24e73deaf671a598fca871"
+  }
+]

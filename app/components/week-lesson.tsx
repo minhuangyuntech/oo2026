@@ -6,6 +6,7 @@ import CourseShell from "./course-shell";
 import ConceptFlow from "./concept-flow";
 import LessonDiagram from "./lesson-diagram";
 import Image from "next/image";
+import {djangoResourceNote} from "../django-data";
 import {basePath,unitInfo,unitRanges,unitChapters,coursePath,ui,weekLabel,type UnitId,type BodyBlock,type Language,type Lesson} from "../data";
 
 function LinkedText({text}:{text:string}) {
@@ -17,7 +18,7 @@ function ContentBlock({block}:{block:BodyBlock}) {
   if(block.type==="heading")return <h4><LinkedText text={block.text||""}/></h4>;
   return <p><LinkedText text={block.text||""}/></p>;
 }
-function CodeBlock({code,output,lang,codeLanguage}:{code:string;output?:string;lang:Language;codeLanguage?:string}){
+function CodeBlock({code,output,lang,codeLanguage,label}:{code:string;output?:string;lang:Language;codeLanguage?:string;label?:string|null}){
   const [status,setStatus]=useState("idle");
   const codeRef=useRef<HTMLElement>(null);
   const timer=useRef<ReturnType<typeof setTimeout>|null>(null);
@@ -33,7 +34,7 @@ function CodeBlock({code,output,lang,codeLanguage}:{code:string;output?:string;l
     timer.current=setTimeout(()=>setStatus("idle"),3500);
   }
   const t=ui[lang];
-  return <div className="lesson-code"><div className="lesson-code-bar"><span>{codeLanguage==="powershell"?"PowerShell · Windows":t.code}</span><button onClick={copy} aria-live="polite">{status==="copied"?`✓ ${t.copied}`:status==="failed"?t.copyFailed:t.copy}</button></div><pre tabIndex={0}><code ref={codeRef}>{code}</code></pre>{status==="failed"&&<p className="copy-help" role="status">{t.selectText}</p>}{output&&<div className="lesson-output"><span>{t.output}</span><pre>{output}</pre></div>}</div>;
+  return <div className="lesson-code"><div className="lesson-code-bar"><span>{label||({powershell:"PowerShell · Windows",html:"HTML · Django Template",css:"CSS",text:{zh:"文字／目錄",en:"Text / directory",ja:"テキスト／ディレクトリ"}[lang]} as Record<string,string>)[codeLanguage||""]||t.code}</span><button onClick={copy} aria-live="polite">{status==="copied"?`✓ ${t.copied}`:status==="failed"?t.copyFailed:t.copy}</button></div><pre tabIndex={0}><code ref={codeRef}>{code}</code></pre>{status==="failed"&&<p className="copy-help" role="status">{t.selectText}</p>}{output&&<div className="lesson-output"><span>{t.output}</span><pre>{output}</pre></div>}</div>;
 }
 
 export default function WeekLesson({lang,week,lesson}:{lang:Language;week:UnitId;lesson:Lesson}){
@@ -41,8 +42,8 @@ export default function WeekLesson({lang,week,lesson}:{lang:Language;week:UnitId
   const download=lesson.download||`week-${week}-${week===4?"zh":lang}.pptx`;
   const examples=lesson.examples||(typeof week==="number"&&week>=3?`week-${week}-examples.zip`:undefined);
   const sourceIsChinese=lesson.sourceLanguage==="zh"||week===4;
-  const previous=week==="gui"?6:week>1?week-1:undefined;
-  const next:UnitId|undefined=week==="gui"?undefined:week<6?week+1:"gui";
+  const previous:UnitId|undefined=week==="django"?"gui":week==="gui"?6:week>1?week-1:undefined;
+  const next:UnitId|undefined=week==="django"?undefined:week==="gui"?"django":week<6?week+1:"gui";
   const [query,setQuery]=useState("");
   const [completed,setCompleted]=useState<number[]>([]);
   const [active,setActive]=useState(1);
@@ -82,10 +83,10 @@ export default function WeekLesson({lang,week,lesson}:{lang:Language;week:UnitId
       <div aria-live="polite" className="search-status">{query&&`${chapters.reduce((sum,c)=>sum+c.slides.length,0)} ${t.topics}`}</div>
       {chapters.every(chapter=>chapter.slides.length===0)&&<p className="no-results">{t.noResults}</p>}
       {chapters.map(chapter=>chapter.slides.length>0&&<section key={chapter.index} id={`chapter-${chapter.index}`} data-chapter={chapter.index} className="lesson-chapter"><header className="chapter-heading"><span>{t.chapter} {String(chapter.index).padStart(2,"0")}</span><h2>{chapter.title}</h2></header>
-        {chapter.slides.map(slide=><article className="lesson-topic" key={slide.number} id={`slide-${slide.number}`}><div className="topic-source">{t.sourceSlide} {String(slide.number).padStart(2,"0")}</div><h3><a href={`#slide-${slide.number}`}>{slide.title}</a></h3>{week===4&&<ConceptFlow slide={slide.number} lang={lang}/>} {slide.diagram&&<LessonDiagram id={slide.diagram} lang={lang}/>} {slide.image&&<figure className="gui-screenshot"><Image src={`${basePath}${slide.image}`} alt={slide.imageAlt||""} width={640} height={480} unoptimized style={{width:"100%",height:"auto"}}/><figcaption>{slide.imageAlt}</figcaption></figure>} {slide.code&&<CodeBlock code={slide.code} output={slide.output} lang={lang} codeLanguage={slide.codeLanguage}/>}<div className="topic-body">{slide.body.map((block,i)=><ContentBlock block={block} key={i}/>)}</div>{!slide.code&&slide.output&&<div className="standalone-output"><b>{t.output}</b><pre>{slide.output}</pre></div>}</article>)}
+        {chapter.slides.map(slide=><article className="lesson-topic" key={slide.number} id={`slide-${slide.number}`}><div className="topic-source">{t.sourceSlide} {String(slide.number).padStart(2,"0")}</div><h3><a href={`#slide-${slide.number}`}>{slide.title}</a></h3>{week===4&&<ConceptFlow slide={slide.number} lang={lang}/>} {slide.diagram&&<LessonDiagram id={slide.diagram} lang={lang}/>} {slide.image&&<figure className={slide.imageLayout==="wide"?"lesson-illustration":"gui-screenshot"}><div className="lesson-image-scroll" tabIndex={slide.imageLayout==="wide"?0:undefined}><Image src={`${basePath}${slide.image}`} alt={slide.imageAlt||""} width={slide.imageWidth||640} height={slide.imageHeight||480} unoptimized style={{width:"100%",height:"auto"}}/></div><figcaption>{slide.imageAlt}</figcaption></figure>} {slide.code&&<CodeBlock code={slide.code} output={slide.output} lang={lang} codeLanguage={slide.codeLanguage}/>}{slide.snippets?.map((snippet,i)=><CodeBlock key={i} code={snippet.code} lang={lang} codeLanguage={snippet.language} label={snippet.label}/>)}<div className="topic-body">{slide.body.map((block,i)=><ContentBlock block={block} key={i}/>)}</div>{!slide.code&&slide.output&&<div className="standalone-output"><b>{t.output}</b><pre>{slide.output}</pre></div>}</article>)}
         {!query&&<button className={`chapter-complete ${completed.includes(chapter.index)?"is-complete":""}`} aria-pressed={completed.includes(chapter.index)} onClick={()=>toggleChapter(chapter.index)}><span aria-hidden="true">{completed.includes(chapter.index)?"✓":"○"}</span>{completed.includes(chapter.index)?t.done:t.mark}</button>}
       </section>)}
-      <section id="resources" className="lesson-resources"><p className="kicker">RESOURCES</p><h2>{t.resources}</h2><p>{t.resourceNote}</p><div className="resource-links"><a className="action-primary" download href={`${basePath}/materials/${download}`}>↓ {sourceIsChinese&&lang!=="zh"?t.chineseSource:t.download}<small>PPTX</small></a>{examples&&<a className="action-secondary" download href={`${basePath}/materials/${examples}`}>↓ {t.examples}</a>}</div><p className="source-filename">{t.source}: {lesson.source}</p>{week===4&&<p>{t.week4Note}</p>}<h3>{t.refs}</h3><ul><li><a href={`https://docs.python.org/${lang==="ja"?"ja/":""}3.12/tutorial/`} target="_blank" rel="noreferrer">Python 3.12 · Tutorial ↗</a></li><li><a href={`https://docs.python.org/${lang==="ja"?"ja/":""}3.12/reference/datamodel.html`} target="_blank" rel="noreferrer">Python · Data model ↗</a></li>{week===4&&<li><a href={`https://docs.djangoproject.com/${lang==="ja"?"ja":"en"}/5.2/ref/models/instances/#validating-objects`} target="_blank" rel="noreferrer">Django 5.2 · Model validation ↗</a></li>}{week===6&&<li><a href="https://www.omg.org/spec/UML/2.5.1" target="_blank" rel="noreferrer">OMG · UML 2.5.1 ↗</a></li>}</ul></section>
+      <section id="resources" className="lesson-resources"><p className="kicker">RESOURCES</p><h2>{t.resources}</h2><p>{week==="django"?djangoResourceNote[lang]:t.resourceNote}</p><div className="resource-links"><a className="action-primary" download href={`${basePath}/materials/${download}`}>↓ {sourceIsChinese&&lang!=="zh"?t.chineseSource:t.download}<small>PPTX</small></a>{examples&&<a className="action-secondary" download href={`${basePath}/materials/${examples}`}>↓ {t.examples}</a>}</div><p className="source-filename">{t.source}: {lesson.source}</p>{(week===4||week==="django")&&<p>{t.week4Note}</p>}<h3>{t.refs}</h3><ul><li><a href={`https://docs.python.org/${lang==="ja"?"ja/":""}3.12/tutorial/`} target="_blank" rel="noreferrer">Python 3.12 · Tutorial ↗</a></li><li><a href={`https://docs.python.org/${lang==="ja"?"ja/":""}3.12/reference/datamodel.html`} target="_blank" rel="noreferrer">Python · Data model ↗</a></li>{week===4&&<li><a href={`https://docs.djangoproject.com/${lang==="ja"?"ja":"en"}/5.2/ref/models/instances/#validating-objects`} target="_blank" rel="noreferrer">Django 5.2 · Model validation ↗</a></li>}{week==="django"&&<li><a href={`https://docs.djangoproject.com/${lang==="ja"?"ja":"en"}/5.2/intro/`} target="_blank" rel="noreferrer">Django 5.2 · Tutorial ↗</a></li>}{week===6&&<li><a href="https://www.omg.org/spec/UML/2.5.1" target="_blank" rel="noreferrer">OMG · UML 2.5.1 ↗</a></li>}</ul></section>
       <nav className="week-pagination" aria-label={t.materials}>{previous?<Link href={coursePath(lang,previous)}><small>← {t.prev}</small><b>{unitInfo(lang,previous).title}</b></Link>:<Link href={coursePath(lang)}><small>← {t.back}</small></Link>}{next?<Link href={coursePath(lang,next)}><small>{t.next} →</small><b>{unitInfo(lang,next).title}</b></Link>:<Link href={`${coursePath(lang)}#full-outline`}><small>{t.allWeeks} →</small><b>{t.later}</b></Link>}</nav>
     </div><aside className="week-toc">{toc}</aside></div>
   </main></CourseShell>;

@@ -1,16 +1,19 @@
+import {djangoInfo,djangoRanges,djangoChapters} from "./django-data";
+export {djangoInfo,djangoRanges,djangoChapters};
 import {extraInfo,extraRanges,extraChapters,guiInfo,guiRanges,guiChapters} from "./additional-data";
 export {guiInfo,guiRanges,guiChapters};
-export type UnitId = number | "gui";
+export type UnitId = number | "gui" | "django";
 export type Language = "zh" | "en" | "ja";
 export type BodyBlock = { type: string; text?: string; rows?: string[][] };
-export type Slide = { number: number; title: string; body: BodyBlock[]; code?: string; output?: string; codeLanguage?: string; diagram?: string; image?: string; imageAlt?: string };
+export type Snippet = {code:string;language:string;label?:string|null};
+export type Slide = { number: number; title: string; body: BodyBlock[]; code?: string; output?: string; codeLanguage?: string; diagram?: string; image?: string; imageAlt?: string; imageLayout?: string; imageWidth?:number; imageHeight?:number; snippets?:Snippet[] };
 export type Lesson = { source: string; slides: Slide[]; download?: string; examples?: string; sourceLanguage?: Language };
 export const locales: Language[] = ["zh", "en", "ja"];
 export const languageNames = { zh: "繁體中文", en: "English", ja: "日本語" };
 export const htmlLanguage = { zh: "zh-Hant", en: "en", ja: "ja" };
 export const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
 export function coursePath(lang: Language, week?: UnitId) {
-  return `${lang === "zh" ? "" : `/${lang}`}${week === "gui" ? "/gui" : week ? `/week/${week}` : ""}/`;
+  return `${lang === "zh" ? "" : `/${lang}`}${typeof week === "string" ? `/${week}` : week ? `/week/${week}` : ""}/`;
 }
 
 export const ui = {
@@ -80,11 +83,12 @@ export const laterWeeks = {
 };
 export function weekLabel(lang: Language, week: UnitId) {
   if(week==="gui")return "GUI";
+  if(week==="django")return "Django";
   return `${ui[lang].week} ${String(week).padStart(2,"0")} ${ui[lang].weekSuffix}`.trim();
 }
 
 for(const lang of locales){weekInfo[lang].push(...extraInfo[lang]);chapterNames[lang].push(...extraChapters[lang]);}
 chapterRanges.push(...extraRanges);
-export function unitInfo(lang:Language,unit:UnitId){return unit==="gui"?guiInfo[lang]:weekInfo[lang][unit-1];}
-export function unitRanges(unit:UnitId){return unit==="gui"?guiRanges:chapterRanges[unit-1];}
-export function unitChapters(lang:Language,unit:UnitId){return unit==="gui"?guiChapters[lang]:chapterNames[lang][unit-1];}
+export function unitInfo(lang:Language,unit:UnitId){return unit==="django"?djangoInfo[lang]:unit==="gui"?guiInfo[lang]:weekInfo[lang][unit-1];}
+export function unitRanges(unit:UnitId){return unit==="django"?djangoRanges:unit==="gui"?guiRanges:chapterRanges[unit-1];}
+export function unitChapters(lang:Language,unit:UnitId){return unit==="django"?djangoChapters[lang]:unit==="gui"?guiChapters[lang]:chapterNames[lang][unit-1];}
