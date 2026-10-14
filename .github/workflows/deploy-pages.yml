@@ -24,7 +24,12 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm run lint
       - run: npm run build
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python scripts/check_export.py
       - uses: actions/upload-pages-artifact@v3
         with:
           path: out

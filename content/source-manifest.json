@@ -1,0 +1,82 @@
+[
+  {
+    "week": 1,
+    "language": "zh",
+    "source": "第一週_課程說明_網站校正版.pptx",
+    "download": "week-1-zh.pptx",
+    "slides": 23,
+    "sha256": "a246c1827c845b35c73711dbd5921191ec90d194ffa642e1dbe319a1a970c8d8"
+  },
+  {
+    "week": 1,
+    "language": "en",
+    "source": "20260916_w1-en.pptx",
+    "download": "week-1-en.pptx",
+    "slides": 23,
+    "sha256": "e11b08978991d7fdd318bec4b4a846d6a03316f4929d19f26da8f0b3f8e4cb3a"
+  },
+  {
+    "week": 1,
+    "language": "ja",
+    "source": "20260916_w1-ja.pptx",
+    "download": "week-1-ja.pptx",
+    "slides": 23,
+    "sha256": "c948026cdddeec5c7e7f2aebec57479152f5ec1c58d23abacee625ba6cf288c4"
+  },
+  {
+    "week": 2,
+    "language": "zh",
+    "source": "OO第二週_Python語法完整複習.pptx",
+    "download": "week-2-zh.pptx",
+    "slides": 67,
+    "sha256": "56e1a528b8352e7738716eb9354f642d29a50ad9b09e0bed6f2568f0ac0dc76c"
+  },
+  {
+    "week": 2,
+    "language": "en",
+    "source": "20260916_w2-en.pptx",
+    "download": "week-2-en.pptx",
+    "slides": 67,
+    "sha256": "44f5ea37a51b2044690d72410c45adf31607faaf358796b8f93ea620f6ae40f3"
+  },
+  {
+    "week": 2,
+    "language": "ja",
+    "source": "20260916_w2-ja-v4.pptx",
+    "download": "week-2-ja.pptx",
+    "slides": 67,
+    "sha256": "b29b1fa21b87c115dea8a733af2da96563067be9d83b157140478bd74db740d7"
+  },
+  {
+    "week": 3,
+    "language": "zh",
+    "source": "OO第三週_類別物件與物件模型.pptx",
+    "download": "week-3-zh.pptx",
+    "slides": 40,
+    "sha256": "4b3b1e39cb1467fe91b1dcab8e93573af14c902da508ddd1da4f95c1c130d822"
+  },
+  {
+    "week": 3,
+    "language": "en",
+    "source": "OO第三週_類別物件與物件模型_英文版-v2.pptx",
+    "download": "week-3-en.pptx",
+    "slides": 40,
+    "sha256": "59c8f7122a2f6fde0ccc0a7cbd46a7230936dfc2eb6d430ce8377c9e7a5c93c7"
+  },
+  {
+    "week": 3,
+    "language": "ja",
+    "source": "OO第三週_類別物件與物件模型_日文版-v2.pptx",
+    "download": "week-3-ja.pptx",
+    "slides": 40,
+    "sha256": "4cd9b9aa94d6c9d0453a0fc1661e0e2648dd3fa2e982c45df3886e857deb44f7"
+  },
+  {
+    "week": 4,
+    "language": "zh",
+    "source": "OO第四週_封裝與資訊隱藏_Django版.pptx",
+    "download": "week-4-zh.pptx",
+    "slides": 56,
+    "sha256": "0d4ce2319e0fba42b5b19861a244e920a3fcfc3cd291c92e8e1d18c238b800f7"
+  }
+]

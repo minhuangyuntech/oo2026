@@ -1,0 +1,226 @@
+{
+  "1": {
+    "en": {"title":"Encapsulation and information hiding","body":["Object-Oriented Programming · Week 04","Department of Electronic Engineering, National Yunlin University of Science and Technology","Fall 2026 · Min-Huang Ho"]},
+    "ja": {"title":"カプセル化と情報隠蔽","body":["オブジェクト指向プログラミング · 第4週","国立雲林科技大学 電子工程系","2026年度 前期 · 何敏煌"]}
+  },
+  "2": {
+    "en": {"title":"The learning path for Week 4","body":["Interfaces and state: public operations, internal data, and class invariants.","Names and attributes: _name, __name, getters, and setters.","Data boundaries: read-only properties, collection copies, and shared references.","Advanced mechanisms: descriptors, interface contracts, and state validation.","Examples use Python 3.12+. The companion Python examples can be run independently."]},
+    "ja": {"title":"第4週の学習内容","body":["インターフェースと状態：公開操作、内部データ、クラスの不変条件。","名前と属性：_name、__name、getter、setter。","データの境界：読み取り専用プロパティ、コレクションのコピー、共有参照。","発展的な仕組み：ディスクリプタ、インターフェースの契約、状態の検証。","例は Python 3.12+ を使用します。付属の Python サンプルはそれぞれ単独で実行できます。"]}
+  },
+  "3": {
+    "en": {"title":"The problem left by Week 3: direct state changes","body":["Initialization checks only once. After __init__ validates the initial value, an ordinary attribute can still be assigned directly.","Rules must cover every update path. If a balance must remain nonnegative, later changes must obey the same rule."]},
+    "ja": {"title":"第3週からの課題：状態の直接変更","body":["初期化時の検証は一度だけです。__init__ で検証しても、通常の属性には後から直接代入できます。","残高を非負に保つには、その後の変更経路にも同じ規則を適用する必要があります。"]}
+  },
+  "4": {
+    "en": {"title":"Encapsulation, information hiding, and abstraction","body":["|Concept | Main question | Account example\nEncapsulation | Who manages state and operations? | BankAccount manages deposits, withdrawals, and the balance\nInformation hiding | Which design decisions stay internal? | Store the balance as an integer internally\nAbstraction | Which capabilities must callers understand? | Deposit, withdraw, and query the balance","A public interface explains how to use an object while leaving room to change its implementation."]},
+    "ja": {"title":"カプセル化・情報隠蔽・抽象化","body":["|概念 | 着目する問い | 口座の例\nカプセル化 | 状態と操作を誰が管理するか | BankAccount が入出金と残高を管理する\n情報隠蔽 | どの設計判断を内部に留めるか | 内部では整数で残高を保存する\n抽象化 | 利用側が理解すべき機能は何か | 入金、出金、残高照会","公開インターフェースで使い方を示し、内部実装には変更の余地を残します。"]}
+  },
+  "5": {
+    "en": {"title":"Class invariants","body":["Price: a price must stay within its permitted range.","Account: the balance must be nonnegative after a public operation finishes.","Interval: start must not exceed end after an operation.","Transaction history: add a record only for a successful deposit or withdrawal.","An invariant defines a valid state. It must hold after construction and subsequent public operations."]},
+    "ja": {"title":"クラスの不変条件","body":["価格：許可された範囲内の値を保ちます。","口座：公開操作の完了後、残高は非負でなければなりません。","区間：操作完了後、start は end 以下でなければなりません。","取引履歴：入出金が成功した場合にだけ記録を追加します。","不変条件は正しい状態の規則です。生成時と、その後の公開操作の両方で維持します。"]}
+  },
+  "6": {
+    "en": {"title":"Python naming conventions","body":["|Name | Meaning | Runtime behavior\nname | Public interface | Intended for normal use by callers\n_name | Non-public implementation detail | Python generally still permits access\n__name | Avoid name collisions in subclasses | Triggers name mangling inside a class\n__name__ | Python special method or attribute | For example, __init__; not subject to this mangling","Public visibility is an interface commitment. Name mangling is not a security boundary."]},
+    "ja": {"title":"Python の命名規約","body":["|名前の形式 | 意味 | 実行時の動作\nname | 公開インターフェース | 利用側からの通常の使用を想定\n_name | 非公開の実装詳細 | 通常、Python はアクセスを禁止しない\n__name | 継承時の名前の衝突を回避 | クラス内で名前マングリングが行われる\n__name__ | Python の特殊メソッドや属性 | __init__ など。このマングリングの対象外","公開かどうかはインターフェース上の約束です。名前マングリングはセキュリティ上の隔離機構ではありません。"]}
+  },
+  "7": {
+    "en": {"title":"A single underscore marks a non-public name","body":["_price remains accessible. A leading underscore does not make the interpreter reject assignment from outside the class.","Callers should follow the interface. The underscore communicates design intent; valid operations still need an explicit definition."]},
+    "ja": {"title":"単一のアンダースコアは非公開の慣例","body":["_price には引き続きアクセスできます。先頭のアンダースコアだけでは、クラス外からの代入は禁止されません。","利用側は公開インターフェースに従います。アンダースコアは設計意図を伝えるもので、正当な操作は別途定義する必要があります。"]}
+  },
+  "8": {
+    "en": {"title":"Double underscores and name mangling","body":["The name is rewritten inside the class: __value becomes _Vault__value here.","Outside code can still use the actual mangled name. Mangling mainly prevents collisions; it does not guarantee that data cannot be read or changed."]},
+    "ja": {"title":"二重アンダースコアと名前マングリング","body":["クラス内で名前が書き換えられます。この例では __value が _Vault__value になります。","クラス外からも実際の名前を指定できます。主な目的は名前の衝突回避であり、読み書きを完全に禁止するものではありません。"]}
+  },
+  "9": {
+    "en": {"title":"Internal attributes with the same name in a hierarchy","body":["Base and Child store separate values because each class uses a different mangled name for __value.","Use a double underscore when avoiding accidental subclass name collisions is the design requirement."]},
+    "ja": {"title":"継承関係における同名の内部属性","body":["Base と Child の __value は異なる名前に変換されるため、それぞれの値を保持します。","サブクラスとの意図しない名前の衝突を避ける必要がある場合に、二重アンダースコアを検討します。"]}
+  },
+  "10": {
+    "en": {"title":"The public interface forms a contract","body":["Calling syntax: p.price and account.deposit(amount).","Valid input: accepted types, ranges, and units.","Failure behavior: exception types and the state after a failed operation.","Compatibility: existing calls keep working when internal details change.","Explicit public behavior reduces callers' dependence on internal fields."]},
+    "ja": {"title":"公開インターフェースは契約になる","body":["呼び出し方：p.price、account.deposit(amount)。","有効な入力：受け付ける型、範囲、単位。","失敗時の動作：例外の種類と、失敗後の状態。","互換性：内部実装を変更しても既存の呼び出し方を維持します。","公開動作を明確にすると、利用側が内部フィールドに依存するのを減らせます。"]}
+  },
+  "11": {
+    "en": {"title":"Product.price in the course example","body":["Use the public attribute during construction. self.price = price invokes the setter.","Store the value internally as _price. The getter reads it; the setter validates before writing it."]},
+    "ja": {"title":"教材の Product.price","body":["生成時にも公開属性を使用します。self.price = price により setter が実行されます。","内部では _price に保存します。getter は値を読み、setter は検証後に値を書き込みます。"]}
+  },
+  "12": {
+    "en": {"title":"Functions behind attribute syntax","body":["|Operation | Entry point | Typical use\np.price | getter | Read or calculate the current value\np.price = value | setter | Validate and store a new value\ndel p.price | deleter | Provide only when deletion is explicitly allowed\nProduct.price | property object on the class | Inspect fget, fset, and fdel","Writing or deleting a property without the corresponding operation normally raises AttributeError."]},
+    "ja": {"title":"属性構文に対応する関数","body":["|操作 | 呼び出される入口 | 主な用途\np.price | getter | 現在の値を読む、または計算する\np.price = value | setter | 新しい値を検証して保存する\ndel p.price | deleter | 明示的に削除を許す場合にだけ提供する\nProduct.price | クラス上の property オブジェクト | fget、fset、fdel を調べる","対応する操作がないプロパティへの代入や削除は、通常 AttributeError を発生させます。"]}
+  },
+  "13": {
+    "en": {"title":"Construction and updates use the same setter","body":["Every public assignment is validated. Object construction and later changes follow the same price rule.","A failed update preserves the old value: validate first, then assign _price. Invalid input never overwrites the previous value."]},
+    "ja": {"title":"生成と変更で同じ setter を使う","body":["公開属性への代入は毎回検証されます。オブジェクト生成時も後からの変更も、同じ価格規則に従います。","検証してから _price に代入するため、更新に失敗しても以前の値が残ります。不正な入力で元の値を上書きしません。"]}
+  },
+  "14": {
+    "en": {"title":"How a property handles reads and writes","body":["Attribute syntax invokes a getter or setter. A read retrieves _price; an assignment validates the new value before updating _price.","The diagram uses the valid price 120 and omits round(value, 2) for clarity."]},
+    "ja": {"title":"プロパティの読み書きの流れ","body":["属性構文によって getter または setter が呼ばれます。読み取りは _price を返し、代入は新しい値を検証してから _price を更新します。","図では有効な価格 120 を使い、round(value, 2) の処理を省略しています。"]}
+  },
+  "15": {
+    "en": {"title":"The recursive setter trap","body":["Assigning self.price = value inside price.setter calls the same setter again.","Use a separate storage name. After validation, assign self._price = value instead."]},
+    "ja": {"title":"setter の再帰の落とし穴","body":["price.setter の中で self.price = value とすると、同じ setter が再び呼ばれます。","保存用には別の名前を使います。検証後は self._price = value に代入します。"]}
+  },
+  "16": {
+    "en": {"title":"Updating before validation leaves invalid state","body":["Raising an exception does not automatically undo an attribute assignment that has already finished.","Check all required conditions before changing the relevant data. This example raises an error but still leaves _price at -5."]},
+    "ja": {"title":"変更してから検証すると不正な状態が残る","body":["例外が発生しても、既に完了した属性への代入が自動的に取り消されるわけではありません。","必要な条件をすべて確認してからデータを変更します。この例では例外が発生しても _price に -5 が残ります。"]}
+  },
+  "17": {
+    "en": {"title":"Validation needs an explicit input policy","body":["|Issue | Possible policy | Details to specify\nWrong type | TypeError | Whether strings, bool, or subclasses are accepted\nOut-of-range value | ValueError | Whether zero, negatives, NaN, or infinity are accepted\nFormat conversion | Explicit normalization | When to trim whitespace or round values\nFailed update | Preserve the old state | Both balance and history remain unchanged","Type hints communicate intent. Runtime rules still require actual checks."]},
+    "ja": {"title":"検証には明確な入力方針が必要","body":["|問題 | 方針の例 | 明示すべき点\n型が不正 | TypeError | 文字列、bool、派生型を受け付けるか\n範囲外の値 | ValueError | 0、負数、NaN、無限大を受け付けるか\n形式の変換 | 明示的な正規化 | 空白除去や丸めを行うタイミング\n更新失敗 | 元の状態を保つ | 残高と取引履歴の両方を維持する","型ヒントは意図を示します。実行時の規則はプログラムで検証する必要があります。"]}
+  },
+  "18": {
+    "en": {"title":"A read-only property with only a getter","body":["The public name cannot be reassigned normally because account_number has no setter.","_number still exists as an implementation detail. The read-only commitment applies to the public interface."]},
+    "ja": {"title":"getter だけの読み取り専用プロパティ","body":["account_number に setter がないため、公開名への通常の代入は失敗します。","内部の _number は存在します。読み取り専用という約束は公開インターフェースに対するものです。"]}
+  },
+  "19": {
+    "en": {"title":"A read-only property can still expose mutable data","body":["No attribute assignment happens here. n.notes returns a list, and append mutates that list.","Read-only access does not imply immutable contents. Inspect which objects returned by a getter are shared."]},
+    "ja": {"title":"読み取り専用でも可変データを公開し得る","body":["ここでは属性への代入は起きていません。n.notes が list を返し、append がその list を変更しています。","読み取り専用でも内容が不変とは限りません。getter が返すオブジェクトの共有関係も確認します。"]}
+  },
+  "20": {
+    "en": {"title":"Computed properties derive values from current state","body":["area is calculated on every read. Avoid storing a second _area value that could become inconsistent.","This example demonstrates a computed property only; validation of width and height is a separate design decision."]},
+    "ja": {"title":"計算プロパティは現在の状態から値を求める","body":["area は読み取りのたびに計算されます。別の _area を保存しないことで、二つのデータの不整合を避けます。","この例は計算プロパティだけを示しています。幅と高さの妥当性検証は別途設計します。"]}
+  },
+  "21": {
+    "en": {"title":"Ordinary attributes, properties, and methods","body":["|Requirement | Suitable interface | Example\nSimple data with no extra rules | Public attribute | student.nickname\nNatural reading or controlled assignment | property | product.price\nExplicit business action and side effects | Method | account.withdraw(50)\nExpensive computation or external I/O | Clearly named method | report.generate()","Choose a form that matches callers' expectations. Not every field needs a setter."]},
+    "ja": {"title":"通常の属性・property・メソッド","body":["|要件 | 適したインターフェース | 例\n追加の規則がない単純なデータ | 公開属性 | student.nickname\n自然な読み取りや制御された代入 | property | product.price\n明確な業務操作と副作用 | メソッド | account.withdraw(50)\n重い計算や外部 I/O | 意図が分かる名前のメソッド | report.generate()","利用側の期待に合う形式を選びます。すべてのフィールドに setter が必要なわけではありません。"]}
+  },
+  "22": {
+    "en": {"title":"The public interface of BankAccount","body":["Read-only queries: account_number, balance, and transactions.","deposit(amount) validates the amount and increases the balance.","withdraw(amount) checks the available balance before deducting funds.","Methods manage the internal _balance and _transactions data.","This example uses integer units and does not model interest, currency conversion, or concurrent transactions."]},
+    "ja": {"title":"BankAccount の公開インターフェース","body":["読み取り専用の照会：account_number、balance、transactions。","deposit(amount) は金額を検証して残高を増やします。","withdraw(amount) は残高を確認してから引き落とします。","内部の _balance と _transactions はメソッドで管理します。","例では整数単位を使い、利息、通貨換算、並行取引は扱いません。"]}
+  },
+  "23": {
+    "en": {"title":"Establishing a valid account state","body":["Balances use integer units. type(value) is int also rejects bool.","Validate before storing state. This is an excerpt of balance initialization; the complete companion program also validates the account number."]},
+    "ja": {"title":"口座生成時に正しい状態を確立する","body":["残高には整数単位を使います。type(value) is int は bool も除外します。","必要な検証を終えてから状態を保存します。ここは残高初期化の抜粋で、付属の完全なプログラムでは口座番号も検証します。"]}
+  },
+  "24": {
+    "en": {"title":"A deposit updates both balance and history","body":["Shared amount validation requires a positive integer and rejects zero, negative values, and bool.","One method expresses a complete operation. Callers do not update the balance and append a transaction separately."]},
+    "ja": {"title":"入金は残高と履歴を更新する","body":["共通の金額検証では正の整数だけを受け付け、0、負数、bool を拒否します。","一つのメソッドで操作全体を表現します。利用側が残高変更と履歴追加を別々に行う必要はありません。"]}
+  },
+  "25": {
+    "en": {"title":"Check available funds before a withdrawal","body":["Change state only after all checks pass: first validate the amount, then check the available balance.","The public balance remains read-only. Callers query a.balance and use an explicit operation to change it."]},
+    "ja": {"title":"出金前に利用可能な残高を確認する","body":["すべての条件を満たしてから状態を変更します。金額を検証し、次に十分な残高があるか確認します。","公開される balance は読み取り専用です。照会は a.balance、変更は明示的な操作で行います。"]}
+  },
+  "26": {
+    "en": {"title":"Rejected operations preserve the previous state","body":["Failure behavior is part of the contract. An excessive withdrawal raises ValueError without changing either the balance or the history.","Observe the complete state in tests. Checking only that an exception occurred does not establish object correctness."]},
+    "ja": {"title":"拒否された操作は元の状態を保つ","body":["失敗時の動作も契約の一部です。残高を超える出金は ValueError を発生させ、残高と履歴の両方を維持します。","テストでは状態全体を観察します。例外が発生したことだけでは、オブジェクトの正しさを確認できません。"]}
+  },
+  "27": {
+    "en": {"title":"Validation and state changes during withdrawal","body":["Update balance and history only after every check passes. The amount must be a positive integer and must not exceed the balance.","Any validation failure preserves the old state. This single-threaded in-memory example does not provide database or concurrent-transaction atomicity."]},
+    "ja": {"title":"出金処理の検証と状態更新","body":["すべての検証を通過してから残高と履歴を変更します。金額は正の整数で、残高以下でなければなりません。","検証に失敗した場合は元の状態を保ちます。これは単一スレッドのメモリ内の例であり、データベースや並行取引の原子性を保証するものではありません。"]}
+  },
+  "28": {
+    "en": {"title":"Assigning responsibilities with Tell, Don't Ask","body":["|Approach | Caller's responsibility | Location of rules\nRead balance, then deduct manually | Read, decide, update, and record | Rules can become scattered among callers\nCall withdraw(amount) | Express the intention to withdraw | BankAccount maintains its own state\nRead balance for display | Retrieve and present information | A valid and necessary query","Keep decisions with the owner of the data. This principle still permits necessary queries."]},
+    "ja": {"title":"Tell, Don't Ask による責任の配置","body":["|方法 | 利用側の責任 | 規則の場所\n残高を取り出して自分で減額 | 読み取り、判断、変更、記録 | 複数の呼び出し元に分散しやすい\nwithdraw(amount) を呼ぶ | 出金の意図を伝える | BankAccount が状態を維持する\n画面表示のために balance を読む | 情報の取得と表示 | 正当で必要な照会","データの所有者に判断を任せる原則です。必要な照会まで禁止するものではありません。"]}
+  },
+  "29": {
+    "en": {"title":"Returning an internal list exposes an update path","body":["external and _entries refer to the same mutable list.","Calling clear from outside the class bypasses the class's intended update methods and can break its rules."]},
+    "ja": {"title":"内部の list を返すと変更経路が漏れる","body":["external と _entries は同じ可変 list を参照しています。","外部から clear を呼ぶと、クラスが定義した変更メソッドを通らずに内部データを書き換えられます。"]}
+  },
+  "30": {
+    "en": {"title":"A tuple snapshot protects the outer sequence","body":["Each call returns an outer snapshot. A snapshot obtained earlier does not automatically gain new transactions.","The elements in this example are also immutable: each record is a tuple containing a str and an int."]},
+    "ja": {"title":"tuple のスナップショットは外側を保護する","body":["呼び出すたびに外側のスナップショットを返します。以前取得した snapshot に新しい取引が自動で追加されることはありません。","この例では要素も不変です。各記録は str と int から成る tuple です。"]}
+  },
+  "31": {
+    "en": {"title":"A tuple does not recursively freeze its elements","body":["The outer container is immutable, but inner objects can still be shared. A tuple element may be a mutable dict.","Encapsulation requires inspecting the whole data structure, not just the return type."]},
+    "ja": {"title":"tuple は要素を再帰的に凍結しない","body":["外側が不変でも、内側のオブジェクトは共有され得ます。tuple の要素が可変の dict である場合もあります。","カプセル化では戻り値の型だけでなく、データ構造全体を確認します。"]}
+  },
+  "32": {
+    "en": {"title":"Tuples and shared inner objects","body":["Container immutability does not recursively apply to every element. internal[0] and snapshot[0] refer to the same dict.","Changing the dictionary's amount is visible through both containers."]},
+    "ja": {"title":"tuple と共有される内側のオブジェクト","body":["コンテナの不変性は、すべての要素に再帰的に適用されるわけではありません。internal[0] と snapshot[0] は同じ dict を参照します。","辞書の amount を変更すると、どちらのコンテナからも新しい値が見えます。"]}
+  },
+  "33": {
+    "en": {"title":"Strategies for returning collections","body":["|Strategy | Changes to the outer container | Mutable inner elements\nReturn the list directly | Callers can change the internal container | Shared\nlist.copy() | Outer changes do not affect the original container | Still shared\ntuple(list) | Cannot add or remove snapshot elements | May still be shared\ndeepcopy(list) | Recursively copies objects that support copying | Evaluate cost and copy semantics","Snapshots, copies, and read-only views have different meanings and do not offer identical protection."]},
+    "ja": {"title":"コレクションを返す方法","body":["|方法 | 外側の変更 | 内側の可変要素\nlist を直接返す | 利用側が内部コンテナを変更できる | 共有される\nlist.copy() | 外側の変更は元のコンテナに影響しない | 共有されたまま\ntuple(list) | スナップショットの要素を追加・削除できない | 共有される可能性がある\ndeepcopy(list) | コピー可能なオブジェクトを再帰的にコピーする | コストとコピーの意味を検討する","スナップショット、コピー、読み取り専用ビューは意味が異なり、同じ保護ではありません。"]}
+  },
+  "34": {
+    "en": {"title":"Input data can also create shared references","body":["Copy the outer container on entry. list(values) creates a new list, so appending to the source does not modify it.","This example assumes string elements. Mutable elements require a separate decision about copying."]},
+    "ja": {"title":"入力データにも共有参照が生じる","body":["入口で外側のコンテナをコピーします。list(values) が新しい list を作るため、元の list への append は影響しません。","この例では要素を文字列と仮定しています。可変要素の場合はコピー方針を別途決める必要があります。"]}
+  },
+  "35": {
+    "en": {"title":"Invariants involving multiple fields","body":["For an interval, start must be less than or equal to end.","Separate setters create an ordering problem: changing start first may put it beyond the old end.","set_bounds(start, end) accepts both new values as one operation. Validate their relationship, then update them together.","A method often expresses a complete state change more clearly when a rule spans multiple fields."]},
+    "ja": {"title":"複数のフィールドにまたがる不変条件","body":["区間では start が end 以下でなければなりません。","個別の setter では順序が問題になります。start を先に変更すると、古い end を一時的に超える場合があります。","set_bounds(start, end) で二つの新しい値を一度に受け取り、関係を検証してからまとめて更新します。","複数フィールドの規則では、状態変更全体をメソッドで表すと明確になります。"]}
+  },
+  "36": {
+    "en": {"title":"Update interval bounds in one operation","body":["Validate the complete proposed state by checking the relationship between start and end.","Callers provide both values at once, reducing dependence on update order. This example does not handle multithreaded synchronization."]},
+    "ja": {"title":"区間の境界を一つの操作で更新する","body":["start と end の関係を調べて、新しい状態全体を検証します。","利用側が二つの値を一度に渡すことで、変更順序への依存を減らせます。この例はマルチスレッドの同期を扱いません。"]}
+  },
+  "37": {
+    "en": {"title":"The function form of property","body":["Decorators are convenient syntax. property can receive getter and setter functions directly.","This simplified example assigns celsius before reading it, ensuring that _celsius exists."]},
+    "ja": {"title":"property の関数形式","body":["デコレータは便利な構文です。property は getter と setter の関数を直接受け取ることもできます。","この簡略例では celsius を先に設定し、_celsius が存在する状態で読み取ります。"]}
+  },
+  "38": {
+    "en": {"title":"Property, descriptors, and lookup order","body":["|Order | Default instance attribute lookup | Example\n1 | Data descriptor on the class | property, including getter-only properties\n2 | Matching entry in the instance dictionary | obj.__dict__\n3 | Non-data descriptor or class attribute | Ordinary methods and class defaults\nIf missing | Normal dotted access may use __getattr__ | Only when it is defined","Descriptors control attribute access through special methods. A descriptor providing __set__ or __delete__ is a data descriptor."]},
+    "ja": {"title":"property・ディスクリプタ・探索順序","body":["|順序 | 通常のインスタンス属性の探索 | 例\n1 | クラス上のデータディスクリプタ | getter だけのものを含む property\n2 | インスタンス辞書の同名の項目 | obj.__dict__\n3 | 非データディスクリプタまたはクラス属性 | 通常のメソッドやクラスの既定値\n見つからない場合 | 通常のドットアクセスは __getattr__ に委ね得る | 定義されている場合だけ実行","ディスクリプタは特殊メソッドで属性アクセスを制御します。__set__ または __delete__ を持つものがデータディスクリプタです。"]}
+  },
+  "39": {
+    "en": {"title":"Instance attribute lookup","body":["With default attribute lookup, a property takes precedence over the instance's __dict__.","A non-data descriptor also invokes __get__; an ordinary class attribute returns its value directly.","Normal attribute access can fall back to __getattr__ after AttributeError, when that method is defined."]},
+    "ja": {"title":"インスタンス属性の探索順序","body":["既定の属性探索では、property がインスタンスの __dict__ より優先されます。","非データディスクリプタでも __get__ が呼ばれ、通常のクラス属性では値がそのまま返されます。","通常の属性アクセスで AttributeError が発生すると、定義されている場合は __getattr__ に処理が渡ります。"]}
+  },
+  "40": {
+    "en": {"title":"An instance dictionary cannot shadow a property","body":["The property takes precedence. x.price still calls the getter and returns the _price value, 100.","This example exposes the mechanism. Directly changing __dict__ is not normal use of the public interface."]},
+    "ja": {"title":"同名の辞書項目では property を隠せない","body":["property が優先されるため、x.price は getter を呼び、_price の値 100 を返します。","仕組みを観察するための例です。__dict__ の直接変更は公開インターフェースの通常の利用方法ではありません。"]}
+  },
+  "41": {
+    "en": {"title":"Give attribute deletion explicit meaning","body":["del invokes the deleter. Here it deletes _value, so subsequent reads cannot find the stored data.","Do not offer deletion for required state. If an account must always have a balance, its balance should not be deletable."]},
+    "ja": {"title":"属性の削除には明確な意味を持たせる","body":["del は deleter を実行します。この例では _value を削除するため、その後の読み取りで値が見つからなくなります。","必須の状態には通常、削除を提供しません。口座が常に残高を持つ必要があるなら、残高の削除は許可しません。"]}
+  },
+  "42": {
+    "en": {"title":"Additional boundaries for floating-point prices","body":["A negative-value check is incomplete. Neither NaN nor positive infinity is rejected by value < 0.","bool is a subclass of int. Binary floating-point numbers may approximate decimal values, which affects rounding."]},
+    "ja": {"title":"浮動小数点価格の追加の境界条件","body":["負数だけの検査では不十分です。NaN と正の無限大は、value < 0 では拒否されません。","bool は int のサブクラスです。二進浮動小数点では十進値が近似されることがあり、丸めにも影響します。"]}
+  },
+  "43": {
+    "en": {"title":"A more complete price setter","body":["This policy accepts built-in int and float, excluding bool and other types.","After conversion, require a finite, nonnegative value. NaN and infinity are rejected. Converting an extremely large integer to float can raise an overflow error.","The shown output corresponds to companion tests for 100, True, and NaN."]},
+    "ja": {"title":"より完全な価格 setter","body":["この方針では組み込みの int と float を受け付け、bool とそれ以外の型を除外します。","変換後は有限かつ非負であることを確認します。NaN と無限大は拒否されます。非常に大きな整数を float に変換すると、オーバーフローする場合があります。","表示される出力は、付属プログラムで 100、True、NaN を試した結果です。"]}
+  },
+  "44": {
+    "en": {"title":"Decimal and an explicit rounding policy","body":["Construct Decimal from a string to preserve the intended decimal input, as in Decimal(\"2.675\").","Rounding is part of the requirements. This example explicitly chooses ROUND_HALF_UP; validation and allowed ranges still need their own rules."]},
+    "ja": {"title":"Decimal と明示的な丸め方針","body":["Decimal(\"2.675\") のように文字列から生成すると、入力した十進値の意味を保持できます。","丸め方は要件の一部です。この例は ROUND_HALF_UP を明示的に選びます。妥当性や範囲の規則は別途必要です。"]}
+  },
+  "45": {
+    "en": {"title":"Separate public syntax from internal representation","body":["Callers read meters without knowing that the implementation stores millimeters.","Preserve the semantic contract as well as the syntax. Precision, allowed ranges, and exceptions can all affect compatibility."]},
+    "ja": {"title":"公開構文と内部表現を分離する","body":["利用側は meters を読み、内部がミリメートルで保存されていることを知る必要がありません。","構文だけでなく意味上の契約も維持します。精度、許可範囲、例外はいずれも互換性に影響します。"]}
+  },
+  "46": {
+    "en": {"title":"How encapsulation supports later projects","body":["|Object | Public operations | Internal design decisions\nToolRegistry | register, get, list_names | Tool storage and duplicate-name checks\nTask | start, complete, cancel | Allowed state transitions and records\nPackage API | Documented functions and classes | _internal modules and data representation\nDjango business service | Complete business operations | Validation rules and collaboration with persistence","First understand Python object interfaces, then integrate frameworks and packages."]},
+    "ja": {"title":"カプセル化を後のプロジェクトへつなげる","body":["|オブジェクト | 公開操作 | 内部の設計判断\nToolRegistry | register、get、list_names | ツールの保存方法と名前の重複検査\nTask | start、complete、cancel | 許可する状態遷移と記録\nPackage API | 文書化された関数とクラス | _internal モジュールとデータ表現\nDjango 業務サービス | 業務操作全体を表現 | 検証規則と永続化との連携","Python オブジェクトのインターフェースを理解してから、フレームワークやパッケージに統合します。"]}
+  },
+  "47": {
+    "en": {"title":"Django example: products and discounts","body":["This Product model excerpt belongs to the companion example using Django 5.2 and SQLite.","price and discount are stored database fields. final_price is computed on every read and has no corresponding database column in this example.","final_price has no setter, while price and discount remain assignable. Assigning a model field does not automatically validate it.","Invariant: 0 ≤ discount ≤ price. Monetary values use Decimal to avoid binary floating-point representation errors."]},
+    "ja": {"title":"Django の例：商品と割引","body":["Product モデルの抜粋です。付属の完全なプログラムは Django 5.2 と SQLite を使います。","price と discount はデータベースに保存するフィールドです。final_price は読むたびに計算され、この例には対応するデータベース列がありません。","final_price に setter はありませんが、price と discount には代入できます。モデルのフィールドへの代入だけでは検証は実行されません。","不変条件は 0 ≤ discount ≤ price。金額には Decimal を使い、二進浮動小数点の表現誤差を避けます。"]}
+  },
+  "48": {
+    "en": {"title":"Cross-field validation in Django","body":["This is the clean() method inside Product. Field validators check nonnegative values; clean() checks the relationship between price and discount.","full_clean() runs model validation. save() does not call it automatically, so arrange validation explicitly before saving.","clean() may still run after field validation fails. Checking types and finiteness first avoids another error during comparison."]},
+    "ja": {"title":"Django のフィールド間検証","body":["Product 内の clean() メソッドです。フィールドの validators は非負値を検査し、clean() は価格と割引の関係を検証します。","full_clean() はモデル検証を実行します。save() は自動で呼び出さないため、保存前の検証を明示的に組み込みます。","フィールド検証に失敗しても clean() が実行されることがあります。先に型と有限性を確認し、比較時の追加エラーを防ぎます。"]}
+  },
+  "49": {
+    "en": {"title":"Validation failure and in-memory state","body":["With a price of 100 and discount of 20, final_price is 80. Validate before saving.","Validation does not undo an assignment already made to the Python object. After failed validation, p.discount is still 150.","refresh_from_db() reloads the previously stored discount of 20 from the database."]},
+    "ja": {"title":"検証失敗とメモリ上の状態","body":["価格が 100、割引が 20 なら final_price は 80 です。検証してから保存します。","検証は Python オブジェクトへの代入を取り消しません。検証に失敗した後も、p.discount は 150 のままです。","refresh_from_db() で、データベースに保存済みの割引 20 を再読み込みします。"]}
+  },
+  "50": {
+    "en": {"title":"Database constraints and the boundary of encapsulation","body":["This Meta excerpt defines a database constraint for Product. QuerySet.update() bypasses the model's clean() and save() methods, but the database still checks this constraint.","The two layers serve different purposes: model validation provides useful errors; the database rejects invalid writes. The companion example receives IntegrityError for a violating update.","Ordinary projects create constraints through migrations. The single-file companion example creates an in-memory table directly."]},
+    "ja": {"title":"データベース制約とカプセル化の境界","body":["Product の Meta 内でデータベース制約を定義しています。QuerySet.update() はモデルの clean() と save() を通りませんが、データベースはこの制約を検査します。","二つの層には異なる役割があります。モデル検証は分かりやすいエラーを提供し、データベースは不正な書き込みを拒否します。付属例の違反更新では IntegrityError が発生します。","通常のプロジェクトでは migration で制約を作ります。単一ファイルの付属例ではメモリ上のテーブルを直接作成します。"]}
+  },
+  "51": {
+    "en": {"title":"Common errors and diagnosis","body":["|Symptom | Common cause | Correction\nRecursionError | Setter assigns its own property | Write to a separate internal field\nState changes despite an exception | Assignment happens before validation | Validate before updating\nRead-only data still changes | Getter returns a shared list | Design snapshots and element types\nDouble-underscore data is accessible | Mangling mistaken for access control | Understand its collision-avoidance purpose\nNaN passes price validation | Only value < 0 is checked | Define a finite-number policy","Inspect exceptions, attribute lookup, and the complete before-and-after state together."]},
+    "ja": {"title":"よくある誤りと診断","body":["|現象 | よくある原因 | 修正方針\nRecursionError | setter が同名の property に代入 | 別の内部フィールドへ保存する\n例外後も状態が変わる | 検証より先に代入 | 検証してから変更する\n読み取り専用データが変わる | getter が共有 list を返す | スナップショットと要素型を設計する\n二重アンダースコアのデータにアクセスできる | マングリングをアクセス制御と誤解 | 衝突回避という目的を理解する\nNaN が価格検証を通る | value < 0 だけで検査 | 有限数の方針を加える","例外、属性の探索元、操作前後の状態全体を一緒に観察します。"]}
+  },
+  "52": {
+    "en": {"title":"Test the public contract","body":["Cover success and failure. A valid deposit changes the balance; an excessive withdrawal must be rejected without changing the state.","assert is used here for example tests. Do not replace production input validation with assert."]},
+    "ja": {"title":"テストで公開契約を確認する","body":["成功と失敗の両方を確認します。正当な入金は残高を変更し、超過出金は状態を変えずに拒否されなければなりません。","ここではテスト用に assert を使います。製品コードの入力検証を assert で置き換えないでください。"]}
+  },
+  "53": {
+    "en": {"title":"Test cases for invariants","body":["|Case | Expected result | Additional observation\nDeposit 20 | Success | Balance increases and one record is added\nDeposit 0 or -1 | ValueError | Balance and history stay unchanged\nAmount is True or \"20\" | TypeError | Values outside the type policy are rejected\nWithdraw more than the balance | ValueError | No failed-transaction record is added\nAssign balance directly | AttributeError | Public balance remains read-only","Tests of public behavior leave more freedom to refactor the implementation."]},
+    "ja": {"title":"不変条件のテストケース","body":["|ケース | 期待結果 | 追加で確認すること\n20 を入金 | 成功 | 残高が増え、記録が1件追加される\n0 または -1 を入金 | ValueError | 残高と履歴は変わらない\n金額が True または \"20\" | TypeError | 型の方針に合わない値を拒否する\n残高を超える出金 | ValueError | 失敗した取引の記録を追加しない\nbalance に直接代入 | AttributeError | 公開残高は読み取り専用のまま","公開動作をテストすると、内部実装をリファクタリングする自由度が高まります。"]}
+  },
+  "54": {
+    "en": {"title":"Week 4 essentials","body":["Define the rules: valid states and failure behavior.","Choose the interface: ordinary attributes, properties, and methods have different roles.","Manage shared data: inspect input references and the mutability of returned collections.","Validate the whole behavior: successful updates are correct, and rejected operations keep state consistent.","Next: object lifecycle and the memory model."]},
+    "ja": {"title":"第4週の要点","body":["規則を定義する：正しい状態と失敗時の動作を明確にします。","公開インターフェースを選ぶ：通常の属性、property、メソッドにはそれぞれ役割があります。","共有データを管理する：入力参照と、返すコレクションの可変性を確認します。","動作全体を検証する：成功時は正しく更新し、拒否時は状態の整合性を保ちます。","次週：オブジェクトのライフサイクルとメモリモデル。"]}
+  },
+  "55": {
+    "en": {"title":"Recognize the concepts and interpret results","body":["_name: a non-public convention; direct external access remains possible.","__name: name mangling inside a class, mainly to avoid inheritance collisions.","Read-only property: restricts public assignment, but returned objects still need inspection.","Tuple snapshot: protects the outer structure without freezing mutable inner values.","Effective encapsulation depends on how the interface and rules work together."]},
+    "ja": {"title":"概念を区別して結果を読み取る","body":["_name：非公開の慣例であり、外部から直接アクセスできます。","__name：クラス内で名前が変換され、主に継承時の衝突を避けます。","読み取り専用 property：公開名への代入を制限しますが、返すオブジェクトも確認が必要です。","tuple のスナップショット：外側の構造を保護しますが、内側の可変値は凍結しません。","カプセル化の効果は、インターフェースと規則がどう協調するかで決まります。"]}
+  },
+  "56": {
+    "en": {"title":"Course and technical references","body":["Course materials: https://minhuangyuntech.github.io/oo2026/week/4/","Python classes and name mangling: https://docs.python.org/3/tutorial/classes.html","Properties and descriptors: https://docs.python.org/3/howto/descriptor.html","Decimal: https://docs.python.org/3/library/decimal.html","Django 5.2 model validation: https://docs.djangoproject.com/en/5.2/ref/models/instances/#validating-objects","Additional links are included in the source slides and companion notes."]},
+    "ja": {"title":"教材と技術資料","body":["コース教材：https://minhuangyuntech.github.io/oo2026/week/4/","Python のクラスと名前マングリング：https://docs.python.org/ja/3/tutorial/classes.html","property とディスクリプタ：https://docs.python.org/ja/3/howto/descriptor.html","Decimal：https://docs.python.org/ja/3/library/decimal.html","Django 5.2 のモデル検証：https://docs.djangoproject.com/ja/5.2/ref/models/instances/#validating-objects","追加リンクは元のスライドと付属資料に記載されています。"]}
+  }
+}

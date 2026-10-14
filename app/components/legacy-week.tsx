@@ -23,14 +23,6 @@ const lessons = [
   ["期末總結及期末專題要求說明","評量","物件導向核心概念總結","專題功能與設計要求","UML、測試與品質證據","文件、部署、展示與評分標準"],
 ] as const;
 
-const details = [
-  "定義：能準確說明概念、目的與常見使用情境。",
-  "辨識：能從需求或程式碼中找出此概念的具體位置。",
-  "設計：能判斷何時使用，以及不用時可能產生的問題。",
-  "實作：能以 Python 建立最小可運作範例。",
-  "驗證：能用輸出、測試或圖表證明設計符合預期。",
-];
-
 const week2Lectures = [
   {
     title:"資料型別、運算子與控制流程",
@@ -171,9 +163,9 @@ function lectureFor(week:number, topic:string, index:number) {
   const specific=weekNotes[week-1];
   return {
     title:topic,
-    lead:`本章聚焦「${topic}」。授課時應先說明它解決的問題，再從 Python 執行行為、設計選擇與錯誤案例逐步建立完整心智模型。`,
+    lead:`本章聚焦「${topic}」，內容涵蓋 Python 執行行為、設計選擇與錯誤案例。`,
     sections:[
-      {title:"1. 核心概念與運作方式",items:[specific[index*2],specific[index*2+1],"請學生用自己的話重新敘述概念，並指出程式執行前後有哪些狀態或依賴發生改變。"]},
+      {title:"1. 核心概念與運作方式",items:[specific[index*2],specific[index*2+1]]},
       {title:"2. Python 實作觀察",items:[applications[week-1][index],`在本週完整範例中找出與「${topic}」直接相關的類別、方法、型別提示或控制流程。`,"執行前先預測輸出，再加入 print、repr 或測試觀察物件身分、狀態與訊息傳遞。"]},
       {title:"3. 設計判斷",items:[`先確認「${topic}」是否真的回應目前需求，而不是為了使用語法或模式而增加複雜度。`,"比較至少兩種可行寫法，從可讀性、耦合、可測試性、擴充成本與執行效能說明取捨。","把設計決策寫成一句話：因為哪一項變化或規則，所以選擇目前的責任與介面配置。"]},
       {title:"4. 常見錯誤與診斷",items:[pitfalls[week-1][index],"要求學生建立最小反例重現問題，再修改為正確版本並比較輸出。","檢查錯誤屬於語法、執行期型別、物件狀態、責任配置或依賴方向，避免只修正表面訊息。"]},
