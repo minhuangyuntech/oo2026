@@ -2,7 +2,9 @@ import {djangoInfo,djangoRanges,djangoChapters} from "./django-data";
 export {djangoInfo,djangoRanges,djangoChapters};
 import {extraInfo,extraRanges,extraChapters,guiInfo,guiRanges,guiChapters} from "./additional-data";
 export {guiInfo,guiRanges,guiChapters};
-export type UnitId = number | "gui" | "django";
+import {pygameInfo,pygameRanges,pygameChapters} from "./pygame-data";
+export {pygameInfo,pygameRanges,pygameChapters};
+export type UnitId = number | "gui" | "django" | "pygame";
 export type Language = "zh" | "en" | "ja";
 export type BodyBlock = { type: string; text?: string; rows?: string[][] };
 export type Snippet = {code:string;language:string;label?:string|null};
@@ -84,11 +86,12 @@ export const laterWeeks = {
 export function weekLabel(lang: Language, week: UnitId) {
   if(week==="gui")return "GUI";
   if(week==="django")return "Django";
+  if(week==="pygame")return "Pygame";
   return `${ui[lang].week} ${String(week).padStart(2,"0")} ${ui[lang].weekSuffix}`.trim();
 }
 
 for(const lang of locales){weekInfo[lang].push(...extraInfo[lang]);chapterNames[lang].push(...extraChapters[lang]);}
 chapterRanges.push(...extraRanges);
-export function unitInfo(lang:Language,unit:UnitId){return unit==="django"?djangoInfo[lang]:unit==="gui"?guiInfo[lang]:weekInfo[lang][unit-1];}
-export function unitRanges(unit:UnitId){return unit==="django"?djangoRanges:unit==="gui"?guiRanges:chapterRanges[unit-1];}
-export function unitChapters(lang:Language,unit:UnitId){return unit==="django"?djangoChapters[lang]:unit==="gui"?guiChapters[lang]:chapterNames[lang][unit-1];}
+export function unitInfo(lang:Language,unit:UnitId){return unit==="pygame"?pygameInfo[lang]:unit==="django"?djangoInfo[lang]:unit==="gui"?guiInfo[lang]:weekInfo[lang][unit-1];}
+export function unitRanges(unit:UnitId){return unit==="pygame"?pygameRanges:unit==="django"?djangoRanges:unit==="gui"?guiRanges:chapterRanges[unit-1];}
+export function unitChapters(lang:Language,unit:UnitId){return unit==="pygame"?pygameChapters[lang]:unit==="django"?djangoChapters[lang]:unit==="gui"?guiChapters[lang]:chapterNames[lang][unit-1];}

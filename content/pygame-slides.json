@@ -1,0 +1,1871 @@
+{
+  "zh": [
+    {
+      "number": 1,
+      "type": "cover",
+      "title": "用射擊遊戲理解物件",
+      "sub": "Pygame · 類別、參照與互動",
+      "notes": [
+        "同一份遊戲，三種語言，五個核心類別。",
+        "從畫面出發，讀懂物件如何合作。"
+      ],
+      "sources": []
+    },
+    {
+      "number": 2,
+      "type": "screenshot",
+      "title": "畫面上的每個角色，都是物件",
+      "sub": "觀察標籤、狀態與右側的參照關係",
+      "notes": [
+        "綠色 Player 是玩家；紅色與紫色 Enemy 是不同實體。",
+        "黃色 Bullet 持有 owner；右側顯示即時物件數量。"
+      ],
+      "sources": []
+    },
+    {
+      "number": 3,
+      "type": "code",
+      "title": "安裝與啟動：Windows",
+      "sub": "解壓縮範例後，在專案資料夾開啟 PowerShell",
+      "notes": [
+        "建議使用 Python 3.12；requirements.txt 固定 pygame==2.6.1。",
+        "直接呼叫環境中的 Python，不需要啟用腳本。"
+      ],
+      "codeLanguage": "powershell",
+      "code": "py -3.12 -m venv .venv\n.\\.venv\\Scripts\\python.exe -m pip install -r requirements.txt\n.\\.venv\\Scripts\\python.exe main.py --lang zh",
+      "file": "PowerShell",
+      "sources": []
+    },
+    {
+      "number": 4,
+      "type": "code",
+      "title": "安裝與啟動：macOS / Linux",
+      "sub": "在專案資料夾開啟終端機；使用本機圖形桌面",
+      "notes": [
+        "--lang 可選 zh、en、ja；三種語言使用相同遊戲規則。",
+        "缺少中文字型時，可安裝系統的 Noto Sans CJK 字型。"
+      ],
+      "codeLanguage": "bash",
+      "code": "python3 -m venv .venv\n.venv/bin/python -m pip install -r requirements.txt\n.venv/bin/python main.py --lang zh",
+      "file": "Terminal",
+      "sources": []
+    },
+    {
+      "number": 5,
+      "type": "table",
+      "title": "先玩一局，再觀察物件",
+      "sub": "擊破敵人 +10 分；200 分勝利；生命從 3 開始",
+      "notes": [
+        "敵人碰到玩家或越過底線會觸發受傷；無敵時間內不重複扣血。"
+      ],
+      "values": [
+        [
+          "按鍵",
+          "功能"
+        ],
+        [
+          "Enter",
+          "開始"
+        ],
+        [
+          "方向鍵 / WASD",
+          "移動"
+        ],
+        [
+          "Space",
+          "射擊"
+        ],
+        [
+          "P / N",
+          "暫停／暫停時前進一影格"
+        ],
+        [
+          "Tab / R / Esc",
+          "標籤／重設回待機／離開"
+        ]
+      ],
+      "sources": []
+    },
+    {
+      "number": 6,
+      "type": "table",
+      "title": "五個類別，各有一份責任",
+      "sub": "讓角色處理自己，讓 Game 協調彼此",
+      "notes": [],
+      "values": [
+        [
+          "類別",
+          "狀態",
+          "主要責任"
+        ],
+        [
+          "Actor",
+          "pos、velocity、image、rect",
+          "共同的移動與外觀資料"
+        ],
+        [
+          "Player",
+          "hp、cooldown、invulnerable",
+          "輸入方向、射擊、受傷"
+        ],
+        [
+          "Enemy",
+          "hp、max_hp",
+          "下降、受擊與死亡"
+        ],
+        [
+          "Bullet",
+          "owner、damage",
+          "前進、離開畫面後移除"
+        ],
+        [
+          "Game",
+          "score、state、群組",
+          "生成、碰撞、勝敗與主迴圈"
+        ]
+      ],
+      "sources": []
+    },
+    {
+      "number": 7,
+      "type": "code",
+      "title": "一個類別，可以建立多個物件",
+      "sub": "類別定義共同規則；實體保存各自狀態",
+      "notes": [
+        "e1 與 e2 都是 Enemy，但身分與 hp 不同。",
+        "e1.take_hit(1) 不會扣掉 e2 的 hp。"
+      ],
+      "code": "e1 = Enemy(\"E01\", (180, 180), hp=1)\ne2 = Enemy(\"E02\", (395, 235), hp=2)\n\nprint(e1 is e2)                 # False\nprint(isinstance(e2, Enemy))    # True\ne1.take_hit(1)\nprint(e1.hp, e2.hp)             # 0 2",
+      "file": "actors.py · Enemy",
+      "sources": []
+    },
+    {
+      "number": 8,
+      "type": "rows",
+      "title": "先讀懂 UML 的三種記號",
+      "sub": "類別圖描述結構；物件圖描述某一刻的實體",
+      "notes": [
+        "類別方框：上層類別名稱，中層屬性，下層方法。",
+        "空心三角形指向父類別；實線箭頭表示可導覽的關聯。",
+        "1 是一個；0..* 是零到多個。物件名稱以 name : Class 表示並加底線。"
+      ],
+      "sources": [
+        [
+          "Pygame · Sprite / Group",
+          "https://www.pygame.org/docs/ref/sprite.html"
+        ],
+        [
+          "Pygame · Clock",
+          "https://www.pygame.org/docs/ref/time.html"
+        ],
+        [
+          "Python 3.12 · Data model",
+          "https://docs.python.org/3.12/reference/datamodel.html"
+        ],
+        [
+          "OMG · UML 2.5.1",
+          "https://www.omg.org/spec/UML/2.5.1"
+        ]
+      ]
+    },
+    {
+      "number": 9,
+      "type": "inheritance",
+      "title": "類別圖：三種角色都是 Actor",
+      "sub": "共用移動機制，再加入各自的行為",
+      "notes": [
+        "空心三角形朝父類別。此圖省略部分繪圖細節。"
+      ],
+      "sources": [
+        [
+          "Pygame · Sprite / Group",
+          "https://www.pygame.org/docs/ref/sprite.html"
+        ],
+        [
+          "Pygame · Clock",
+          "https://www.pygame.org/docs/ref/time.html"
+        ],
+        [
+          "Python 3.12 · Data model",
+          "https://docs.python.org/3.12/reference/datamodel.html"
+        ],
+        [
+          "OMG · UML 2.5.1",
+          "https://www.omg.org/spec/UML/2.5.1"
+        ]
+      ]
+    },
+    {
+      "number": 10,
+      "type": "relations",
+      "title": "類別關係：管理、參照與建立",
+      "sub": "Bullet.owner 是參照；Game 持有群組來管理角色",
+      "notes": [
+        "一顆 Bullet 對應一個 Player；同一 Player 可被多顆 Bullet 參照。",
+        "群組不等於獨佔擁有，不使用組合關係的實心菱形。"
+      ],
+      "sources": [
+        [
+          "Pygame · Sprite / Group",
+          "https://www.pygame.org/docs/ref/sprite.html"
+        ],
+        [
+          "Pygame · Clock",
+          "https://www.pygame.org/docs/ref/time.html"
+        ],
+        [
+          "Python 3.12 · Data model",
+          "https://docs.python.org/3.12/reference/datamodel.html"
+        ],
+        [
+          "OMG · UML 2.5.1",
+          "https://www.omg.org/spec/UML/2.5.1"
+        ]
+      ]
+    },
+    {
+      "number": 11,
+      "type": "objects",
+      "title": "物件圖：同一個玩家，兩個參照",
+      "sub": "暫停畫面中的快照：1 個 Player、3 個 Enemy、2 個 Bullet",
+      "notes": [
+        "B01.owner 與 B02.owner 指向同一個 player，不會複製玩家。",
+        "每個敵人的 hp、位置與速度仍各自獨立。"
+      ],
+      "sources": [
+        [
+          "Pygame · Sprite / Group",
+          "https://www.pygame.org/docs/ref/sprite.html"
+        ],
+        [
+          "Pygame · Clock",
+          "https://www.pygame.org/docs/ref/time.html"
+        ],
+        [
+          "Python 3.12 · Data model",
+          "https://docs.python.org/3.12/reference/datamodel.html"
+        ],
+        [
+          "OMG · UML 2.5.1",
+          "https://www.omg.org/spec/UML/2.5.1"
+        ]
+      ]
+    },
+    {
+      "number": 12,
+      "type": "code",
+      "title": "Group 分組，不會複製物件",
+      "sub": "同一個 Enemy 可以同時出現在兩個群組",
+      "notes": [
+        "all_sprites 統一更新與繪製；enemies 用於敵人碰撞檢查。",
+        "改變 e.hp，從任何群組取得的同一物件都會反映新值。"
+      ],
+      "code": "e = Enemy(\"E01\", (180, 180))\nall_sprites = pygame.sprite.Group(e)\nenemies = pygame.sprite.Group(e)\n\nprint(all_sprites.sprites()[0] is e)  # True\nprint(enemies.sprites()[0] is e)      # True",
+      "file": "game.py · spawn_enemy()",
+      "sources": [
+        [
+          "Pygame · Sprite / Group",
+          "https://www.pygame.org/docs/ref/sprite.html"
+        ],
+        [
+          "Pygame · Clock",
+          "https://www.pygame.org/docs/ref/time.html"
+        ],
+        [
+          "Python 3.12 · Data model",
+          "https://docs.python.org/3.12/reference/datamodel.html"
+        ],
+        [
+          "OMG · UML 2.5.1",
+          "https://www.omg.org/spec/UML/2.5.1"
+        ]
+      ]
+    },
+    {
+      "number": 13,
+      "type": "code",
+      "title": "Actor：把共同資料集中起來",
+      "sub": "image 是外觀；rect 是位置與碰撞範圍",
+      "notes": [
+        "super().__init__() 先初始化 Sprite 的群組管理功能。",
+        "pos 使用浮點座標；rect 使用整數像素座標。"
+      ],
+      "code": "class Actor(pygame.sprite.Sprite):\n    def __init__(self, name, position, size):\n        super().__init__()\n        self.name = name\n        self.image = pygame.Surface(size, pygame.SRCALPHA)\n        self.pos = pygame.Vector2(position)\n        self.rect = self.image.get_rect(center=position)\n        self.velocity = pygame.Vector2()",
+      "file": "actors.py · Actor.__init__()",
+      "sources": []
+    },
+    {
+      "number": 14,
+      "type": "code",
+      "title": "移動 = 速度 × 經過時間",
+      "sub": "dt 的單位是秒；速度的單位是像素／秒",
+      "notes": [
+        "每秒 80 像素，經過 0.5 秒會移動 40 像素。",
+        "先更新 pos 再同步 rect，避免每影格的小數位移被丟掉。"
+      ],
+      "code": "def update(self, dt):\n    self.pos += self.velocity * dt\n    self.rect.center = (round(self.pos.x), round(self.pos.y))",
+      "file": "actors.py · Actor.update()",
+      "sources": []
+    },
+    {
+      "number": 15,
+      "type": "code",
+      "title": "Player：把輸入轉成方向",
+      "sub": "由 Game 讀取按鍵；Player 決定自己的速度",
+      "notes": [
+        "(1, 0) 向右；(0, -1) 向上；(0, 0) 停止。",
+        "normalize() 讓斜向移動與直向移動具有相同速率。"
+      ],
+      "code": "def set_direction(self, x, y):\n    direction = pygame.Vector2(x, y)\n    if direction.length_squared() > 1:\n        direction = direction.normalize()\n    self.velocity = direction * PLAYER_SPEED",
+      "file": "actors.py · Player.set_direction()",
+      "sources": []
+    },
+    {
+      "number": 16,
+      "type": "code",
+      "title": "Player.shoot()：決定能否發射",
+      "sub": "方法把限制與狀態更新封裝在一起",
+      "notes": [
+        "冷卻未結束或 hp 為 0 時，回傳 None。",
+        "成功時建立新 Bullet；self 就是發射它的玩家。"
+      ],
+      "code": "def shoot(self, name):\n    if self.cooldown > 0 or self.hp == 0:\n        return None\n    self.cooldown = SHOT_INTERVAL\n    return Bullet(name, self)",
+      "file": "actors.py · Player.shoot()",
+      "sources": []
+    },
+    {
+      "number": 17,
+      "type": "code",
+      "title": "Bullet：記住誰發射自己",
+      "sub": "owner 保留物件參照；負的 y 速度表示向上",
+      "notes": [
+        "owner 是 Player 物件，不是字串，也不是複本。",
+        "此頁省略外觀繪製；傷害數值為 1。"
+      ],
+      "code": "def __init__(self, name, owner):\n    position = (owner.rect.centerx, owner.rect.top - 9)\n    super().__init__(name, position, (8, 20))\n    self.owner = owner\n    self.damage = 1\n    self.velocity.y = -BULLET_SPEED",
+      "file": "actors.py · Bullet.__init__() · excerpt",
+      "sources": []
+    },
+    {
+      "number": 18,
+      "type": "code",
+      "title": "Game：把新子彈加入場景",
+      "sub": "建立物件，與加入群組，是兩個不同步驟",
+      "notes": [
+        "Player 負責產生 Bullet；Game 決定它參與哪些群組。",
+        "加入 bullets 後可參與碰撞；加入 all_sprites 後可更新與繪製。"
+      ],
+      "code": "bullet = self.player.shoot(f\"B{self.next_bullet:02}\")\nif bullet is not None:\n    self.next_bullet += 1\n    self.bullets.add(bullet)\n    self.all_sprites.add(bullet)",
+      "file": "game.py · Game.try_shoot() · excerpt",
+      "sources": []
+    },
+    {
+      "number": 19,
+      "type": "rows",
+      "title": "多型：同一個 update(dt)，不同工作",
+      "sub": "game.all_sprites.update(dt)",
+      "notes": [
+        "Player.update：先移動，再限制邊界、更新冷卻與無敵時間。",
+        "Enemy：直接沿用 Actor.update，依自己的 velocity 向下移動。",
+        "Bullet.update：先移動，離開上方邊界就 kill()。"
+      ],
+      "sources": [
+        [
+          "Pygame · Sprite / Group",
+          "https://www.pygame.org/docs/ref/sprite.html"
+        ],
+        [
+          "Pygame · Clock",
+          "https://www.pygame.org/docs/ref/time.html"
+        ],
+        [
+          "Python 3.12 · Data model",
+          "https://docs.python.org/3.12/reference/datamodel.html"
+        ],
+        [
+          "OMG · UML 2.5.1",
+          "https://www.omg.org/spec/UML/2.5.1"
+        ]
+      ]
+    },
+    {
+      "number": 20,
+      "type": "code",
+      "title": "Enemy：自己管理受擊狀態",
+      "sub": "Game 問「是否擊破？」；Enemy 決定 hp 如何變化",
+      "notes": [
+        "max(0, ...) 使 hp 不會小於 0。",
+        "回傳 True 才表示剛被擊破；Game 才加分。"
+      ],
+      "code": "def take_hit(self, damage):\n    self.hp = max(0, self.hp - damage)\n    if self.hp == 0:\n        self.kill()\n        return True\n    return False",
+      "file": "actors.py · Enemy.take_hit()",
+      "sources": []
+    },
+    {
+      "number": 21,
+      "type": "code",
+      "title": "碰撞：一顆子彈只處理一次命中",
+      "sub": "rect 矩形重疊；本例沒有使用像素遮罩",
+      "notes": [
+        "hits[0] 只取第一個敵人；重疊敵人不會被同一顆子彈重複擊中。",
+        "先扣血，再移除子彈；擊破才 +10。"
+      ],
+      "code": "for bullet in self.bullets.sprites():\n    hits = pygame.sprite.spritecollide(\n        bullet, self.enemies, False)\n    if hits:\n        enemy = hits[0]\n        destroyed = enemy.take_hit(bullet.damage)\n        bullet.kill()\n        if destroyed:\n            self.score += 10",
+      "file": "game.py · Game.resolve_collisions() · excerpt",
+      "sources": []
+    },
+    {
+      "number": 22,
+      "type": "code",
+      "title": "受傷：由 Player 維持有效狀態",
+      "sub": "每次有效受傷扣 1；接著有 0.8 秒無敵時間",
+      "notes": [
+        "無敵時間內或 hp 已為 0 時，拒絕新的傷害。",
+        "Game 不直接修改 player.hp，而是呼叫 take_damage()。"
+      ],
+      "code": "def take_damage(self):\n    if self.invulnerable > 0 or self.hp == 0:\n        return False\n    self.hp -= 1\n    self.invulnerable = 0.8\n    return True",
+      "file": "actors.py · Player.take_damage()",
+      "sources": []
+    },
+    {
+      "number": 23,
+      "type": "code",
+      "title": "kill()：離開場景，不等於立即銷毀",
+      "sub": "群組成員身分與 Python 物件生命週期不同",
+      "notes": [
+        "kill() 從所有 Group 移除；外部變數 b 仍持有參照。",
+        "alive() 檢查是否屬於群組，不是檢查 hp。"
+      ],
+      "code": "b = game.player.shoot(\"B99\")\nif b is not None:\n    game.bullets.add(b)\n    game.all_sprites.add(b)\n    b.kill()\n    print(b.alive())                 # False\n    print(b.owner is game.player)    # True",
+      "file": "interactive example · fresh Game",
+      "sources": [
+        [
+          "Pygame · Sprite / Group",
+          "https://www.pygame.org/docs/ref/sprite.html"
+        ],
+        [
+          "Pygame · Clock",
+          "https://www.pygame.org/docs/ref/time.html"
+        ],
+        [
+          "Python 3.12 · Data model",
+          "https://docs.python.org/3.12/reference/datamodel.html"
+        ],
+        [
+          "OMG · UML 2.5.1",
+          "https://www.omg.org/spec/UML/2.5.1"
+        ]
+      ]
+    },
+    {
+      "number": 24,
+      "type": "code",
+      "title": "主迴圈：讀輸入、更新、畫出來",
+      "sub": "run() 的順序；中間省略按鍵讀取細節",
+      "notes": [
+        "tick() 只有 playing 才更新；view.draw() 也會繪製暫停與結束狀態。",
+        "Clock 回傳毫秒，除以 1000 得秒；本例將 dt 上限設為 1/30 秒。"
+      ],
+      "code": "dt = min(self.clock.tick(FPS) / 1000, 1 / 30)\nself.handle_events(pygame.event.get())\n# direction and shooting come from keyboard input\nself.tick(dt, direction, shooting)\nview.draw(self)\npygame.display.flip()",
+      "file": "game.py · Game.run() · excerpt",
+      "sources": [
+        [
+          "Pygame · Sprite / Group",
+          "https://www.pygame.org/docs/ref/sprite.html"
+        ],
+        [
+          "Pygame · Clock",
+          "https://www.pygame.org/docs/ref/time.html"
+        ],
+        [
+          "Python 3.12 · Data model",
+          "https://docs.python.org/3.12/reference/datamodel.html"
+        ],
+        [
+          "OMG · UML 2.5.1",
+          "https://www.omg.org/spec/UML/2.5.1"
+        ]
+      ]
+    },
+    {
+      "number": 25,
+      "type": "states",
+      "title": "狀態：暫停不再偷偷移動",
+      "sub": "ready → playing ⇄ paused；playing → won / lost",
+      "notes": [
+        "N 只在 paused 時呼叫 update(1 / FPS)；一次推進一影格，不會自動射擊。",
+        "R 重設回 ready；Enter 再開始。hp = 0 判定優先於達到 200 分。"
+      ],
+      "sources": []
+    },
+    {
+      "number": 26,
+      "type": "code",
+      "title": "重設：建立新一局的物件",
+      "sub": "reset() 重建玩家與群組，重新設定分數與狀態",
+      "notes": [
+        "舊物件先移出群組；若其他地方仍有參照，就仍可存取。",
+        "範例接著建立三個初始敵人；新局的 player 是新物件。"
+      ],
+      "code": "if hasattr(self, \"all_sprites\"):\n    for actor in self.all_sprites.sprites():\n        actor.kill()\nself.player = Player((PLAY_AREA.centerx, PLAY_AREA.bottom - 60))\nself.all_sprites = pygame.sprite.Group(self.player)\nself.enemies = pygame.sprite.Group()\nself.bullets = pygame.sprite.Group()\nself.score = 0\nself.state = \"ready\"",
+      "file": "game.py · Game.reset() · excerpt after first initialization",
+      "sources": []
+    },
+    {
+      "number": 27,
+      "type": "table",
+      "title": "從檔案找到要修改的責任",
+      "sub": "五個核心類別；顯示與語言使用獨立函式",
+      "notes": [],
+      "values": [
+        [
+          "檔案",
+          "內容"
+        ],
+        [
+          "actors.py",
+          "Actor、Player、Enemy、Bullet"
+        ],
+        [
+          "game.py",
+          "Game 與事件、生成、碰撞、狀態"
+        ],
+        [
+          "view.py / i18n.py",
+          "畫面與介面文字；不負責遊戲規則"
+        ],
+        [
+          "settings.py / main.py",
+          "參數設定／指令列入口"
+        ],
+        [
+          "tests/test_game.py",
+          "角色行為、碰撞、狀態與畫面測試"
+        ]
+      ],
+      "sources": []
+    },
+    {
+      "number": 28,
+      "type": "code",
+      "title": "用測試確認物件的合作",
+      "sub": "可觀察的結果，比只看程式碼更明確",
+      "notes": [
+        "確認同一參照、冷卻、單次命中、無敵時間與勝敗停止。",
+        "測試採 SDL dummy 驅動，不必開啟遊戲視窗。"
+      ],
+      "codeLanguage": "text",
+      "code": "# Windows PowerShell\n.\\.venv\\Scripts\\python.exe -m unittest discover -s tests -v\n\n# macOS / Linux\n.venv/bin/python -m unittest discover -s tests -v",
+      "file": "project folder",
+      "sources": []
+    },
+    {
+      "number": 29,
+      "type": "rows",
+      "title": "小練習：只修改負責的類別",
+      "sub": "以可以觀察或測試的行為描述完成條件",
+      "notes": [
+        "把 Enemy 的 hp 設為 3：需要三次命中，且只加一次 10 分。",
+        "把 Bullet.damage 改為 2：一發擊破 hp 為 2 的敵人。",
+        "縮短 SHOT_INTERVAL：確認冷卻期間仍不會建立新 Bullet。"
+      ],
+      "sources": []
+    },
+    {
+      "number": 30,
+      "type": "refs",
+      "title": "從五個類別，理解一個系統",
+      "sub": "把狀態留在物件裡，用方法讓物件合作",
+      "notes": [
+        "繼承共用行為；關聯持有參照；多型統一呼叫。",
+        "完整範例、三語投影片與可搜尋的章節都在課程網站。"
+      ],
+      "sources": [
+        [
+          "Pygame · Sprite / Group",
+          "https://www.pygame.org/docs/ref/sprite.html"
+        ],
+        [
+          "Pygame · Clock",
+          "https://www.pygame.org/docs/ref/time.html"
+        ],
+        [
+          "Python 3.12 · Data model",
+          "https://docs.python.org/3.12/reference/datamodel.html"
+        ],
+        [
+          "OMG · UML 2.5.1",
+          "https://www.omg.org/spec/UML/2.5.1"
+        ]
+      ],
+      "links": [
+        [
+          "Pygame · Sprite / Group",
+          "https://www.pygame.org/docs/ref/sprite.html"
+        ],
+        [
+          "Pygame · Clock",
+          "https://www.pygame.org/docs/ref/time.html"
+        ],
+        [
+          "Python 3.12 · Data model",
+          "https://docs.python.org/3.12/reference/datamodel.html"
+        ],
+        [
+          "OMG · UML 2.5.1",
+          "https://www.omg.org/spec/UML/2.5.1"
+        ],
+        [
+          "Course · Pygame",
+          "https://minhuangyuntech.github.io/oo2026/pygame/"
+        ]
+      ]
+    }
+  ],
+  "en": [
+    {
+      "number": 1,
+      "type": "cover",
+      "title": "Objects in a shooting game",
+      "sub": "Pygame · Classes, references & interactions",
+      "notes": [
+        "One game. Three languages. Five core classes.",
+        "Start with the screen; see how objects cooperate."
+      ],
+      "sources": []
+    },
+    {
+      "number": 2,
+      "type": "screenshot",
+      "title": "Every on-screen actor is an object",
+      "sub": "Observe labels, state, and references in the inspector",
+      "notes": [
+        "The green Player is you; red and purple Enemies are separate instances.",
+        "Each yellow Bullet holds an owner reference; the panel counts live objects."
+      ],
+      "sources": []
+    },
+    {
+      "number": 3,
+      "type": "code",
+      "title": "Install and run: Windows",
+      "sub": "Extract the ZIP; open PowerShell in the project folder",
+      "notes": [
+        "Use Python 3.12; requirements.txt pins pygame==2.6.1.",
+        "Call the environment's Python directly; activation is unnecessary."
+      ],
+      "codeLanguage": "powershell",
+      "code": "py -3.12 -m venv .venv\n.\\.venv\\Scripts\\python.exe -m pip install -r requirements.txt\n.\\.venv\\Scripts\\python.exe main.py --lang en",
+      "file": "PowerShell",
+      "sources": []
+    },
+    {
+      "number": 4,
+      "type": "code",
+      "title": "Install and run: macOS / Linux",
+      "sub": "Open a terminal in the project; use a graphical desktop",
+      "notes": [
+        "--lang accepts zh, en, or ja; game rules stay the same.",
+        "If CJK text is missing, install a system Noto Sans CJK font."
+      ],
+      "codeLanguage": "bash",
+      "code": "python3 -m venv .venv\n.venv/bin/python -m pip install -r requirements.txt\n.venv/bin/python main.py --lang en",
+      "file": "Terminal",
+      "sources": []
+    },
+    {
+      "number": 5,
+      "type": "table",
+      "title": "Play one round; observe the objects",
+      "sub": "+10 per defeated enemy; win at 200; start with 3 HP",
+      "notes": [
+        "Contact or a missed enemy triggers damage; invulnerability prevents repeated HP loss."
+      ],
+      "values": [
+        [
+          "Key",
+          "Action"
+        ],
+        [
+          "Enter",
+          "Start"
+        ],
+        [
+          "Arrows / WASD",
+          "Move"
+        ],
+        [
+          "Space",
+          "Shoot"
+        ],
+        [
+          "P / N",
+          "Pause / advance one paused frame"
+        ],
+        [
+          "Tab / R / Esc",
+          "Labels / reset to ready / quit"
+        ]
+      ],
+      "sources": []
+    },
+    {
+      "number": 6,
+      "type": "table",
+      "title": "Five classes, five responsibilities",
+      "sub": "Actors handle themselves; Game coordinates interactions",
+      "notes": [],
+      "values": [
+        [
+          "Class",
+          "State",
+          "Responsibility"
+        ],
+        [
+          "Actor",
+          "pos, velocity, image, rect",
+          "Shared position and visual data"
+        ],
+        [
+          "Player",
+          "hp, cooldown, invulnerable",
+          "Direction, shooting, damage"
+        ],
+        [
+          "Enemy",
+          "hp, max_hp",
+          "Descent, hits, defeat"
+        ],
+        [
+          "Bullet",
+          "owner, damage",
+          "Travel and off-screen removal"
+        ],
+        [
+          "Game",
+          "score, state, groups",
+          "Spawning, collisions, game loop"
+        ]
+      ],
+      "sources": []
+    },
+    {
+      "number": 7,
+      "type": "code",
+      "title": "One class can create many objects",
+      "sub": "A class defines shared rules; instances keep separate state",
+      "notes": [
+        "e1 and e2 are both Enemies, but have different identities and HP.",
+        "e1.take_hit(1) does not reduce e2.hp."
+      ],
+      "code": "e1 = Enemy(\"E01\", (180, 180), hp=1)\ne2 = Enemy(\"E02\", (395, 235), hp=2)\n\nprint(e1 is e2)                 # False\nprint(isinstance(e2, Enemy))    # True\ne1.take_hit(1)\nprint(e1.hp, e2.hp)             # 0 2",
+      "file": "actors.py · Enemy",
+      "sources": []
+    },
+    {
+      "number": 8,
+      "type": "rows",
+      "title": "Read three UML notations",
+      "sub": "Class diagrams show structure; object diagrams show instances at a moment",
+      "notes": [
+        "Class box: name at the top, attributes in the middle, methods below.",
+        "A hollow triangle points to the superclass; an open arrow shows a navigable association.",
+        "1 means one; 0..* means zero or more. Underline name : Class for an instance."
+      ],
+      "sources": [
+        [
+          "Pygame · Sprite / Group",
+          "https://www.pygame.org/docs/ref/sprite.html"
+        ],
+        [
+          "Pygame · Clock",
+          "https://www.pygame.org/docs/ref/time.html"
+        ],
+        [
+          "Python 3.12 · Data model",
+          "https://docs.python.org/3.12/reference/datamodel.html"
+        ],
+        [
+          "OMG · UML 2.5.1",
+          "https://www.omg.org/spec/UML/2.5.1"
+        ]
+      ]
+    },
+    {
+      "number": 9,
+      "type": "inheritance",
+      "title": "Class diagram: three kinds of Actor",
+      "sub": "Share movement, then add specialized behavior",
+      "notes": [
+        "Hollow triangles point to superclasses. Some drawing details are omitted."
+      ],
+      "sources": [
+        [
+          "Pygame · Sprite / Group",
+          "https://www.pygame.org/docs/ref/sprite.html"
+        ],
+        [
+          "Pygame · Clock",
+          "https://www.pygame.org/docs/ref/time.html"
+        ],
+        [
+          "Python 3.12 · Data model",
+          "https://docs.python.org/3.12/reference/datamodel.html"
+        ],
+        [
+          "OMG · UML 2.5.1",
+          "https://www.omg.org/spec/UML/2.5.1"
+        ]
+      ]
+    },
+    {
+      "number": 10,
+      "type": "relations",
+      "title": "Relationships: manage, reference, create",
+      "sub": "Bullet.owner is a reference; Game manages actors through groups",
+      "notes": [
+        "Each Bullet references one Player; many Bullets can reference that same Player.",
+        "Group membership is not exclusive ownership, so no composition diamond is used."
+      ],
+      "sources": [
+        [
+          "Pygame · Sprite / Group",
+          "https://www.pygame.org/docs/ref/sprite.html"
+        ],
+        [
+          "Pygame · Clock",
+          "https://www.pygame.org/docs/ref/time.html"
+        ],
+        [
+          "Python 3.12 · Data model",
+          "https://docs.python.org/3.12/reference/datamodel.html"
+        ],
+        [
+          "OMG · UML 2.5.1",
+          "https://www.omg.org/spec/UML/2.5.1"
+        ]
+      ]
+    },
+    {
+      "number": 11,
+      "type": "objects",
+      "title": "Object diagram: one player, two references",
+      "sub": "Paused snapshot: 1 Player, 3 Enemies, 2 Bullets",
+      "notes": [
+        "B01.owner and B02.owner refer to the same player; no player is copied.",
+        "Each enemy still has its own HP, position, and velocity."
+      ],
+      "sources": [
+        [
+          "Pygame · Sprite / Group",
+          "https://www.pygame.org/docs/ref/sprite.html"
+        ],
+        [
+          "Pygame · Clock",
+          "https://www.pygame.org/docs/ref/time.html"
+        ],
+        [
+          "Python 3.12 · Data model",
+          "https://docs.python.org/3.12/reference/datamodel.html"
+        ],
+        [
+          "OMG · UML 2.5.1",
+          "https://www.omg.org/spec/UML/2.5.1"
+        ]
+      ]
+    },
+    {
+      "number": 12,
+      "type": "code",
+      "title": "Groups organize; they do not copy",
+      "sub": "One Enemy can belong to two groups at once",
+      "notes": [
+        "all_sprites updates and draws; enemies narrows collision checks.",
+        "Changing e.hp is visible through either reference to that same object."
+      ],
+      "code": "e = Enemy(\"E01\", (180, 180))\nall_sprites = pygame.sprite.Group(e)\nenemies = pygame.sprite.Group(e)\n\nprint(all_sprites.sprites()[0] is e)  # True\nprint(enemies.sprites()[0] is e)      # True",
+      "file": "game.py · spawn_enemy()",
+      "sources": [
+        [
+          "Pygame · Sprite / Group",
+          "https://www.pygame.org/docs/ref/sprite.html"
+        ],
+        [
+          "Pygame · Clock",
+          "https://www.pygame.org/docs/ref/time.html"
+        ],
+        [
+          "Python 3.12 · Data model",
+          "https://docs.python.org/3.12/reference/datamodel.html"
+        ],
+        [
+          "OMG · UML 2.5.1",
+          "https://www.omg.org/spec/UML/2.5.1"
+        ]
+      ]
+    },
+    {
+      "number": 13,
+      "type": "code",
+      "title": "Actor: keep shared data together",
+      "sub": "image holds appearance; rect holds placement and collision bounds",
+      "notes": [
+        "super().__init__() initializes Sprite's group machinery.",
+        "pos keeps floating-point coordinates; rect uses integer pixels."
+      ],
+      "code": "class Actor(pygame.sprite.Sprite):\n    def __init__(self, name, position, size):\n        super().__init__()\n        self.name = name\n        self.image = pygame.Surface(size, pygame.SRCALPHA)\n        self.pos = pygame.Vector2(position)\n        self.rect = self.image.get_rect(center=position)\n        self.velocity = pygame.Vector2()",
+      "file": "actors.py · Actor.__init__()",
+      "sources": []
+    },
+    {
+      "number": 14,
+      "type": "code",
+      "title": "Movement = velocity × elapsed time",
+      "sub": "dt is in seconds; velocity is in pixels per second",
+      "notes": [
+        "At 80 pixels per second, 0.5 seconds produces 40 pixels of movement.",
+        "Update pos, then sync rect, so fractional movement is retained."
+      ],
+      "code": "def update(self, dt):\n    self.pos += self.velocity * dt\n    self.rect.center = (round(self.pos.x), round(self.pos.y))",
+      "file": "actors.py · Actor.update()",
+      "sources": []
+    },
+    {
+      "number": 15,
+      "type": "code",
+      "title": "Player: turn input into direction",
+      "sub": "Game reads keys; Player sets its own velocity",
+      "notes": [
+        "(1, 0) moves right; (0, -1) moves up; (0, 0) stops.",
+        "normalize() keeps diagonal and straight movement at the same speed."
+      ],
+      "code": "def set_direction(self, x, y):\n    direction = pygame.Vector2(x, y)\n    if direction.length_squared() > 1:\n        direction = direction.normalize()\n    self.velocity = direction * PLAYER_SPEED",
+      "file": "actors.py · Player.set_direction()",
+      "sources": []
+    },
+    {
+      "number": 16,
+      "type": "code",
+      "title": "Player.shoot(): decide whether to fire",
+      "sub": "One method encapsulates the rule and state change",
+      "notes": [
+        "Return None while cooling down or when HP is zero.",
+        "On success, create a new Bullet; self is the player firing it."
+      ],
+      "code": "def shoot(self, name):\n    if self.cooldown > 0 or self.hp == 0:\n        return None\n    self.cooldown = SHOT_INTERVAL\n    return Bullet(name, self)",
+      "file": "actors.py · Player.shoot()",
+      "sources": []
+    },
+    {
+      "number": 17,
+      "type": "code",
+      "title": "Bullet: remember who fired it",
+      "sub": "owner stores a reference; negative y velocity moves upward",
+      "notes": [
+        "owner is a Player object, not a string or a copy.",
+        "Drawing details are omitted here; damage is 1."
+      ],
+      "code": "def __init__(self, name, owner):\n    position = (owner.rect.centerx, owner.rect.top - 9)\n    super().__init__(name, position, (8, 20))\n    self.owner = owner\n    self.damage = 1\n    self.velocity.y = -BULLET_SPEED",
+      "file": "actors.py · Bullet.__init__() · excerpt",
+      "sources": []
+    },
+    {
+      "number": 18,
+      "type": "code",
+      "title": "Game: add the new bullet to the scene",
+      "sub": "Constructing an object and adding it to a group are separate steps",
+      "notes": [
+        "Player creates the Bullet; Game chooses its group memberships.",
+        "bullets enables collision checks; all_sprites enables updates and drawing."
+      ],
+      "code": "bullet = self.player.shoot(f\"B{self.next_bullet:02}\")\nif bullet is not None:\n    self.next_bullet += 1\n    self.bullets.add(bullet)\n    self.all_sprites.add(bullet)",
+      "file": "game.py · Game.try_shoot() · excerpt",
+      "sources": []
+    },
+    {
+      "number": 19,
+      "type": "rows",
+      "title": "Polymorphism: one call, different behavior",
+      "sub": "game.all_sprites.update(dt)",
+      "notes": [
+        "Player.update: move, clamp to the field, update cooldown and invulnerability.",
+        "Enemy inherits Actor.update and moves downward using its own velocity.",
+        "Bullet.update: move, then kill() when it leaves the top edge."
+      ],
+      "sources": [
+        [
+          "Pygame · Sprite / Group",
+          "https://www.pygame.org/docs/ref/sprite.html"
+        ],
+        [
+          "Pygame · Clock",
+          "https://www.pygame.org/docs/ref/time.html"
+        ],
+        [
+          "Python 3.12 · Data model",
+          "https://docs.python.org/3.12/reference/datamodel.html"
+        ],
+        [
+          "OMG · UML 2.5.1",
+          "https://www.omg.org/spec/UML/2.5.1"
+        ]
+      ]
+    },
+    {
+      "number": 20,
+      "type": "code",
+      "title": "Enemy: manage its own damage state",
+      "sub": "Game asks whether it was defeated; Enemy manages its HP",
+      "notes": [
+        "max(0, ...) prevents HP from becoming negative.",
+        "True reports defeat; Game then awards the points."
+      ],
+      "code": "def take_hit(self, damage):\n    self.hp = max(0, self.hp - damage)\n    if self.hp == 0:\n        self.kill()\n        return True\n    return False",
+      "file": "actors.py · Enemy.take_hit()",
+      "sources": []
+    },
+    {
+      "number": 21,
+      "type": "code",
+      "title": "Collision: one bullet, one hit",
+      "sub": "Use rect overlap; this example does not use pixel masks",
+      "notes": [
+        "hits[0] selects one enemy, so one bullet does not hit every overlapping enemy.",
+        "Apply damage, remove the bullet, then add 10 only on defeat."
+      ],
+      "code": "for bullet in self.bullets.sprites():\n    hits = pygame.sprite.spritecollide(\n        bullet, self.enemies, False)\n    if hits:\n        enemy = hits[0]\n        destroyed = enemy.take_hit(bullet.damage)\n        bullet.kill()\n        if destroyed:\n            self.score += 10",
+      "file": "game.py · Game.resolve_collisions() · excerpt",
+      "sources": []
+    },
+    {
+      "number": 22,
+      "type": "code",
+      "title": "Damage: Player keeps its state valid",
+      "sub": "Lose 1 HP per accepted hit, then gain 0.8 seconds of invulnerability",
+      "notes": [
+        "Reject damage during invulnerability or when HP is already zero.",
+        "Game calls take_damage() instead of changing player.hp directly."
+      ],
+      "code": "def take_damage(self):\n    if self.invulnerable > 0 or self.hp == 0:\n        return False\n    self.hp -= 1\n    self.invulnerable = 0.8\n    return True",
+      "file": "actors.py · Player.take_damage()",
+      "sources": []
+    },
+    {
+      "number": 23,
+      "type": "code",
+      "title": "kill(): leave the scene, still an object",
+      "sub": "Group membership and Python object lifetime are different",
+      "notes": [
+        "kill() removes every Group membership; b still holds a reference.",
+        "alive() checks group membership, not HP."
+      ],
+      "code": "b = game.player.shoot(\"B99\")\nif b is not None:\n    game.bullets.add(b)\n    game.all_sprites.add(b)\n    b.kill()\n    print(b.alive())                 # False\n    print(b.owner is game.player)    # True",
+      "file": "interactive example · fresh Game",
+      "sources": [
+        [
+          "Pygame · Sprite / Group",
+          "https://www.pygame.org/docs/ref/sprite.html"
+        ],
+        [
+          "Pygame · Clock",
+          "https://www.pygame.org/docs/ref/time.html"
+        ],
+        [
+          "Python 3.12 · Data model",
+          "https://docs.python.org/3.12/reference/datamodel.html"
+        ],
+        [
+          "OMG · UML 2.5.1",
+          "https://www.omg.org/spec/UML/2.5.1"
+        ]
+      ]
+    },
+    {
+      "number": 24,
+      "type": "code",
+      "title": "The loop: input, update, draw",
+      "sub": "Order inside run(); key-reading details are omitted",
+      "notes": [
+        "tick() updates only while playing; view.draw() also renders paused and end states.",
+        "Clock returns milliseconds; divide by 1000 for seconds. This game caps dt at 1/30."
+      ],
+      "code": "dt = min(self.clock.tick(FPS) / 1000, 1 / 30)\nself.handle_events(pygame.event.get())\n# direction and shooting come from keyboard input\nself.tick(dt, direction, shooting)\nview.draw(self)\npygame.display.flip()",
+      "file": "game.py · Game.run() · excerpt",
+      "sources": [
+        [
+          "Pygame · Sprite / Group",
+          "https://www.pygame.org/docs/ref/sprite.html"
+        ],
+        [
+          "Pygame · Clock",
+          "https://www.pygame.org/docs/ref/time.html"
+        ],
+        [
+          "Python 3.12 · Data model",
+          "https://docs.python.org/3.12/reference/datamodel.html"
+        ],
+        [
+          "OMG · UML 2.5.1",
+          "https://www.omg.org/spec/UML/2.5.1"
+        ]
+      ]
+    },
+    {
+      "number": 25,
+      "type": "states",
+      "title": "State: paused really means paused",
+      "sub": "ready → playing ⇄ paused; playing → won / lost",
+      "notes": [
+        "N calls update(1 / FPS) only while paused: one frame, without automatic firing.",
+        "R resets to ready; Enter starts again. Zero HP takes priority over reaching 200 points."
+      ],
+      "sources": []
+    },
+    {
+      "number": 26,
+      "type": "code",
+      "title": "Reset: create a new round of objects",
+      "sub": "reset() rebuilds the player and groups, then resets score and state",
+      "notes": [
+        "Old objects leave their groups; other references can still keep them accessible.",
+        "The game then spawns three initial enemies; the new player is a new object."
+      ],
+      "code": "if hasattr(self, \"all_sprites\"):\n    for actor in self.all_sprites.sprites():\n        actor.kill()\nself.player = Player((PLAY_AREA.centerx, PLAY_AREA.bottom - 60))\nself.all_sprites = pygame.sprite.Group(self.player)\nself.enemies = pygame.sprite.Group()\nself.bullets = pygame.sprite.Group()\nself.score = 0\nself.state = \"ready\"",
+      "file": "game.py · Game.reset() · excerpt after first initialization",
+      "sources": []
+    },
+    {
+      "number": 27,
+      "type": "table",
+      "title": "Find the file that owns the change",
+      "sub": "Five core classes; display and language use separate functions",
+      "notes": [],
+      "values": [
+        [
+          "File",
+          "Contents"
+        ],
+        [
+          "actors.py",
+          "Actor, Player, Enemy, Bullet"
+        ],
+        [
+          "game.py",
+          "Game: events, spawning, collision, state"
+        ],
+        [
+          "view.py / i18n.py",
+          "Display and UI text; no game rules"
+        ],
+        [
+          "settings.py / main.py",
+          "Parameters / command-line entry point"
+        ],
+        [
+          "tests/test_game.py",
+          "Behavior, collisions, state, rendering"
+        ]
+      ],
+      "sources": []
+    },
+    {
+      "number": 28,
+      "type": "code",
+      "title": "Test how the objects cooperate",
+      "sub": "Check observable outcomes, not just the code's appearance",
+      "notes": [
+        "Check identity, cooldown, single hits, invulnerability, and stopped end states.",
+        "Tests use SDL's dummy driver, so they do not need a game window."
+      ],
+      "codeLanguage": "text",
+      "code": "# Windows PowerShell\n.\\.venv\\Scripts\\python.exe -m unittest discover -s tests -v\n\n# macOS / Linux\n.venv/bin/python -m unittest discover -s tests -v",
+      "file": "project folder",
+      "sources": []
+    },
+    {
+      "number": 29,
+      "type": "rows",
+      "title": "Small exercises: change the responsible class",
+      "sub": "Describe completion through observable, testable behavior",
+      "notes": [
+        "Give an Enemy 3 HP: three hits to defeat it, with one 10-point award.",
+        "Set Bullet.damage to 2: defeat a 2-HP enemy with one shot.",
+        "Shorten SHOT_INTERVAL: verify no new Bullet is created during cooldown."
+      ],
+      "sources": []
+    },
+    {
+      "number": 30,
+      "type": "refs",
+      "title": "Five classes explain one system",
+      "sub": "Keep state in objects; let methods coordinate behavior",
+      "notes": [
+        "Inheritance shares behavior; associations hold references; polymorphism unifies calls.",
+        "The course website includes the complete example, three decks, and searchable chapters."
+      ],
+      "sources": [
+        [
+          "Pygame · Sprite / Group",
+          "https://www.pygame.org/docs/ref/sprite.html"
+        ],
+        [
+          "Pygame · Clock",
+          "https://www.pygame.org/docs/ref/time.html"
+        ],
+        [
+          "Python 3.12 · Data model",
+          "https://docs.python.org/3.12/reference/datamodel.html"
+        ],
+        [
+          "OMG · UML 2.5.1",
+          "https://www.omg.org/spec/UML/2.5.1"
+        ]
+      ],
+      "links": [
+        [
+          "Pygame · Sprite / Group",
+          "https://www.pygame.org/docs/ref/sprite.html"
+        ],
+        [
+          "Pygame · Clock",
+          "https://www.pygame.org/docs/ref/time.html"
+        ],
+        [
+          "Python 3.12 · Data model",
+          "https://docs.python.org/3.12/reference/datamodel.html"
+        ],
+        [
+          "OMG · UML 2.5.1",
+          "https://www.omg.org/spec/UML/2.5.1"
+        ],
+        [
+          "Course · Pygame",
+          "https://minhuangyuntech.github.io/oo2026/en/pygame/"
+        ]
+      ]
+    }
+  ],
+  "ja": [
+    {
+      "number": 1,
+      "type": "cover",
+      "title": "シューティングで学ぶオブジェクト",
+      "sub": "Pygame · クラス・参照・相互作用",
+      "notes": [
+        "一つのゲーム、三つの言語、五つの主要クラス。",
+        "画面を出発点に、オブジェクトの連携を理解する。"
+      ],
+      "sources": []
+    },
+    {
+      "number": 2,
+      "type": "screenshot",
+      "title": "画面のキャラクターはオブジェクト",
+      "sub": "ラベル・状態・右側の参照を観察する",
+      "notes": [
+        "緑の Player が自機。赤と紫の Enemy は別々のインスタンス。",
+        "黄色の Bullet は owner を参照し、右側に現在の個数が表示される。"
+      ],
+      "sources": []
+    },
+    {
+      "number": 3,
+      "type": "code",
+      "title": "インストールと起動：Windows",
+      "sub": "ZIP を展開し、プロジェクト内で PowerShell を開く",
+      "notes": [
+        "Python 3.12 を使用。requirements.txt は pygame==2.6.1 を指定。",
+        "環境内の Python を直接呼び出すため、activate は不要。"
+      ],
+      "codeLanguage": "powershell",
+      "code": "py -3.12 -m venv .venv\n.\\.venv\\Scripts\\python.exe -m pip install -r requirements.txt\n.\\.venv\\Scripts\\python.exe main.py --lang ja",
+      "file": "PowerShell",
+      "sources": []
+    },
+    {
+      "number": 4,
+      "type": "code",
+      "title": "インストールと起動：macOS / Linux",
+      "sub": "プロジェクト内のターミナルから、GUI のある環境で実行する",
+      "notes": [
+        "--lang は zh・en・ja。ゲームのルールは共通。",
+        "文字が表示されない場合は Noto Sans CJK をインストールする。"
+      ],
+      "codeLanguage": "bash",
+      "code": "python3 -m venv .venv\n.venv/bin/python -m pip install -r requirements.txt\n.venv/bin/python main.py --lang ja",
+      "file": "Terminal",
+      "sources": []
+    },
+    {
+      "number": 5,
+      "type": "table",
+      "title": "一度プレイして、オブジェクトを見る",
+      "sub": "敵を倒すと +10 点。200 点でクリア。HP は 3 から開始。",
+      "notes": [
+        "接触または敵の通過で被弾。無敵時間中は HP が重ねて減らない。"
+      ],
+      "values": [
+        [
+          "キー",
+          "操作"
+        ],
+        [
+          "Enter",
+          "開始"
+        ],
+        [
+          "矢印 / WASD",
+          "移動"
+        ],
+        [
+          "Space",
+          "発射"
+        ],
+        [
+          "P / N",
+          "一時停止／停止中に 1 フレーム進む"
+        ],
+        [
+          "Tab / R / Esc",
+          "ラベル／待機状態へリセット／終了"
+        ]
+      ],
+      "sources": []
+    },
+    {
+      "number": 6,
+      "type": "table",
+      "title": "五つのクラスと責任分担",
+      "sub": "各キャラクターは自分の処理を行い、Game が連携を調整する",
+      "notes": [],
+      "values": [
+        [
+          "クラス",
+          "状態",
+          "主な責任"
+        ],
+        [
+          "Actor",
+          "pos, velocity, image, rect",
+          "共通の位置と描画データ"
+        ],
+        [
+          "Player",
+          "hp, cooldown, invulnerable",
+          "移動方向・発射・被弾"
+        ],
+        [
+          "Enemy",
+          "hp, max_hp",
+          "下降・被弾・撃破"
+        ],
+        [
+          "Bullet",
+          "owner, damage",
+          "移動と画面外での除去"
+        ],
+        [
+          "Game",
+          "score, state, groups",
+          "生成・衝突・勝敗・ループ"
+        ]
+      ],
+      "sources": []
+    },
+    {
+      "number": 7,
+      "type": "code",
+      "title": "一つのクラスから複数のオブジェクト",
+      "sub": "クラスは共通の規則、インスタンスは個別の状態を持つ",
+      "notes": [
+        "e1 と e2 はどちらも Enemy だが、同一性と HP は別。",
+        "e1.take_hit(1) は e2.hp を減らさない。"
+      ],
+      "code": "e1 = Enemy(\"E01\", (180, 180), hp=1)\ne2 = Enemy(\"E02\", (395, 235), hp=2)\n\nprint(e1 is e2)                 # False\nprint(isinstance(e2, Enemy))    # True\ne1.take_hit(1)\nprint(e1.hp, e2.hp)             # 0 2",
+      "file": "actors.py · Enemy",
+      "sources": []
+    },
+    {
+      "number": 8,
+      "type": "rows",
+      "title": "UML の三つの表記を読む",
+      "sub": "クラス図は構造、オブジェクト図はある時点の実体を表す",
+      "notes": [
+        "クラスの枠：上段は名前、中段は属性、下段はメソッド。",
+        "白抜き三角は親クラスへ向く。開いた矢印は参照方向を表す。",
+        "1 は一つ、0..* はゼロ個以上。実体は name : Class と書き、下線を引く。"
+      ],
+      "sources": [
+        [
+          "Pygame · Sprite / Group",
+          "https://www.pygame.org/docs/ref/sprite.html"
+        ],
+        [
+          "Pygame · Clock",
+          "https://www.pygame.org/docs/ref/time.html"
+        ],
+        [
+          "Python 3.12 · Data model",
+          "https://docs.python.org/3.12/reference/datamodel.html"
+        ],
+        [
+          "OMG · UML 2.5.1",
+          "https://www.omg.org/spec/UML/2.5.1"
+        ]
+      ]
+    },
+    {
+      "number": 9,
+      "type": "inheritance",
+      "title": "クラス図：三種類の Actor",
+      "sub": "移動を共有し、それぞれの振る舞いを追加する",
+      "notes": [
+        "白抜き三角は親クラスへ向く。描画の一部は省略。"
+      ],
+      "sources": [
+        [
+          "Pygame · Sprite / Group",
+          "https://www.pygame.org/docs/ref/sprite.html"
+        ],
+        [
+          "Pygame · Clock",
+          "https://www.pygame.org/docs/ref/time.html"
+        ],
+        [
+          "Python 3.12 · Data model",
+          "https://docs.python.org/3.12/reference/datamodel.html"
+        ],
+        [
+          "OMG · UML 2.5.1",
+          "https://www.omg.org/spec/UML/2.5.1"
+        ]
+      ]
+    },
+    {
+      "number": 10,
+      "type": "relations",
+      "title": "クラス間の関係：管理・参照・生成",
+      "sub": "Bullet.owner は参照。Game はグループを通して役者を管理する",
+      "notes": [
+        "一つの Bullet は一つの Player を参照し、同じ Player を複数の Bullet が参照できる。",
+        "グループ所属は排他的な所有ではないため、合成の黒いひし形は使わない。"
+      ],
+      "sources": [
+        [
+          "Pygame · Sprite / Group",
+          "https://www.pygame.org/docs/ref/sprite.html"
+        ],
+        [
+          "Pygame · Clock",
+          "https://www.pygame.org/docs/ref/time.html"
+        ],
+        [
+          "Python 3.12 · Data model",
+          "https://docs.python.org/3.12/reference/datamodel.html"
+        ],
+        [
+          "OMG · UML 2.5.1",
+          "https://www.omg.org/spec/UML/2.5.1"
+        ]
+      ]
+    },
+    {
+      "number": 11,
+      "type": "objects",
+      "title": "オブジェクト図：一つの自機、二つの参照",
+      "sub": "停止中のスナップショット：Player 1、Enemy 3、Bullet 2",
+      "notes": [
+        "B01.owner と B02.owner は同じ player を指し、自機のコピーは作らない。",
+        "各敵の HP・位置・速度はそれぞれ独立している。"
+      ],
+      "sources": [
+        [
+          "Pygame · Sprite / Group",
+          "https://www.pygame.org/docs/ref/sprite.html"
+        ],
+        [
+          "Pygame · Clock",
+          "https://www.pygame.org/docs/ref/time.html"
+        ],
+        [
+          "Python 3.12 · Data model",
+          "https://docs.python.org/3.12/reference/datamodel.html"
+        ],
+        [
+          "OMG · UML 2.5.1",
+          "https://www.omg.org/spec/UML/2.5.1"
+        ]
+      ]
+    },
+    {
+      "number": 12,
+      "type": "code",
+      "title": "Group は分類し、コピーはしない",
+      "sub": "同じ Enemy が同時に二つのグループに所属できる",
+      "notes": [
+        "all_sprites は更新と描画、enemies は敵との衝突判定に使う。",
+        "e.hp を変更すると、どちらの参照から見ても同じ変更が現れる。"
+      ],
+      "code": "e = Enemy(\"E01\", (180, 180))\nall_sprites = pygame.sprite.Group(e)\nenemies = pygame.sprite.Group(e)\n\nprint(all_sprites.sprites()[0] is e)  # True\nprint(enemies.sprites()[0] is e)      # True",
+      "file": "game.py · spawn_enemy()",
+      "sources": [
+        [
+          "Pygame · Sprite / Group",
+          "https://www.pygame.org/docs/ref/sprite.html"
+        ],
+        [
+          "Pygame · Clock",
+          "https://www.pygame.org/docs/ref/time.html"
+        ],
+        [
+          "Python 3.12 · Data model",
+          "https://docs.python.org/3.12/reference/datamodel.html"
+        ],
+        [
+          "OMG · UML 2.5.1",
+          "https://www.omg.org/spec/UML/2.5.1"
+        ]
+      ]
+    },
+    {
+      "number": 13,
+      "type": "code",
+      "title": "Actor：共通のデータをまとめる",
+      "sub": "image は外観、rect は配置と衝突範囲",
+      "notes": [
+        "super().__init__() で Sprite のグループ管理機能を初期化する。",
+        "pos は浮動小数点の座標、rect は整数ピクセルの座標を持つ。"
+      ],
+      "code": "class Actor(pygame.sprite.Sprite):\n    def __init__(self, name, position, size):\n        super().__init__()\n        self.name = name\n        self.image = pygame.Surface(size, pygame.SRCALPHA)\n        self.pos = pygame.Vector2(position)\n        self.rect = self.image.get_rect(center=position)\n        self.velocity = pygame.Vector2()",
+      "file": "actors.py · Actor.__init__()",
+      "sources": []
+    },
+    {
+      "number": 14,
+      "type": "code",
+      "title": "移動量 = 速度 × 経過時間",
+      "sub": "dt の単位は秒、速度の単位はピクセル／秒",
+      "notes": [
+        "毎秒 80 ピクセルなら、0.5 秒で 40 ピクセル移動する。",
+        "pos を更新して rect に反映し、小数の移動量を保持する。"
+      ],
+      "code": "def update(self, dt):\n    self.pos += self.velocity * dt\n    self.rect.center = (round(self.pos.x), round(self.pos.y))",
+      "file": "actors.py · Actor.update()",
+      "sources": []
+    },
+    {
+      "number": 15,
+      "type": "code",
+      "title": "Player：入力を移動方向に変える",
+      "sub": "Game がキーを読み、Player が自分の速度を決める",
+      "notes": [
+        "(1, 0) は右、(0, -1) は上、(0, 0) は停止。",
+        "normalize() により斜め移動でも速さが同じになる。"
+      ],
+      "code": "def set_direction(self, x, y):\n    direction = pygame.Vector2(x, y)\n    if direction.length_squared() > 1:\n        direction = direction.normalize()\n    self.velocity = direction * PLAYER_SPEED",
+      "file": "actors.py · Player.set_direction()",
+      "sources": []
+    },
+    {
+      "number": 16,
+      "type": "code",
+      "title": "Player.shoot()：発射できるかを決める",
+      "sub": "制約と状態変更を一つのメソッドにまとめる",
+      "notes": [
+        "クールダウン中、または HP が 0 なら None を返す。",
+        "成功時に新しい Bullet を作る。self は発射した Player。"
+      ],
+      "code": "def shoot(self, name):\n    if self.cooldown > 0 or self.hp == 0:\n        return None\n    self.cooldown = SHOT_INTERVAL\n    return Bullet(name, self)",
+      "file": "actors.py · Player.shoot()",
+      "sources": []
+    },
+    {
+      "number": 17,
+      "type": "code",
+      "title": "Bullet：誰が発射したかを覚える",
+      "sub": "owner はオブジェクト参照。y の負の速度は上向き。",
+      "notes": [
+        "owner は文字列やコピーではなく、Player オブジェクト。",
+        "ここでは外観の描画を省略。damage は 1。"
+      ],
+      "code": "def __init__(self, name, owner):\n    position = (owner.rect.centerx, owner.rect.top - 9)\n    super().__init__(name, position, (8, 20))\n    self.owner = owner\n    self.damage = 1\n    self.velocity.y = -BULLET_SPEED",
+      "file": "actors.py · Bullet.__init__() · excerpt",
+      "sources": []
+    },
+    {
+      "number": 18,
+      "type": "code",
+      "title": "Game：新しい弾を画面に登録する",
+      "sub": "オブジェクトの生成とグループへの追加は別の手順",
+      "notes": [
+        "Player が Bullet を作り、Game が所属グループを決める。",
+        "bullets で衝突判定、all_sprites で更新と描画の対象になる。"
+      ],
+      "code": "bullet = self.player.shoot(f\"B{self.next_bullet:02}\")\nif bullet is not None:\n    self.next_bullet += 1\n    self.bullets.add(bullet)\n    self.all_sprites.add(bullet)",
+      "file": "game.py · Game.try_shoot() · excerpt",
+      "sources": []
+    },
+    {
+      "number": 19,
+      "type": "rows",
+      "title": "多態性：同じ呼び出し、異なる動作",
+      "sub": "game.all_sprites.update(dt)",
+      "notes": [
+        "Player.update：移動、範囲制限、クールダウンと無敵時間の更新。",
+        "Enemy：Actor.update を継承し、自分の velocity で下へ移動。",
+        "Bullet.update：移動し、上端を出たら kill() する。"
+      ],
+      "sources": [
+        [
+          "Pygame · Sprite / Group",
+          "https://www.pygame.org/docs/ref/sprite.html"
+        ],
+        [
+          "Pygame · Clock",
+          "https://www.pygame.org/docs/ref/time.html"
+        ],
+        [
+          "Python 3.12 · Data model",
+          "https://docs.python.org/3.12/reference/datamodel.html"
+        ],
+        [
+          "OMG · UML 2.5.1",
+          "https://www.omg.org/spec/UML/2.5.1"
+        ]
+      ]
+    },
+    {
+      "number": 20,
+      "type": "code",
+      "title": "Enemy：被弾した状態を自分で管理する",
+      "sub": "Game は撃破の結果を受け取り、Enemy が HP を管理する",
+      "notes": [
+        "max(0, ...) により HP は負にならない。",
+        "True が撃破を表し、Game が得点を加える。"
+      ],
+      "code": "def take_hit(self, damage):\n    self.hp = max(0, self.hp - damage)\n    if self.hp == 0:\n        self.kill()\n        return True\n    return False",
+      "file": "actors.py · Enemy.take_hit()",
+      "sources": []
+    },
+    {
+      "number": 21,
+      "type": "code",
+      "title": "衝突：一つの弾は一度だけ当たる",
+      "sub": "rect の重なりを判定。この例はピクセルマスクを使わない。",
+      "notes": [
+        "hits[0] で一体だけを選び、重なった敵にも一発で多重命中しない。",
+        "ダメージを与え、弾を除去し、撃破時だけ +10 点。"
+      ],
+      "code": "for bullet in self.bullets.sprites():\n    hits = pygame.sprite.spritecollide(\n        bullet, self.enemies, False)\n    if hits:\n        enemy = hits[0]\n        destroyed = enemy.take_hit(bullet.damage)\n        bullet.kill()\n        if destroyed:\n            self.score += 10",
+      "file": "game.py · Game.resolve_collisions() · excerpt",
+      "sources": []
+    },
+    {
+      "number": 22,
+      "type": "code",
+      "title": "被弾：Player が正しい状態を守る",
+      "sub": "有効な被弾ごとに HP を 1 減らし、その後 0.8 秒間は無敵",
+      "notes": [
+        "無敵時間中、または HP がすでに 0 ならダメージを受け付けない。",
+        "Game は player.hp を直接変えず、take_damage() を呼ぶ。"
+      ],
+      "code": "def take_damage(self):\n    if self.invulnerable > 0 or self.hp == 0:\n        return False\n    self.hp -= 1\n    self.invulnerable = 0.8\n    return True",
+      "file": "actors.py · Player.take_damage()",
+      "sources": []
+    },
+    {
+      "number": 23,
+      "type": "code",
+      "title": "kill()：画面を離れても実体は残る",
+      "sub": "グループへの所属と Python オブジェクトの寿命は異なる",
+      "notes": [
+        "kill() は全 Group から除去するが、b が参照を保持している。",
+        "alive() はグループへの所属を調べるもので、HP の検査ではない。"
+      ],
+      "code": "b = game.player.shoot(\"B99\")\nif b is not None:\n    game.bullets.add(b)\n    game.all_sprites.add(b)\n    b.kill()\n    print(b.alive())                 # False\n    print(b.owner is game.player)    # True",
+      "file": "interactive example · fresh Game",
+      "sources": [
+        [
+          "Pygame · Sprite / Group",
+          "https://www.pygame.org/docs/ref/sprite.html"
+        ],
+        [
+          "Pygame · Clock",
+          "https://www.pygame.org/docs/ref/time.html"
+        ],
+        [
+          "Python 3.12 · Data model",
+          "https://docs.python.org/3.12/reference/datamodel.html"
+        ],
+        [
+          "OMG · UML 2.5.1",
+          "https://www.omg.org/spec/UML/2.5.1"
+        ]
+      ]
+    },
+    {
+      "number": 24,
+      "type": "code",
+      "title": "メインループ：入力・更新・描画",
+      "sub": "run() の順序。キー入力の取得部分は省略。",
+      "notes": [
+        "tick() は playing のときだけ更新。view.draw() は停止・終了状態も描く。",
+        "Clock はミリ秒を返すので 1000 で割る。この例では dt を最大 1/30 秒に制限。"
+      ],
+      "code": "dt = min(self.clock.tick(FPS) / 1000, 1 / 30)\nself.handle_events(pygame.event.get())\n# direction and shooting come from keyboard input\nself.tick(dt, direction, shooting)\nview.draw(self)\npygame.display.flip()",
+      "file": "game.py · Game.run() · excerpt",
+      "sources": [
+        [
+          "Pygame · Sprite / Group",
+          "https://www.pygame.org/docs/ref/sprite.html"
+        ],
+        [
+          "Pygame · Clock",
+          "https://www.pygame.org/docs/ref/time.html"
+        ],
+        [
+          "Python 3.12 · Data model",
+          "https://docs.python.org/3.12/reference/datamodel.html"
+        ],
+        [
+          "OMG · UML 2.5.1",
+          "https://www.omg.org/spec/UML/2.5.1"
+        ]
+      ]
+    },
+    {
+      "number": 25,
+      "type": "states",
+      "title": "状態：停止中は勝手に動かない",
+      "sub": "ready → playing ⇄ paused、playing → won / lost",
+      "notes": [
+        "N は paused のときだけ update(1 / FPS) を呼び、発射せず 1 フレーム進める。",
+        "R で ready、Enter で再開。HP が 0 の判定は 200 点到達より優先。"
+      ],
+      "sources": []
+    },
+    {
+      "number": 26,
+      "type": "code",
+      "title": "リセット：新しいラウンドの実体を作る",
+      "sub": "reset() は自機とグループを再生成し、得点と状態を戻す",
+      "notes": [
+        "古い実体をグループから除去しても、別の参照があればアクセスできる。",
+        "続いて初期の敵三体を作る。新しい player は別のオブジェクト。"
+      ],
+      "code": "if hasattr(self, \"all_sprites\"):\n    for actor in self.all_sprites.sprites():\n        actor.kill()\nself.player = Player((PLAY_AREA.centerx, PLAY_AREA.bottom - 60))\nself.all_sprites = pygame.sprite.Group(self.player)\nself.enemies = pygame.sprite.Group()\nself.bullets = pygame.sprite.Group()\nself.score = 0\nself.state = \"ready\"",
+      "file": "game.py · Game.reset() · excerpt after first initialization",
+      "sources": []
+    },
+    {
+      "number": 27,
+      "type": "table",
+      "title": "変更する責任からファイルを探す",
+      "sub": "主要クラスは五つ。表示と言語は独立した関数に分ける",
+      "notes": [],
+      "values": [
+        [
+          "ファイル",
+          "内容"
+        ],
+        [
+          "actors.py",
+          "Actor・Player・Enemy・Bullet"
+        ],
+        [
+          "game.py",
+          "Game：イベント・生成・衝突・状態"
+        ],
+        [
+          "view.py / i18n.py",
+          "画面と言語。ゲームの規則は扱わない"
+        ],
+        [
+          "settings.py / main.py",
+          "パラメータ／コマンドラインの入口"
+        ],
+        [
+          "tests/test_game.py",
+          "動作・衝突・状態・描画のテスト"
+        ]
+      ],
+      "sources": []
+    },
+    {
+      "number": 28,
+      "type": "code",
+      "title": "オブジェクトの連携をテストする",
+      "sub": "コードを読むだけでなく、観察できる結果を確かめる",
+      "notes": [
+        "同一性・クールダウン・一度だけの命中・無敵時間・終了後の停止を確認する。",
+        "テストは SDL の dummy ドライバーを使い、ゲーム画面を開かずに実行できる。"
+      ],
+      "codeLanguage": "text",
+      "code": "# Windows PowerShell\n.\\.venv\\Scripts\\python.exe -m unittest discover -s tests -v\n\n# macOS / Linux\n.venv/bin/python -m unittest discover -s tests -v",
+      "file": "project folder",
+      "sources": []
+    },
+    {
+      "number": 29,
+      "type": "rows",
+      "title": "演習：担当するクラスだけを変える",
+      "sub": "観察・テストできる振る舞いで完成条件を決める",
+      "notes": [
+        "Enemy の HP を 3 にし、三発で撃破、10 点の加算は一度だけにする。",
+        "Bullet.damage を 2 にし、HP 2 の敵を一発で倒す。",
+        "SHOT_INTERVAL を短くし、クールダウン中には新しい Bullet が作られないことを確かめる。"
+      ],
+      "sources": []
+    },
+    {
+      "number": 30,
+      "type": "refs",
+      "title": "五つのクラスからシステムを理解する",
+      "sub": "状態を実体に持たせ、メソッドで協力させる",
+      "notes": [
+        "継承で動作を共有し、関連で参照を持ち、多態性で呼び出しを統一する。",
+        "コースサイトに完成版の例・三言語のスライド・検索できる章を掲載。"
+      ],
+      "sources": [
+        [
+          "Pygame · Sprite / Group",
+          "https://www.pygame.org/docs/ref/sprite.html"
+        ],
+        [
+          "Pygame · Clock",
+          "https://www.pygame.org/docs/ref/time.html"
+        ],
+        [
+          "Python 3.12 · Data model",
+          "https://docs.python.org/3.12/reference/datamodel.html"
+        ],
+        [
+          "OMG · UML 2.5.1",
+          "https://www.omg.org/spec/UML/2.5.1"
+        ]
+      ],
+      "links": [
+        [
+          "Pygame · Sprite / Group",
+          "https://www.pygame.org/docs/ref/sprite.html"
+        ],
+        [
+          "Pygame · Clock",
+          "https://www.pygame.org/docs/ref/time.html"
+        ],
+        [
+          "Python 3.12 · Data model",
+          "https://docs.python.org/3.12/reference/datamodel.html"
+        ],
+        [
+          "OMG · UML 2.5.1",
+          "https://www.omg.org/spec/UML/2.5.1"
+        ],
+        [
+          "Course · Pygame",
+          "https://minhuangyuntech.github.io/oo2026/ja/pygame/"
+        ]
+      ]
+    }
+  ]
+}

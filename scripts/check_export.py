@@ -33,7 +33,7 @@ class Page(HTMLParser):
 
 pages = {('/'+str(file.relative_to(OUT)).replace('\\','/').removesuffix('index.html')):Page(file) for file in OUT.rglob('index.html')}
 lessons=json.loads((ROOT/"content/lessons.json").read_text(encoding="utf-8"))
-units=[1,2,3,4,5,6,"gui","django"]
+units=[1,2,3,4,5,6,"gui","django","pygame"]
 for locale, prefix, html_lang in [('zh','','zh-Hant'),('en','/en','en'),('ja','/ja','ja')]:
     home=pages[prefix+'/']
     assert home.lang == html_lang
@@ -58,7 +58,7 @@ for locale, prefix, html_lang in [('zh','','zh-Hant'),('en','/en','en'),('ja','/
                 assert unquote(parsed.fragment) in Page(target).ids,(route,'missing target anchor',url)
 for week in range(7,19):assert f'/week/{week}/' in pages
 
-manifest=[source for name in ['source-manifest.json','additional-source-manifest.json','django-source-manifest.json'] for source in json.loads((ROOT/'content'/name).read_text(encoding='utf-8'))]
+manifest=[source for name in ['source-manifest.json','additional-source-manifest.json','django-source-manifest.json','pygame-source-manifest.json'] for source in json.loads((ROOT/'content'/name).read_text(encoding='utf-8'))]
 for source in manifest:
     file=ROOT/'public/materials'/source['download']
     assert hashlib.sha256(file.read_bytes()).hexdigest()==source['sha256'],source['source']
@@ -94,7 +94,7 @@ for source_key,deck in additional.items():
             ast.parse(code)
             codes+=1
 for lang in ['zh','en','ja']:
-    for unit in [5,6,'gui','django']:
+    for unit in [5,6,'gui','django','pygame']:
         lesson=lessons[f'{lang}-{unit}']
         route=('' if lang=='zh' else '/'+lang)+(f'/{unit}/' if isinstance(unit,str) else f'/week/{unit}/')
         for name in [lesson['download'],lesson['examples']]:assert f'{BASE}/materials/{name}' in pages[route].links
@@ -117,4 +117,15 @@ for lang,deck in django_raw.items():
                 if slide['number']==32:code='{\n'+code+'\n}'
                 ast.parse(code)
                 codes+=1
-print(f'PASS: 3 homepages, 24 localized lessons (903 topics), 12 preserved later weeks, links/assets/anchors, 15 deck checksums, and {codes} Python excerpts.')
+pygame_raw=json.loads((ROOT/'content/pygame-slides.json').read_text(encoding='utf-8'))
+for lang,deck in pygame_raw.items():
+    lesson=lessons[f'{lang}-pygame']
+    assert len(lesson['slides'])==30
+    assert sum(bool(s.get('image')) for s in lesson['slides'])==5
+    for source,slide in zip(deck,lesson['slides']):
+        assert slide.get('code')==source.get('code')
+        assert slide['title']==source['title']
+        assert [b['text'] for b in slide['body'] if b['type']=='text'][1:1+len(source['notes'])]==source['notes']
+        if slide.get('code') and slide['codeLanguage']=='python':
+            ast.parse(slide['code']);codes+=1
+print(f'PASS: 3 homepages, 27 localized lessons (993 topics), 12 preserved later weeks, links/assets/anchors, 18 deck checksums, and {codes} Python excerpts.')
