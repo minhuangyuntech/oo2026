@@ -60,3 +60,16 @@ python scripts/sync_materials.py ../output
 ```
 
 檢查工具驗證三語頁面、主題完整性、下載檔案雜湊、站內連結、錨點、靜態資產、原始程式行及 Python 語法。Django 範例另以 5.2.x 執行驗證；帳戶範例沿用其 13 項公開契約測試。
+
+## Pygame 瀏覽器遊戲
+
+課程首頁與 Pygame 教材皆有遊戲入口：`/pygame/play/`、`/en/pygame/play/`、`/ja/pygame/play/`。這是原 Pygame 範例的 TypeScript / Canvas 移植版，無須安裝 Python、套件或瀏覽器外掛。切換語言保留現有場景、分數、標籤設定與選取物件；重新整理網頁則重新開始。
+
+- `app/game/engine.ts`：Actor、Player、Enemy、Bullet、Game 五個類別，沿用原遊戲座標、速度、射擊間隔、碰撞規則、HP、200 分目標與五種狀態。
+- `app/game/draw.ts`：Canvas 畫面、物件標籤、碰撞範圍與選取子彈的 owner 連線。
+- `app/game/text.ts`：中英日 UI 與事件翻譯。
+- `app/components/shooter-game.tsx`：鍵盤、可長按的觸控按鈕、暫停、1/60 秒單步、物件檢視器及自動暫停。
+
+點選畫面角色或使用物件下拉選單可暫停並選取物件。「載入觀察範例」建立含兩顆子彈的全新暫停場景。群組保存物件參照；`kill()` 移除群組成員，檢視器仍可保留被移除物件的參照，對應教材的生命週期說明。瀏覽器以 `L` 切換物件標籤，保留 `Tab` 作一般焦點導覽。
+
+執行 `npm run test:game` 驗證物件身分、冷卻、移動、碰撞、計分、生命、暫停、單步、清除與勝敗。GitHub Actions 會在發布前自動執行。`scripts/check_export.py` 同時檢查三語遊戲頁面與首頁／教材入口。

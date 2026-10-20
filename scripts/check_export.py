@@ -58,6 +58,27 @@ for locale, prefix, html_lang in [('zh','','zh-Hant'),('en','/en','en'),('ja','/
                 assert unquote(parsed.fragment) in Page(target).ids,(route,'missing target anchor',url)
 for week in range(7,19):assert f'/week/{week}/' in pages
 
+for locale, prefix, html_lang in [('zh','','zh-Hant'),('en','/en','en'),('ja','/ja','ja')]:
+    route = prefix + '/pygame/play/'
+    page = pages[route]
+    assert page.lang == html_lang and page.headings == 1, route
+    assert {'game-main', 'game-controls', 'object-select'} <= page.ids, route
+    assert BASE + route in pages[prefix + '/'].links, (route, 'missing home entry')
+    assert BASE + route in pages[prefix + '/pygame/'].links, (route, 'missing lesson entry')
+    assert BASE + prefix + '/pygame/' in page.links, (route, 'missing lesson return')
+    for url in page.links + page.assets:
+        parsed = urlsplit(url)
+        if parsed.scheme or parsed.netloc: continue
+        if not parsed.path:
+            assert unquote(parsed.fragment) in page.ids, (route, url)
+            continue
+        assert parsed.path.startswith(BASE + '/'), (route, 'missing basePath', url)
+        target = OUT / unquote(parsed.path[len(BASE):]).lstrip('/')
+        if target.is_dir(): target = target / 'index.html'
+        assert target.exists(), (route, 'missing file', url)
+    html = (OUT / route.lstrip('/') / 'index.html').read_text(encoding='utf-8')
+    assert 'rel="canonical" href="https://minhuangyuntech.github.io' + BASE + route + '"' in html
+
 manifest=[source for name in ['source-manifest.json','additional-source-manifest.json','django-source-manifest.json','pygame-source-manifest.json'] for source in json.loads((ROOT/'content'/name).read_text(encoding='utf-8'))]
 for source in manifest:
     file=ROOT/'public/materials'/source['download']
@@ -128,4 +149,4 @@ for lang,deck in pygame_raw.items():
         assert [b['text'] for b in slide['body'] if b['type']=='text'][1:1+len(source['notes'])]==source['notes']
         if slide.get('code') and slide['codeLanguage']=='python':
             ast.parse(slide['code']);codes+=1
-print(f'PASS: 3 homepages, 27 localized lessons (993 topics), 12 preserved later weeks, links/assets/anchors, 18 deck checksums, and {codes} Python excerpts.')
+print(f'PASS: 3 homepages, 27 localized lessons (993 topics), 3 playable game pages, 12 preserved later weeks, links/assets/anchors, 18 deck checksums, and {codes} Python excerpts.')

@@ -7,6 +7,7 @@ import ConceptFlow from "./concept-flow";
 import LessonDiagram from "./lesson-diagram";
 import Image from "next/image";
 import {pygameResourceNote} from "../pygame-data";
+import {playPath,playText} from "../game/text";
 import {djangoResourceNote} from "../django-data";
 import {basePath,unitInfo,unitRanges,unitChapters,coursePath,ui,weekLabel,type UnitId,type BodyBlock,type Language,type Lesson} from "../data";
 
@@ -78,6 +79,7 @@ export default function WeekLesson({lang,week,lesson}:{lang:Language;week:UnitId
     <header className="week-heading"><div className="week-heading-meta"><span className="week-badge">{weekLabel(lang,week)}</span><span>{info.tag}</span></div><h1>{info.title}</h1><p>{info.summary}</p><div className="week-heading-bottom"><span>{ranges.length} {t.chapters}<i/> {lesson.slides.length} {t.slides}<i/> Python 3.12+</span><button className="print-button" onClick={()=>window.print()}>{t.print} ↗</button></div></header>
     <div className="week-reading-layout"><div className="reading-main">
       <section className="outcomes"><h2>{t.key}</h2><ol>{info.outcomes.map((outcome,i)=><li key={outcome}><span>0{i+1}</span>{outcome}</li>)}</ol></section>
+      {week==="pygame"&&<section className="pygame-play-entry"><div><h2>{playText[lang].subtitle}</h2><p>{playText[lang].description}</p></div><Link className="action-primary" href={playPath(lang)}>▶ {playText[lang].launch}</Link></section>}
       <div className="mobile-toc"><button aria-expanded={tocOpen} aria-controls="mobile-chapters" onClick={()=>setTocOpen(!tocOpen)}>{t.tocToggle}<span>{tocOpen?"−":"+"}</span></button>{tocOpen&&<div id="mobile-chapters">{toc}</div>}</div>
       <div className="lesson-search"><label htmlFor="lesson-search">{t.search}</label><div><span aria-hidden="true">⌕</span><input id="lesson-search" type="search" value={query} onChange={e=>setQuery(e.target.value)} placeholder={t.search}/>{query&&<button onClick={()=>setQuery("")}>{t.clear}</button>}</div></div>
       {week!==1&&<p className="excerpt-note">{t.codeNote}</p>}
