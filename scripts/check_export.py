@@ -89,6 +89,8 @@ for locale, prefix, html_lang in [('zh','','zh-Hant'),('en','/en','en'),('ja','/
     assert BASE+route in pages[prefix+'/'].links,(route,'missing home entry')
     assert BASE+route in pages[prefix+'/memory/'].links,(route,'missing lesson entry')
     assert BASE+prefix+'/memory/' in page.links,(route,'missing lesson return')
+    assert BASE+'/materials/memory-oop-trilingual.zip' in page.links,(route,'missing Pygame download')
+    assert BASE+prefix+'/memory/#slide-19' in page.links,(route,'missing Pygame instructions')
     for url in page.links+page.assets:
         parsed=urlsplit(url)
         if parsed.scheme or parsed.netloc:continue
@@ -181,13 +183,14 @@ for lang,deck in pygame_raw.items():
 memory_raw=json.loads((ROOT/'content/memory-slides.json').read_text(encoding='utf-8'))
 for lang,deck in memory_raw.items():
     lesson=lessons[f'{lang}-memory']
-    assert len(lesson['slides'])==18
-    assert sum(bool(s.get('image')) for s in lesson['slides'])==3
+    assert len(lesson['slides'])==27
+    assert sum(bool(s.get('image')) for s in lesson['slides'])==4
     prefix='' if lang=='zh' else '/'+lang
     game_url='https://minhuangyuntech.github.io'+BASE+prefix+'/memory/play/'
     assert game_url in pages[prefix+'/memory/'].links
     with zipfile.ZipFile(ROOT/'public/materials'/lesson['download']) as pptx:
-        assert len([n for n in pptx.namelist() if re.fullmatch(r'ppt/slides/slide\d+\.xml',n)])==18
+        assert len([n for n in pptx.namelist() if re.fullmatch(r'ppt/slides/slide\d+\.xml',n)])==27
+        assert 'https://minhuangyuntech.github.io/oo2026/materials/memory-oop-trilingual.zip' in pptx.read('ppt/slides/_rels/slide20.xml.rels').decode('utf-8')
         for number in [1,2]:assert game_url in pptx.read(f'ppt/slides/_rels/slide{number}.xml.rels').decode('utf-8')
     for source,slide in zip(deck,lesson['slides']):
         assert slide['title']==source['title']
@@ -197,10 +200,11 @@ for lang,deck in memory_raw.items():
         if slide.get('code') and slide['codeLanguage']=='python':
             ast.parse(slide['code']);codes+=1
 with zipfile.ZipFile(ROOT/'public/materials/memory-oop-trilingual.zip') as examples:
+    assert {'memory_oop/pygame_app.py','memory_oop/pygame_text.py','memory_oop/requirements.txt','memory_oop/assets/OFL.txt','memory_oop/assets/ATTRIBUTION.txt','memory_oop/assets/NotoSansCJKtc-Regular.otf','memory_oop/tests/test_pygame_app.py'} <= set(examples.namelist())
     assert examples.read('memory_oop/browser/engine.ts')==(ROOT/'app/memory/engine.ts').read_bytes()
     for lang in ['zh','en','ja']:
         html=examples.read(f'memory_oop/docs/lesson-{lang}.html').decode('utf-8')
-        assert len(re.findall(r'<section id="slide-',html))==18
+        assert len(re.findall(r'<section id="slide-',html))==27
     for name in examples.namelist():
         assert '__pycache__' not in name and not name.endswith('.pyc')
         if name.endswith('.py'):ast.parse(examples.read(name).decode('utf-8'))

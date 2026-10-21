@@ -62,7 +62,7 @@ export default function MemoryGame({initialLang}:{initialLang:Language}){
     <h3>{t.events}</h3><ol className="ml-events">{game.events.map((ev,i)=><li key={`${i}-${ev.kind}`}>{t.event[ev.kind].replace('{cards}',ev.names.join(', '))}</li>)}</ol>
    </aside></div>
    <section className="ml-examples"><div><h2>{t.examples}</h2><p>{t.exampleNote}</p></div><div><button onClick={()=>reset('match')}>{t.matchDemo}</button><button onClick={()=>reset('miss')}>{t.missDemo}</button></div></section>
-   <section className="ml-model"><div><h2>{t.model}</h2><p>{t.modelNote}</p><p className="ml-small">{t.port}</p></div><div className="ml-class-line"><span><b>Game</b><code>first · second · pending</code></span><i>→</i><span><b>Board</b><code>cards[0..11]</code></span><i>→</i><span><b>12 × Card</b><code>pair_id · face_up · matched</code></span></div></section>
+   <section className="ml-model"><div><h2>{t.model}</h2><p>{t.modelNote}</p><p className="ml-small">{t.port}</p><p><a download href={`${basePath}/materials/memory-oop-trilingual.zip`}>↓ {t.desktopDownload}</a></p><p><a href={`${basePath}${coursePath(lang,'memory')}#slide-19`}>{t.desktopGuide} ↗</a></p></div><div className="ml-class-line"><span><b>Game</b><code>first · second · pending</code></span><i>→</i><span><b>Board</b><code>cards[0..11]</code></span><i>→</i><span><b>12 × Card</b><code>pair_id · face_up · matched</code></span></div></section>
   </main><footer>PAIR LAB · OOP 2026 <Link href={coursePath(lang,'memory')}>{t.back} ↗</Link></footer>
  </div>;
 }

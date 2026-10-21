@@ -2,7 +2,7 @@
 
 以 Python 為主要實作語言的 18 週物件導向程式設計教材網站。
 
-第 1–6 週、GUI 入門、Django 網站入門、Pygame 射擊遊戲與翻牌配對已依最新版投影片同步，提供繁體中文、英文與日文完整網頁教材，共 352 個原始投影片主題、1056 個語言版本主題。第 7–18 週保留原有中文教材與網址。
+第 1–6 週、GUI 入門、Django 網站入門、Pygame 射擊遊戲與翻牌配對已依最新版投影片同步，提供繁體中文、英文與日文完整網頁教材，共 361 個原始投影片主題、1083 個語言版本主題。第 7–18 週保留原有中文教材與網址。
 
 - 中文：`/`、`/week/1/` 至 `/week/6/`、`/gui/`、`/django/`
 - 英文：`/en/`、`/en/week/1/` 至 `/en/week/6/`、`/en/gui/`、`/en/django/`
@@ -22,7 +22,7 @@
 | GUI | 五種常見做法・學生版 v2 | 中文 32 頁；五個工具家族與六個可執行範例 |
 | Django | 網站建立與專案檔案解析；中文 v3、英文 v2、日文 v3 | 各語言 53 頁，含對應語言的商品目錄專案 |
 | Pygame | 射擊遊戲、類別與物件觀察 | 中、英、日各 33 頁；第 31–33 頁為線上版連結、操作與暫停範例 |
-| 翻牌配對 | Card、Board、Game 的狀態與參照 | 中、英、日各 18 頁，含線上遊戲、類別圖、物件圖、單步範例與 Python 程式碼 |
+| 翻牌配對 | Card、Board、Game 的狀態與參照 | 中、英、日各 27 頁，含線上遊戲、類別圖、物件圖、單步範例；第 19–27 頁補充 Pygame 安裝、操作、事件與繪圖程式碼 |
 
 `content/source-manifest.json` 記錄完整原始檔名、下載檔名、頁數與 SHA-256。第 1–3 週英日文取自既有翻譯投影片，第 4 週翻譯位於 `content/week4-translations.json`。程式碼保留來源縮排，投影片片段不一律視為可獨立執行的程式。
 
@@ -89,6 +89,19 @@ python scripts/sync_materials.py ../output
 
 一般模式翻兩張牌後按「確認這一回合」。單步模式選牌只保存 pending，按 N 或「下一步」依序翻牌、比較、結算。比較後 matched 仍為 false，結算才標記配對或蓋回。成功範例是 C01/C02，失敗範例是 C03/C04。載入範例建立固定棋盤並開啟觀察模式。L 切換標籤，下拉選單只更換檢視對象。
 
-`python scripts/sync_memory.py ../output` 同步三語教材、18 頁 PPTX、3 張遊戲實照、6 張 SVG、ZIP 與 SHA-256 manifest。ZIP 包含可直接執行的 Python 模型與三語終端機介面、6 項測試、TypeScript 模型及三語離線 HTML 教材。Python 3.12+ 即可執行，不需額外套件。
+`python scripts/sync_memory.py ../output` 同步三語教材、27 頁 PPTX、6 張遊戲實照、6 張 SVG、ZIP 與 SHA-256 manifest。ZIP 包含 Pygame 視窗版、Python 模型與三語終端機、16 項模型／介面測試、TypeScript 模型及三語離線 HTML 教材。視窗版使用 Python 3.12、Pygame 2.6.1；原有模型與終端機版不需額外套件。
 
-`npm run test:game` 同時執行射擊遊戲的 16 項測試與翻牌配對的 8 項測試。匯出檢查也驗證三語遊戲頁、教材入口、54 個新增主題、PPTX 內的遊戲超連結及範例 ZIP 中的模型。
+`npm run test:game` 同時執行射擊遊戲的 16 項測試與翻牌配對的 8 項測試。匯出檢查也驗證三語遊戲頁、教材入口、81 個翻牌配對主題、PPTX 內的遊戲超連結及範例 ZIP 中的模型。
+
+
+下載 `materials/memory-oop-trilingual.zip`，解壓縮後在 `memory_oop` 執行：
+
+```sh
+python -m pip install -r requirements.txt
+python pygame_app.py --lang zh --sample
+python -m unittest discover -s tests -v
+```
+
+PygameApp 持有原有 Game，處理事件、縮放座標與繪圖。物件標籤用 L 切換，N 執行單步，M 切換模式，F1 / F2 開啟成功／失敗範例，1 / 2 / 3 切換語言並保留物件狀態。右鍵與方向鍵只切換檢視對象，Enter 選牌，Space 確認回合，Esc 結束。沒有計時器自動推進配對。隨附 Noto Sans CJK TC 字型及 SIL OFL 授權，可離線顯示中日文字。
+
+`python scripts/check_memory_package.py` 從實際下載 ZIP 解壓縮，執行 6 項模型測試與 10 項 Pygame 介面測試；需先安裝 pygame==2.6.1。介面測試使用 SDL dummy driver，驗證事件、語言、縮放、單步與繪圖。GitHub Actions 發布前也會執行。

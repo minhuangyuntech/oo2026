@@ -4,23 +4,23 @@
     "language": "zh",
     "source": "翻牌配對_物件導向教學_繁體中文.pptx",
     "download": "memory-zh.pptx",
-    "slides": 18,
-    "sha256": "4fd6a975625ee17f0e504651e87507942048ef23d0bdea107b0a9395b6818ee4"
+    "slides": 27,
+    "sha256": "1fa4c8b9b654132d5be87f90c25ba221eda5c32c60f36af152dcbb78b3432eff"
   },
   {
     "unit": "memory",
     "language": "en",
     "source": "Card_Matching_OOP_English.pptx",
     "download": "memory-en.pptx",
-    "slides": 18,
-    "sha256": "f9bf8683da906be94d87dafca4836998622f4a80a845e4e3bb42fd4635f7ec16"
+    "slides": 27,
+    "sha256": "0eac3795d24342ad705bfb50f458579eb77b9a8d605241edd2d582fe713f1a72"
   },
   {
     "unit": "memory",
     "language": "ja",
     "source": "神経衰弱_オブジェクト指向_日本語.pptx",
     "download": "memory-ja.pptx",
-    "slides": 18,
-    "sha256": "aed876f47b92d171497914d66489b6c88833c9563047a1bd8eb369f0eaebc97d"
+    "slides": 27,
+    "sha256": "b2b91c16f4b227d9ae9168c55c7a121a291372f4ebf3ea37668e180c4ede52db"
   }
 ]

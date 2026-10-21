@@ -408,6 +408,203 @@
           "https://docs.python.org/3.12/reference/expressions.html#is-not"
         ]
       ]
+    },
+    {
+      "number": 19,
+      "type": "code",
+      "title": "安裝與執行 Pygame 版",
+      "sub": "下載 ZIP，解壓縮後在 memory_oop 資料夾開啟終端機",
+      "notes": [
+        "使用 Python 3.12 與 Pygame 2.6.1。首次安裝套件需要網路。",
+        "--sample 開啟固定棋盤與單步觀察。安裝後可離線遊玩。"
+      ],
+      "sources": [
+        "https://pypi.org/project/pygame/2.6.1/"
+      ],
+      "code": "python -m pip install -r requirements.txt\npython pygame_app.py --lang zh\npython pygame_app.py --lang zh --sample\npython -m unittest discover -s tests -v",
+      "codeLanguage": "text",
+      "file": "Terminal / PowerShell"
+    },
+    {
+      "number": 20,
+      "type": "desktop",
+      "title": "Pygame 桌面版",
+      "sub": "與網頁版共用配對規則，以 Python 物件直接運作",
+      "notes": [
+        "物件標籤與參照檢視器保留。",
+        "比較與結算是兩個步驟。"
+      ],
+      "sources": [
+        "https://www.pygame.org/docs/ref/event.html",
+        "https://www.pygame.org/docs/ref/display.html"
+      ],
+      "links": [
+        [
+          "下載 Pygame / Python 範例",
+          "https://minhuangyuntech.github.io/oo2026/materials/memory-oop-trilingual.zip"
+        ]
+      ]
+    },
+    {
+      "number": 21,
+      "type": "table",
+      "title": "桌面版操作",
+      "sub": "滑鼠與鍵盤皆可操作，視窗縮放不改變遊戲狀態",
+      "notes": [
+        "右鍵與方向鍵只改變檢視對象。切換語言保留目前棋盤。"
+      ],
+      "sources": [
+        "https://www.pygame.org/docs/ref/event.html",
+        "https://www.pygame.org/docs/ref/display.html"
+      ],
+      "values": [
+        [
+          "操作",
+          "功能"
+        ],
+        [
+          "左鍵／Enter",
+          "選取目前的牌"
+        ],
+        [
+          "右鍵／方向鍵",
+          "只切換檢視對象"
+        ],
+        [
+          "N／下一步",
+          "觀察模式前進一個階段"
+        ],
+        [
+          "Space／確認回合",
+          "一般模式比較並結算"
+        ],
+        [
+          "M / L / R",
+          "切換模式／標籤／新遊戲"
+        ],
+        [
+          "F1 / F2 / 1–3 / Esc",
+          "成功範例／失敗範例／語言／結束"
+        ]
+      ]
+    },
+    {
+      "number": 22,
+      "type": "table",
+      "title": "PygameApp 與模型的分工",
+      "sub": "PygameApp 持有 Game，沿用既有的 Board 與 Card",
+      "notes": [
+        "PygameApp → Game → Board → Card。沒有新增卡牌的繼承階層。"
+      ],
+      "sources": [
+        "https://www.pygame.org/docs/ref/event.html",
+        "https://www.pygame.org/docs/ref/display.html"
+      ],
+      "values": [
+        [
+          "檔案或類別",
+          "責任"
+        ],
+        [
+          "model.py",
+          "Card、Board、Game：狀態與配對規則"
+        ],
+        [
+          "PygameApp",
+          "持有 Game，處理輸入、繪圖與視窗"
+        ],
+        [
+          "pygame_text.py",
+          "中英日介面文字"
+        ],
+        [
+          "assets/",
+          "隨附 Noto 字型與 OFL 授權"
+        ]
+      ]
+    },
+    {
+      "number": 23,
+      "type": "code",
+      "title": "事件迴圈與畫面更新",
+      "sub": "pygame_app.py · PygameApp.run",
+      "notes": [
+        "每一輪先處理事件，再繪圖並更新視窗。",
+        "tick(60) 限制更新頻率；繪圖本身不會推進配對狀態。"
+      ],
+      "sources": [
+        "https://www.pygame.org/docs/ref/event.html",
+        "https://www.pygame.org/docs/ref/display.html"
+      ],
+      "code": "def run(self):\n    while self.running:\n        for event in pygame.event.get():\n            self.handle_event(event)\n        self.draw()\n        self.present()\n        pygame.display.flip()\n        self.clock.tick(60)\n    pygame.quit()",
+      "codeLanguage": "python",
+      "file": "pygame_app.py"
+    },
+    {
+      "number": 24,
+      "type": "code",
+      "title": "滑鼠位置對應到卡牌",
+      "sub": "pygame_app.py · PygameApp.click_card",
+      "notes": [
+        "click() 先將視窗座標轉為 1280 × 800 的邏輯座標。",
+        "Rect.collidepoint() 找到牌；右鍵只改變 selected。"
+      ],
+      "sources": [
+        "https://www.pygame.org/docs/ref/rect.html"
+      ],
+      "code": "def click_card(self, pos, inspect_only=False):\n    for index, rect in enumerate(self.card_rects):\n        if rect.collidepoint(pos):\n            if inspect_only:\n                self.selected = index\n            else:\n                self.pick(index)\n            return True\n    return False",
+      "codeLanguage": "python",
+      "file": "pygame_app.py"
+    },
+    {
+      "number": 25,
+      "type": "code",
+      "title": "選牌與單步呼叫",
+      "sub": "pygame_app.py · PygameApp.pick / advance",
+      "notes": [
+        "觀察模式：queue() 只保存參照，step() 才執行下一階段。",
+        "一般模式：play() 立即翻牌，finish_turn() 完成比較與結算。"
+      ],
+      "sources": [
+        "https://www.pygame.org/docs/ref/event.html",
+        "https://www.pygame.org/docs/ref/display.html"
+      ],
+      "code": "def pick(self, index):\n    self.selected = index\n    card = self.game.board.cards[index]\n    if self.observe:\n        self.game.queue(card.name)\n    else:\n        self.game.play(card.name)\n\ndef advance(self):\n    if self.observe or self.game.pending:\n        self.game.step()\n    else:\n        self.game.finish_turn()",
+      "codeLanguage": "python",
+      "file": "pygame_app.py"
+    },
+    {
+      "number": 26,
+      "type": "code",
+      "title": "由物件狀態繪製卡牌",
+      "sub": "draw_card() 節錄，省略圖案與選取外框的繪製",
+      "notes": [
+        "face_up 決定牌面顏色，labels 決定是否畫出物件名稱。",
+        "繪圖讀取 Card 屬性；翻牌規則由模型的方法處理。"
+      ],
+      "sources": [
+        "https://www.pygame.org/docs/ref/event.html",
+        "https://www.pygame.org/docs/ref/display.html"
+      ],
+      "code": "def draw_card(self, card, rect, selected=False):\n    color = FACE if card.face_up else BACK\n    pygame.draw.rect(self.screen, color, rect, border_radius=10)\n    # ... symbol and selection rendering ...\n    if self.labels:\n        self.text(f'{card.name}: Card',\n                  (rect.x + 16, rect.y + 91), 16,\n                  INK if card.face_up else WHITE)",
+      "codeLanguage": "python",
+      "file": "pygame_app.py"
+    },
+    {
+      "number": 27,
+      "type": "code",
+      "title": "檢視參照與物件身分",
+      "sub": "pygame_app.py · PygameApp.draw_identity",
+      "notes": [
+        "畫面上的 is 直接比較 Python 物件參照。",
+        "配對後 first、second 清空，但 Board 仍持有原本的 Card。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/reference/expressions.html#is-not"
+      ],
+      "code": "def draw_identity(self, card):\n    for key in ('first', 'second', 'pending'):\n        if getattr(self.game, key) is card:\n            self.text(f'game.{key} is', (840, 560), 18, GREEN)\n            self.text(f'game.board.cards[{self.selected}]', (840, 586), 18, GREEN)\n            self.text('True · ' + self.t['same'], (840, 612), 16, GREEN)\n            return\n    self.text(self.t['no_ref'], (840, 572), 16, MUTED)",
+      "codeLanguage": "python",
+      "file": "pygame_app.py"
     }
   ],
   "en": [
@@ -819,6 +1016,203 @@
           "https://docs.python.org/3.12/reference/expressions.html#is-not"
         ]
       ]
+    },
+    {
+      "number": 19,
+      "type": "code",
+      "title": "Install and run the Pygame version",
+      "sub": "Extract the ZIP and open a terminal in memory_oop",
+      "notes": [
+        "Use Python 3.12 and Pygame 2.6.1. Initial package installation needs internet.",
+        "--sample opens a fixed board in step mode. Play offline after setup."
+      ],
+      "sources": [
+        "https://pypi.org/project/pygame/2.6.1/"
+      ],
+      "code": "python -m pip install -r requirements.txt\npython pygame_app.py --lang en\npython pygame_app.py --lang en --sample\npython -m unittest discover -s tests -v",
+      "codeLanguage": "text",
+      "file": "Terminal / PowerShell"
+    },
+    {
+      "number": 20,
+      "type": "desktop",
+      "title": "Pygame desktop version",
+      "sub": "The same matching rules run directly on Python objects",
+      "notes": [
+        "Object labels and reference inspection are retained.",
+        "Equal pictures: compare first, then settle."
+      ],
+      "sources": [
+        "https://www.pygame.org/docs/ref/event.html",
+        "https://www.pygame.org/docs/ref/display.html"
+      ],
+      "links": [
+        [
+          "Download Pygame / Python example",
+          "https://minhuangyuntech.github.io/oo2026/materials/memory-oop-trilingual.zip"
+        ]
+      ]
+    },
+    {
+      "number": 21,
+      "type": "table",
+      "title": "Desktop controls",
+      "sub": "Mouse and keyboard input; resizing preserves game state",
+      "notes": [
+        "Right-click and arrows only change the inspected card. Language changes preserve the board."
+      ],
+      "sources": [
+        "https://www.pygame.org/docs/ref/event.html",
+        "https://www.pygame.org/docs/ref/display.html"
+      ],
+      "values": [
+        [
+          "Control",
+          "Action"
+        ],
+        [
+          "Left-click / Enter",
+          "Select the current card"
+        ],
+        [
+          "Right-click / arrows",
+          "Inspect without revealing"
+        ],
+        [
+          "N / Next step",
+          "Advance one stage in step mode"
+        ],
+        [
+          "Space / Confirm turn",
+          "Compare and settle in normal play"
+        ],
+        [
+          "M / L / R",
+          "Toggle mode / labels / new game"
+        ],
+        [
+          "F1 / F2 / 1–3 / Esc",
+          "Match / mismatch / language / exit"
+        ]
+      ]
+    },
+    {
+      "number": 22,
+      "type": "table",
+      "title": "PygameApp and the model",
+      "sub": "PygameApp holds a Game and reuses Board and Card",
+      "notes": [
+        "PygameApp → Game → Board → Card. No new card inheritance hierarchy."
+      ],
+      "sources": [
+        "https://www.pygame.org/docs/ref/event.html",
+        "https://www.pygame.org/docs/ref/display.html"
+      ],
+      "values": [
+        [
+          "File or class",
+          "Responsibility"
+        ],
+        [
+          "model.py",
+          "Card, Board, Game: state and matching rules"
+        ],
+        [
+          "PygameApp",
+          "Hold a Game; handle input, drawing, and the window"
+        ],
+        [
+          "pygame_text.py",
+          "Chinese, English, and Japanese UI text"
+        ],
+        [
+          "assets/",
+          "Bundled Noto font and OFL license"
+        ]
+      ]
+    },
+    {
+      "number": 23,
+      "type": "code",
+      "title": "Event loop and screen updates",
+      "sub": "pygame_app.py · PygameApp.run",
+      "notes": [
+        "Each loop handles events, draws, then updates the window.",
+        "tick(60) caps the frame rate. Drawing does not advance a turn."
+      ],
+      "sources": [
+        "https://www.pygame.org/docs/ref/event.html",
+        "https://www.pygame.org/docs/ref/display.html"
+      ],
+      "code": "def run(self):\n    while self.running:\n        for event in pygame.event.get():\n            self.handle_event(event)\n        self.draw()\n        self.present()\n        pygame.display.flip()\n        self.clock.tick(60)\n    pygame.quit()",
+      "codeLanguage": "python",
+      "file": "pygame_app.py"
+    },
+    {
+      "number": 24,
+      "type": "code",
+      "title": "From mouse position to Card",
+      "sub": "pygame_app.py · PygameApp.click_card",
+      "notes": [
+        "click() first converts window coordinates to the 1280 × 800 logical surface.",
+        "Rect.collidepoint() finds a card. Right-click only changes selected."
+      ],
+      "sources": [
+        "https://www.pygame.org/docs/ref/rect.html"
+      ],
+      "code": "def click_card(self, pos, inspect_only=False):\n    for index, rect in enumerate(self.card_rects):\n        if rect.collidepoint(pos):\n            if inspect_only:\n                self.selected = index\n            else:\n                self.pick(index)\n            return True\n    return False",
+      "codeLanguage": "python",
+      "file": "pygame_app.py"
+    },
+    {
+      "number": 25,
+      "type": "code",
+      "title": "Selection and step calls",
+      "sub": "pygame_app.py · PygameApp.pick / advance",
+      "notes": [
+        "Step mode: queue() holds a reference; step() performs the next stage.",
+        "Normal play: play() reveals; finish_turn() compares and settles."
+      ],
+      "sources": [
+        "https://www.pygame.org/docs/ref/event.html",
+        "https://www.pygame.org/docs/ref/display.html"
+      ],
+      "code": "def pick(self, index):\n    self.selected = index\n    card = self.game.board.cards[index]\n    if self.observe:\n        self.game.queue(card.name)\n    else:\n        self.game.play(card.name)\n\ndef advance(self):\n    if self.observe or self.game.pending:\n        self.game.step()\n    else:\n        self.game.finish_turn()",
+      "codeLanguage": "python",
+      "file": "pygame_app.py"
+    },
+    {
+      "number": 26,
+      "type": "code",
+      "title": "Drawing from object state",
+      "sub": "draw_card() excerpt; symbol and selection rendering omitted",
+      "notes": [
+        "face_up chooses the card color. labels controls the object name.",
+        "Drawing reads Card attributes. Model methods handle the rules."
+      ],
+      "sources": [
+        "https://www.pygame.org/docs/ref/event.html",
+        "https://www.pygame.org/docs/ref/display.html"
+      ],
+      "code": "def draw_card(self, card, rect, selected=False):\n    color = FACE if card.face_up else BACK\n    pygame.draw.rect(self.screen, color, rect, border_radius=10)\n    # ... symbol and selection rendering ...\n    if self.labels:\n        self.text(f'{card.name}: Card',\n                  (rect.x + 16, rect.y + 91), 16,\n                  INK if card.face_up else WHITE)",
+      "codeLanguage": "python",
+      "file": "pygame_app.py"
+    },
+    {
+      "number": 27,
+      "type": "code",
+      "title": "Inspecting references and identity",
+      "sub": "pygame_app.py · PygameApp.draw_identity",
+      "notes": [
+        "The displayed is expression compares actual Python object references.",
+        "Settlement clears first and second. Board still holds the original Cards."
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/reference/expressions.html#is-not"
+      ],
+      "code": "def draw_identity(self, card):\n    for key in ('first', 'second', 'pending'):\n        if getattr(self.game, key) is card:\n            self.text(f'game.{key} is', (840, 560), 18, GREEN)\n            self.text(f'game.board.cards[{self.selected}]', (840, 586), 18, GREEN)\n            self.text('True · ' + self.t['same'], (840, 612), 16, GREEN)\n            return\n    self.text(self.t['no_ref'], (840, 572), 16, MUTED)",
+      "codeLanguage": "python",
+      "file": "pygame_app.py"
     }
   ],
   "ja": [
@@ -1230,6 +1624,203 @@
           "https://docs.python.org/3.12/reference/expressions.html#is-not"
         ]
       ]
+    },
+    {
+      "number": 19,
+      "type": "code",
+      "title": "Pygame 版のインストールと実行",
+      "sub": "ZIP を展開し、memory_oop フォルダーでターミナルを開く",
+      "notes": [
+        "Python 3.12 / Pygame 2.6.1。初回はネット接続が必要。",
+        "--sample：固定盤面でコマ送り。導入後はオフライン対応。"
+      ],
+      "sources": [
+        "https://pypi.org/project/pygame/2.6.1/"
+      ],
+      "code": "python -m pip install -r requirements.txt\npython pygame_app.py --lang ja\npython pygame_app.py --lang ja --sample\npython -m unittest discover -s tests -v",
+      "codeLanguage": "text",
+      "file": "Terminal / PowerShell"
+    },
+    {
+      "number": 20,
+      "type": "desktop",
+      "title": "Pygame デスクトップ版",
+      "sub": "同じルールを Python オブジェクトで実行",
+      "notes": [
+        "オブジェクト名と参照の観察に対応。",
+        "絵が一致しても、比較と確定は別の段階です。"
+      ],
+      "sources": [
+        "https://www.pygame.org/docs/ref/event.html",
+        "https://www.pygame.org/docs/ref/display.html"
+      ],
+      "links": [
+        [
+          "Pygame / Python サンプルをダウンロード",
+          "https://minhuangyuntech.github.io/oo2026/materials/memory-oop-trilingual.zip"
+        ]
+      ]
+    },
+    {
+      "number": 21,
+      "type": "table",
+      "title": "デスクトップ版の操作",
+      "sub": "マウスとキーボードに対応。サイズ変更でも状態を保持",
+      "notes": [
+        "右クリックと方向キーは観察対象だけを変更。言語の切替でも盤面は保持。"
+      ],
+      "sources": [
+        "https://www.pygame.org/docs/ref/event.html",
+        "https://www.pygame.org/docs/ref/display.html"
+      ],
+      "values": [
+        [
+          "操作",
+          "動作"
+        ],
+        [
+          "左クリック / Enter",
+          "現在のカードを選択"
+        ],
+        [
+          "右クリック / 方向キー",
+          "めくらずに観察対象を変更"
+        ],
+        [
+          "N / 次のステップ",
+          "コマ送りで一段階進む"
+        ],
+        [
+          "Space / 手番を確定",
+          "通常プレイで比較と確定"
+        ],
+        [
+          "M / L / R",
+          "モード / 名前 / 新しいゲーム"
+        ],
+        [
+          "F1 / F2 / 1–3 / Esc",
+          "一致例 / 不一致例 / 言語 / 終了"
+        ]
+      ]
+    },
+    {
+      "number": 22,
+      "type": "table",
+      "title": "PygameApp とモデルの役割",
+      "sub": "PygameApp が Game を持ち、既存の Board と Card を利用",
+      "notes": [
+        "PygameApp → Game → Board → Card。カードの継承階層は追加しません。"
+      ],
+      "sources": [
+        "https://www.pygame.org/docs/ref/event.html",
+        "https://www.pygame.org/docs/ref/display.html"
+      ],
+      "values": [
+        [
+          "ファイル・クラス",
+          "役割"
+        ],
+        [
+          "model.py",
+          "Card・Board・Game：状態と一致のルール"
+        ],
+        [
+          "PygameApp",
+          "Game を保持し、入力・描画・ウィンドウを管理"
+        ],
+        [
+          "pygame_text.py",
+          "中英日の画面テキスト"
+        ],
+        [
+          "assets/",
+          "同梱の Noto フォントと OFL ライセンス"
+        ]
+      ]
+    },
+    {
+      "number": 23,
+      "type": "code",
+      "title": "イベントループと画面更新",
+      "sub": "pygame_app.py · PygameApp.run",
+      "notes": [
+        "各ループでイベント処理、描画、画面更新を行います。",
+        "tick(60) は更新頻度を制限。描画だけでは手番は進みません。"
+      ],
+      "sources": [
+        "https://www.pygame.org/docs/ref/event.html",
+        "https://www.pygame.org/docs/ref/display.html"
+      ],
+      "code": "def run(self):\n    while self.running:\n        for event in pygame.event.get():\n            self.handle_event(event)\n        self.draw()\n        self.present()\n        pygame.display.flip()\n        self.clock.tick(60)\n    pygame.quit()",
+      "codeLanguage": "python",
+      "file": "pygame_app.py"
+    },
+    {
+      "number": 24,
+      "type": "code",
+      "title": "マウス位置からカードを特定",
+      "sub": "pygame_app.py · PygameApp.click_card",
+      "notes": [
+        "click() がウィンドウ座標を 1280 × 800 の論理座標に変換。",
+        "Rect.collidepoint() で特定。右クリックは selected のみ変更。"
+      ],
+      "sources": [
+        "https://www.pygame.org/docs/ref/rect.html"
+      ],
+      "code": "def click_card(self, pos, inspect_only=False):\n    for index, rect in enumerate(self.card_rects):\n        if rect.collidepoint(pos):\n            if inspect_only:\n                self.selected = index\n            else:\n                self.pick(index)\n            return True\n    return False",
+      "codeLanguage": "python",
+      "file": "pygame_app.py"
+    },
+    {
+      "number": 25,
+      "type": "code",
+      "title": "選択とコマ送りの呼び出し",
+      "sub": "pygame_app.py · PygameApp.pick / advance",
+      "notes": [
+        "コマ送り：queue() は参照を保存し、step() が次の段階を実行。",
+        "通常プレイ：play() でめくり、finish_turn() で比較と確定。"
+      ],
+      "sources": [
+        "https://www.pygame.org/docs/ref/event.html",
+        "https://www.pygame.org/docs/ref/display.html"
+      ],
+      "code": "def pick(self, index):\n    self.selected = index\n    card = self.game.board.cards[index]\n    if self.observe:\n        self.game.queue(card.name)\n    else:\n        self.game.play(card.name)\n\ndef advance(self):\n    if self.observe or self.game.pending:\n        self.game.step()\n    else:\n        self.game.finish_turn()",
+      "codeLanguage": "python",
+      "file": "pygame_app.py"
+    },
+    {
+      "number": 26,
+      "type": "code",
+      "title": "オブジェクトの状態を描画",
+      "sub": "draw_card() の抜粋。絵と選択枠の描画は省略",
+      "notes": [
+        "face_up でカードの色を決め、labels で名前の表示を切替。",
+        "描画は Card の属性を読み、ルールはモデルのメソッドで処理。"
+      ],
+      "sources": [
+        "https://www.pygame.org/docs/ref/event.html",
+        "https://www.pygame.org/docs/ref/display.html"
+      ],
+      "code": "def draw_card(self, card, rect, selected=False):\n    color = FACE if card.face_up else BACK\n    pygame.draw.rect(self.screen, color, rect, border_radius=10)\n    # ... symbol and selection rendering ...\n    if self.labels:\n        self.text(f'{card.name}: Card',\n                  (rect.x + 16, rect.y + 91), 16,\n                  INK if card.face_up else WHITE)",
+      "codeLanguage": "python",
+      "file": "pygame_app.py"
+    },
+    {
+      "number": 27,
+      "type": "code",
+      "title": "参照と同一性の観察",
+      "sub": "pygame_app.py · PygameApp.draw_identity",
+      "notes": [
+        "表示する is 式は実際の Python オブジェクトの参照を比較。",
+        "確定後に first と second を消しても、Board は元の Card を保持。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/reference/expressions.html#is-not"
+      ],
+      "code": "def draw_identity(self, card):\n    for key in ('first', 'second', 'pending'):\n        if getattr(self.game, key) is card:\n            self.text(f'game.{key} is', (840, 560), 18, GREEN)\n            self.text(f'game.board.cards[{self.selected}]', (840, 586), 18, GREEN)\n            self.text('True · ' + self.t['same'], (840, 612), 16, GREEN)\n            return\n    self.text(self.t['no_ref'], (840, 572), 16, MUTED)",
+      "codeLanguage": "python",
+      "file": "pygame_app.py"
     }
   ]
 }
