@@ -1,0 +1,1235 @@
+{
+  "zh": [
+    {
+      "number": 1,
+      "type": "cover",
+      "title": "翻牌配對與物件狀態",
+      "sub": "Card · Board · Game",
+      "notes": [
+        "一張牌是一個物件。",
+        "用單步操作觀察狀態與參照。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/memory/play/"
+      ],
+      "links": [
+        [
+          "直接玩線上版",
+          "https://minhuangyuntech.github.io/oo2026/memory/play/"
+        ]
+      ]
+    },
+    {
+      "number": 2,
+      "type": "screenshot",
+      "title": "線上遊戲與物件標籤",
+      "sub": "12 張牌、6 組圖案，直接用瀏覽器遊玩",
+      "notes": [
+        "一般遊玩：選兩張牌，再確認這一回合。",
+        "單步觀察：選牌後逐步翻開、比較、結算。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/memory/play/"
+      ],
+      "links": [
+        [
+          "直接玩線上版",
+          "https://minhuangyuntech.github.io/oo2026/memory/play/"
+        ]
+      ]
+    },
+    {
+      "number": 3,
+      "type": "table",
+      "title": "遊玩與觀察操作",
+      "sub": "滑鼠、觸控與鍵盤皆可操作",
+      "notes": [
+        "切換語言保留目前棋盤與進度。重新整理頁面會建立新遊戲。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/memory/play/"
+      ],
+      "values": [
+        [
+          "操作",
+          "結果"
+        ],
+        [
+          "一般遊玩",
+          "選兩張牌，按「確認這一回合」"
+        ],
+        [
+          "單步觀察 / N",
+          "選牌後逐步翻開、比較、結算"
+        ],
+        [
+          "L / 物件標籤",
+          "切換 C01: Card 等標籤"
+        ],
+        [
+          "物件檢視器",
+          "只切換檢視對象，不會翻牌"
+        ],
+        [
+          "固定範例",
+          "建立新一局，開啟單步觀察"
+        ],
+        [
+          "新遊戲／洗牌",
+          "建立新的物件與隨機棋盤"
+        ]
+      ]
+    },
+    {
+      "number": 4,
+      "type": "table",
+      "title": "三個類別的責任",
+      "sub": "讓資料與操作留在負責的物件裡",
+      "notes": [
+        "畫面讀取模型狀態，按鈕呼叫模型方法。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/memory/play/",
+        "https://docs.python.org/3.12/tutorial/classes.html"
+      ],
+      "values": [
+        [
+          "類別",
+          "資料",
+          "責任"
+        ],
+        [
+          "Card",
+          "name, pair_id, face_up, matched",
+          "翻開、蓋回、標記配對"
+        ],
+        [
+          "Board",
+          "cards",
+          "建立與查找 12 張牌"
+        ],
+        [
+          "Game",
+          "first, second, pending, phase",
+          "協調選牌、比較與結算"
+        ]
+      ]
+    },
+    {
+      "number": 5,
+      "type": "classes",
+      "title": "UML 類別圖",
+      "sub": "方框分為名稱、屬性、方法；箭頭表示可導覽的關聯",
+      "notes": [
+        "一個 Game 對應一個 Board，Board 保存 12 張 Card。",
+        "first、second、pending 各參照零或一張 Card。本例以關聯合作。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/memory/play/"
+      ]
+    },
+    {
+      "number": 6,
+      "type": "objects",
+      "title": "兩張相同圖案，兩個不同物件",
+      "sub": "固定棋盤：C01 與 C02 的 pair_id 都是 moon",
+      "notes": [
+        "C01 與 C02 是兩個實體，face_up 可各自改變。",
+        "Game.first 與 Board.cards[0] 可以參照同一張牌。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/memory/play/",
+        "https://docs.python.org/3.12/reference/expressions.html#is-not"
+      ]
+    },
+    {
+      "number": 7,
+      "type": "table",
+      "title": "Card 的三種狀態",
+      "sub": "兩個布林屬性，描述畫面上的牌",
+      "notes": [
+        "已配對的牌會保持正面；hide() 不會把它蓋回。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/memory/play/"
+      ],
+      "values": [
+        [
+          "畫面狀態",
+          "face_up",
+          "matched"
+        ],
+        [
+          "牌背",
+          "False",
+          "False"
+        ],
+        [
+          "已翻開，尚未配對",
+          "True",
+          "False"
+        ],
+        [
+          "已配對，保持正面",
+          "True",
+          "True"
+        ]
+      ]
+    },
+    {
+      "number": 8,
+      "type": "code",
+      "title": "Card：資料與翻牌行為",
+      "sub": "model.py · Card",
+      "notes": [
+        "reveal() 拒絕重複翻開及已配對的牌。",
+        "本例屬性可直接讀寫；程式流程透過方法維持規則。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/memory/play/",
+        "https://docs.python.org/3.12/tutorial/classes.html"
+      ],
+      "code": "class Card:\n    def __init__(self, name, pair_id):\n        self.name = name\n        self.pair_id = pair_id\n        self.face_up = False\n        self.matched = False\n\n    def reveal(self):\n        if self.face_up or self.matched:\n            return False\n        self.face_up = True\n        return True",
+      "codeLanguage": "python",
+      "file": "model.py"
+    },
+    {
+      "number": 9,
+      "type": "code",
+      "title": "Board：建立與保存卡牌",
+      "sub": "model.py · Board.__init__",
+      "notes": [
+        "每次呼叫 Card(...) 都建立新的實體。",
+        "sample=True 保留固定順序；一般遊戲會洗牌。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/memory/play/",
+        "https://docs.python.org/3.12/tutorial/classes.html"
+      ],
+      "code": "def __init__(self, sample=False):\n    pairs = SAMPLE.copy()\n    if not sample:\n        shuffle(pairs)\n    self.cards = [Card(f'C{i+1:02}', pair)\n                  for i, pair in enumerate(pairs)]",
+      "codeLanguage": "python",
+      "file": "model.py"
+    },
+    {
+      "number": 10,
+      "type": "code",
+      "title": "選牌：先保存 pending 參照",
+      "sub": "model.py · Game.queue",
+      "notes": [
+        "選牌尚未改變 face_up，按下一步才翻開。",
+        "同一張已翻開的牌不能再作為第二張。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/memory/play/"
+      ],
+      "code": "def queue(self, name):\n    if self.phase not in ('first', 'second') or self.pending:\n        return False\n    card = self.board.get(name)\n    if card is None or card.face_up or card.matched:\n        return False\n    self.pending = card\n    return True",
+      "codeLanguage": "python",
+      "file": "model.py"
+    },
+    {
+      "number": 11,
+      "type": "code",
+      "title": "單步：翻開等待中的牌",
+      "sub": "Game.step() 的翻牌分支；其餘分支呼叫 compare()、settle()",
+      "notes": [
+        "first、second 各自參照 Board 中選取的牌。",
+        "一次 step() 只完成一個階段。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/memory/play/"
+      ],
+      "code": "def step(self):\n    if self.pending and self.phase in ('first', 'second'):\n        card = self.pending\n        self.pending = None\n        card.reveal()\n        if self.phase == 'first':\n            self.first = card\n            self.phase = 'second'\n        else:\n            self.second = card\n            self.phase = 'compare'\n        return True",
+      "codeLanguage": "python",
+      "file": "model.py"
+    },
+    {
+      "number": 12,
+      "type": "code",
+      "title": "比較：檢查 pair_id",
+      "sub": "model.py · Game.compare",
+      "notes": [
+        "比較圖案值，並增加一次比較次數。",
+        "此時 matched 仍為 False，等待下一步結算。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/memory/play/"
+      ],
+      "code": "def compare(self):\n    if self.phase != 'compare' or not (self.first and self.second):\n        return\n    self.result = self.first.pair_id == self.second.pair_id\n    self.turns += 1\n    self.phase = 'resolve'",
+      "codeLanguage": "python",
+      "file": "model.py"
+    },
+    {
+      "number": 13,
+      "type": "code",
+      "title": "結算：保留或蓋回",
+      "sub": "model.py · Game.settle",
+      "notes": [
+        "相同圖案標記已配對；不同圖案呼叫 hide()。",
+        "清空暫存參照後，牌仍由 Board 保存。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/memory/play/"
+      ],
+      "code": "def settle(self):\n    if self.phase != 'resolve' or not (self.first and self.second):\n        return\n    if self.result:\n        self.first.mark_matched()\n        self.second.mark_matched()\n        self.matches += 1\n    else:\n        self.first.hide()\n        self.second.hide()\n    self.first = self.second = None\n    self.result = None\n    self.phase = 'won' if self.board.complete else 'first'",
+      "codeLanguage": "python",
+      "file": "model.py"
+    },
+    {
+      "number": 14,
+      "type": "table",
+      "title": "成功範例：C01 與 C02",
+      "sub": "載入「配對成功」範例，依序選牌並按 N",
+      "notes": [
+        "選牌只是排入 pending。每次 N 才推進一個階段。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/memory/play/"
+      ],
+      "values": [
+        [
+          "操作",
+          "phase",
+          "可觀察結果"
+        ],
+        [
+          "選 C01，按 N",
+          "second",
+          "first → C01，face_up = True"
+        ],
+        [
+          "選 C02，按 N",
+          "compare",
+          "second → C02，兩張正面"
+        ],
+        [
+          "按 N：比較",
+          "resolve",
+          "result = True，turns = 1"
+        ],
+        [
+          "按 N：結算",
+          "first",
+          "matched = True，matches = 1"
+        ]
+      ]
+    },
+    {
+      "number": 15,
+      "type": "table",
+      "title": "失敗範例：C03 與 C04",
+      "sub": "載入「配對失敗」範例，比較 leaf 與 sun",
+      "notes": [
+        "蓋回後仍是原來的 Card，不會重新建立兩張牌。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/memory/play/"
+      ],
+      "values": [
+        [
+          "操作",
+          "phase",
+          "可觀察結果"
+        ],
+        [
+          "選 C03，N；選 C04，N",
+          "compare",
+          "leaf 與 sun 都是正面"
+        ],
+        [
+          "按 N：比較",
+          "resolve",
+          "result = False，turns = 1"
+        ],
+        [
+          "按 N：結算",
+          "first",
+          "兩張 face_up = False"
+        ],
+        [
+          "檢視 Board.cards",
+          "first",
+          "仍保存原物件，matches = 0"
+        ]
+      ]
+    },
+    {
+      "number": 16,
+      "type": "code",
+      "title": "參照、重設與物件身分",
+      "sub": "Python 的 is 檢查物件身分",
+      "notes": [
+        "新遊戲建立新的 Board 與 Card。",
+        "外部變數 card 仍能參照上一局的物件。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/memory/play/",
+        "https://docs.python.org/3.12/reference/expressions.html#is-not"
+      ],
+      "code": "game = Game(sample=True)\ngame.play('C01')\ncard = game.first\nprint(card is game.board.cards[0])  # True\n\nnew_game = Game(sample=True)\nprint(card is new_game.board.cards[0])  # False\nprint(card.face_up)                    # True",
+      "codeLanguage": "python",
+      "file": "model.py"
+    },
+    {
+      "number": 17,
+      "type": "code",
+      "title": "執行 Python 範例",
+      "sub": "Python 3.12+，不需安裝額外套件",
+      "notes": [
+        "在解壓縮後的 memory_oop 資料夾開啟終端機。",
+        "指令：pick C01、step、inspect C01、confirm、sample、quit。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/memory/play/"
+      ],
+      "code": "python main.py --lang zh --sample\npython -m unittest discover -s tests -v",
+      "codeLanguage": "text",
+      "file": "Terminal / PowerShell"
+    },
+    {
+      "number": 18,
+      "type": "refs",
+      "title": "練習與參考",
+      "sub": "從可觀察的狀態檢查程式規則",
+      "notes": [
+        "配對後呼叫 hide()，確認牌仍為正面。",
+        "先保留 card 參照再建立新遊戲，比較物件身分。",
+        "對照 TypeScript 與 Python：=== 用於網頁物件身分，is 用於 Python。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/memory/play/"
+      ],
+      "links": [
+        [
+          "Python · Classes",
+          "https://docs.python.org/3.12/tutorial/classes.html"
+        ],
+        [
+          "Python · Identity",
+          "https://docs.python.org/3.12/reference/expressions.html#is-not"
+        ]
+      ]
+    }
+  ],
+  "en": [
+    {
+      "number": 1,
+      "type": "cover",
+      "title": "Card matching & object state",
+      "sub": "Card · Board · Game",
+      "notes": [
+        "Each card is an object.",
+        "Step through state changes and references."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/en/memory/play/"
+      ],
+      "links": [
+        [
+          "Play in your browser",
+          "https://minhuangyuntech.github.io/oo2026/en/memory/play/"
+        ]
+      ]
+    },
+    {
+      "number": 2,
+      "type": "screenshot",
+      "title": "Browser game & object labels",
+      "sub": "12 cards, 6 pairs. Play directly in your browser.",
+      "notes": [
+        "Normal play: choose two cards, then confirm the turn.",
+        "Step mode: queue, reveal, compare, and settle."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/en/memory/play/"
+      ],
+      "links": [
+        [
+          "Play in your browser",
+          "https://minhuangyuntech.github.io/oo2026/en/memory/play/"
+        ]
+      ]
+    },
+    {
+      "number": 3,
+      "type": "table",
+      "title": "Play & inspection controls",
+      "sub": "Use a mouse, touch, or keyboard",
+      "notes": [
+        "Switching languages preserves the board and progress. Reloading starts a new game."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/en/memory/play/"
+      ],
+      "values": [
+        [
+          "Control",
+          "Result"
+        ],
+        [
+          "Normal play",
+          "Choose two cards; confirm the turn"
+        ],
+        [
+          "Step mode / N",
+          "Reveal, compare, and settle separately"
+        ],
+        [
+          "L / Object labels",
+          "Toggle labels such as C01: Card"
+        ],
+        [
+          "Object inspector",
+          "Inspect a card without revealing it"
+        ],
+        [
+          "Fixed examples",
+          "Create a new game in step mode"
+        ],
+        [
+          "New game / shuffle",
+          "Create new objects and a shuffled board"
+        ]
+      ]
+    },
+    {
+      "number": 4,
+      "type": "table",
+      "title": "Three class responsibilities",
+      "sub": "Keep data and behavior in the responsible object",
+      "notes": [
+        "The view reads model state. Buttons call model methods."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/en/memory/play/",
+        "https://docs.python.org/3.12/tutorial/classes.html"
+      ],
+      "values": [
+        [
+          "Class",
+          "Data",
+          "Responsibility"
+        ],
+        [
+          "Card",
+          "name, pair_id, face_up, matched",
+          "Reveal, hide, mark matched"
+        ],
+        [
+          "Board",
+          "cards",
+          "Create and find 12 cards"
+        ],
+        [
+          "Game",
+          "first, second, pending, phase",
+          "Coordinate selection and turns"
+        ]
+      ]
+    },
+    {
+      "number": 5,
+      "type": "classes",
+      "title": "UML class diagram",
+      "sub": "Name, attributes, methods. Arrows show navigable associations.",
+      "notes": [
+        "One Game has one Board. The Board holds 12 Cards.",
+        "first, second, and pending each refer to zero or one Card."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/en/memory/play/"
+      ]
+    },
+    {
+      "number": 6,
+      "type": "objects",
+      "title": "Equal pictures, distinct objects",
+      "sub": "Fixed board: C01 and C02 both have pair_id = moon",
+      "notes": [
+        "C01 and C02 are separate instances with independent face_up values.",
+        "Game.first and Board.cards[0] can refer to the same card."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/en/memory/play/",
+        "https://docs.python.org/3.12/reference/expressions.html#is-not"
+      ]
+    },
+    {
+      "number": 7,
+      "type": "table",
+      "title": "Three Card states",
+      "sub": "Two Boolean attributes describe the visible state",
+      "notes": [
+        "A matched card stays face up. hide() leaves it unchanged."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/en/memory/play/"
+      ],
+      "values": [
+        [
+          "Visible state",
+          "face_up",
+          "matched"
+        ],
+        [
+          "Face down",
+          "False",
+          "False"
+        ],
+        [
+          "Revealed, not yet matched",
+          "True",
+          "False"
+        ],
+        [
+          "Matched, stays face up",
+          "True",
+          "True"
+        ]
+      ]
+    },
+    {
+      "number": 8,
+      "type": "code",
+      "title": "Card: data and reveal behavior",
+      "sub": "model.py · Card",
+      "notes": [
+        "reveal() rejects cards that are already face up or matched.",
+        "Attributes are writable here. The game uses methods to maintain its rules."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/en/memory/play/",
+        "https://docs.python.org/3.12/tutorial/classes.html"
+      ],
+      "code": "class Card:\n    def __init__(self, name, pair_id):\n        self.name = name\n        self.pair_id = pair_id\n        self.face_up = False\n        self.matched = False\n\n    def reveal(self):\n        if self.face_up or self.matched:\n            return False\n        self.face_up = True\n        return True",
+      "codeLanguage": "python",
+      "file": "model.py"
+    },
+    {
+      "number": 9,
+      "type": "code",
+      "title": "Board: create and keep cards",
+      "sub": "model.py · Board.__init__",
+      "notes": [
+        "Each Card(...) call creates a new instance.",
+        "sample=True keeps the fixed order. Normal games shuffle."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/en/memory/play/",
+        "https://docs.python.org/3.12/tutorial/classes.html"
+      ],
+      "code": "def __init__(self, sample=False):\n    pairs = SAMPLE.copy()\n    if not sample:\n        shuffle(pairs)\n    self.cards = [Card(f'C{i+1:02}', pair)\n                  for i, pair in enumerate(pairs)]",
+      "codeLanguage": "python",
+      "file": "model.py"
+    },
+    {
+      "number": 10,
+      "type": "code",
+      "title": "Selection: a pending reference",
+      "sub": "model.py · Game.queue",
+      "notes": [
+        "Queuing does not change face_up. The next step reveals it.",
+        "A revealed card cannot also be selected as the second card."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/en/memory/play/"
+      ],
+      "code": "def queue(self, name):\n    if self.phase not in ('first', 'second') or self.pending:\n        return False\n    card = self.board.get(name)\n    if card is None or card.face_up or card.matched:\n        return False\n    self.pending = card\n    return True",
+      "codeLanguage": "python",
+      "file": "model.py"
+    },
+    {
+      "number": 11,
+      "type": "code",
+      "title": "One step: reveal the queued card",
+      "sub": "Reveal branch of Game.step(); other branches call compare() and settle()",
+      "notes": [
+        "first and second hold references to existing Cards.",
+        "Each step() completes only one stage."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/en/memory/play/"
+      ],
+      "code": "def step(self):\n    if self.pending and self.phase in ('first', 'second'):\n        card = self.pending\n        self.pending = None\n        card.reveal()\n        if self.phase == 'first':\n            self.first = card\n            self.phase = 'second'\n        else:\n            self.second = card\n            self.phase = 'compare'\n        return True",
+      "codeLanguage": "python",
+      "file": "model.py"
+    },
+    {
+      "number": 12,
+      "type": "code",
+      "title": "Comparison: check pair_id",
+      "sub": "model.py · Game.compare",
+      "notes": [
+        "Compare picture values and count one comparison.",
+        "matched is still False until the settlement step."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/en/memory/play/"
+      ],
+      "code": "def compare(self):\n    if self.phase != 'compare' or not (self.first and self.second):\n        return\n    self.result = self.first.pair_id == self.second.pair_id\n    self.turns += 1\n    self.phase = 'resolve'",
+      "codeLanguage": "python",
+      "file": "model.py"
+    },
+    {
+      "number": 13,
+      "type": "code",
+      "title": "Settlement: keep or hide",
+      "sub": "model.py · Game.settle",
+      "notes": [
+        "Equal pictures are marked matched; different ones are hidden.",
+        "Temporary references are cleared. Board still holds the cards."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/en/memory/play/"
+      ],
+      "code": "def settle(self):\n    if self.phase != 'resolve' or not (self.first and self.second):\n        return\n    if self.result:\n        self.first.mark_matched()\n        self.second.mark_matched()\n        self.matches += 1\n    else:\n        self.first.hide()\n        self.second.hide()\n    self.first = self.second = None\n    self.result = None\n    self.phase = 'won' if self.board.complete else 'first'",
+      "codeLanguage": "python",
+      "file": "model.py"
+    },
+    {
+      "number": 14,
+      "type": "table",
+      "title": "Match example: C01 and C02",
+      "sub": "Load the Match example, select cards, and use N",
+      "notes": [
+        "Selecting a card only queues it. Each N advances one stage."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/en/memory/play/"
+      ],
+      "values": [
+        [
+          "Action",
+          "phase",
+          "Observation"
+        ],
+        [
+          "Choose C01, press N",
+          "second",
+          "first → C01; face_up = True"
+        ],
+        [
+          "Choose C02, press N",
+          "compare",
+          "second → C02; both face up"
+        ],
+        [
+          "N: compare",
+          "resolve",
+          "result = True; turns = 1"
+        ],
+        [
+          "N: settle",
+          "first",
+          "matched = True; matches = 1"
+        ]
+      ]
+    },
+    {
+      "number": 15,
+      "type": "table",
+      "title": "Mismatch example: C03 and C04",
+      "sub": "Load the Mismatch example: leaf versus sun",
+      "notes": [
+        "Hiding changes the existing Cards. It does not create replacements."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/en/memory/play/"
+      ],
+      "values": [
+        [
+          "Action",
+          "phase",
+          "Observation"
+        ],
+        [
+          "C03, N; then C04, N",
+          "compare",
+          "leaf and sun are face up"
+        ],
+        [
+          "N: compare",
+          "resolve",
+          "result = False; turns = 1"
+        ],
+        [
+          "N: settle",
+          "first",
+          "Both face_up = False"
+        ],
+        [
+          "Inspect Board.cards",
+          "first",
+          "Same objects; matches = 0"
+        ]
+      ]
+    },
+    {
+      "number": 16,
+      "type": "code",
+      "title": "References, reset & identity",
+      "sub": "Python is tests object identity",
+      "notes": [
+        "A new game creates a new Board and new Cards.",
+        "The variable card can still refer to an object from the old game."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/en/memory/play/",
+        "https://docs.python.org/3.12/reference/expressions.html#is-not"
+      ],
+      "code": "game = Game(sample=True)\ngame.play('C01')\ncard = game.first\nprint(card is game.board.cards[0])  # True\n\nnew_game = Game(sample=True)\nprint(card is new_game.board.cards[0])  # False\nprint(card.face_up)                    # True",
+      "codeLanguage": "python",
+      "file": "model.py"
+    },
+    {
+      "number": 17,
+      "type": "code",
+      "title": "Run the Python example",
+      "sub": "Python 3.12+, with no additional packages",
+      "notes": [
+        "Open a terminal in the extracted memory_oop folder.",
+        "Commands: pick C01, step, inspect C01, confirm, sample, quit."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/en/memory/play/"
+      ],
+      "code": "python main.py --lang en --sample\npython -m unittest discover -s tests -v",
+      "codeLanguage": "text",
+      "file": "Terminal / PowerShell"
+    },
+    {
+      "number": 18,
+      "type": "refs",
+      "title": "Exercises & references",
+      "sub": "Check rules through observable state",
+      "notes": [
+        "Call hide() after matching. The card should stay face up.",
+        "Keep a card reference, start a new game, and compare identities.",
+        "Compare languages: === checks object identity in the web version; Python uses is."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/en/memory/play/"
+      ],
+      "links": [
+        [
+          "Python · Classes",
+          "https://docs.python.org/3.12/tutorial/classes.html"
+        ],
+        [
+          "Python · Identity",
+          "https://docs.python.org/3.12/reference/expressions.html#is-not"
+        ]
+      ]
+    }
+  ],
+  "ja": [
+    {
+      "number": 1,
+      "type": "cover",
+      "title": "神経衰弱とオブジェクトの状態",
+      "sub": "Card · Board · Game",
+      "notes": [
+        "一枚のカードが一つのオブジェクト。",
+        "状態と参照を一歩ずつ観察します。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/ja/memory/play/"
+      ],
+      "links": [
+        [
+          "ブラウザーで遊ぶ",
+          "https://minhuangyuntech.github.io/oo2026/ja/memory/play/"
+        ]
+      ]
+    },
+    {
+      "number": 2,
+      "type": "screenshot",
+      "title": "ブラウザー版とオブジェクト名",
+      "sub": "12 枚、6 ペア。ブラウザーですぐ遊べます。",
+      "notes": [
+        "通常プレイ：二枚選んで手番を確定します。",
+        "コマ送り：めくる・比較・確定を一段階ずつ観察。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/ja/memory/play/"
+      ],
+      "links": [
+        [
+          "ブラウザーで遊ぶ",
+          "https://minhuangyuntech.github.io/oo2026/ja/memory/play/"
+        ]
+      ]
+    },
+    {
+      "number": 3,
+      "type": "table",
+      "title": "プレイと観察の操作",
+      "sub": "マウス・タッチ・キーボードに対応",
+      "notes": [
+        "言語を切り替えても盤面と進行は維持。再読み込みで新しいゲームになります。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/ja/memory/play/"
+      ],
+      "values": [
+        [
+          "操作",
+          "結果"
+        ],
+        [
+          "通常プレイ",
+          "二枚選び、手番を確定"
+        ],
+        [
+          "コマ送り / N",
+          "めくる・比較・確定を一段階ずつ"
+        ],
+        [
+          "L / オブジェクト名",
+          "C01: Card などの名前を切替"
+        ],
+        [
+          "観察用の選択欄",
+          "めくらずに対象だけを選択"
+        ],
+        [
+          "固定の観察例",
+          "新しいゲームをコマ送りで作成"
+        ],
+        [
+          "新しいゲーム",
+          "新しい実体とランダムな盤面を作成"
+        ]
+      ]
+    },
+    {
+      "number": 4,
+      "type": "table",
+      "title": "三つのクラスの責任",
+      "sub": "担当するオブジェクトにデータと処理をまとめる",
+      "notes": [
+        "画面はモデルの状態を読み、ボタンはメソッドを呼びます。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/ja/memory/play/",
+        "https://docs.python.org/3.12/tutorial/classes.html"
+      ],
+      "values": [
+        [
+          "クラス",
+          "データ",
+          "責任"
+        ],
+        [
+          "Card",
+          "name, pair_id, face_up, matched",
+          "めくる・裏返す・一致済みにする"
+        ],
+        [
+          "Board",
+          "cards",
+          "12 枚の生成と検索"
+        ],
+        [
+          "Game",
+          "first, second, pending, phase",
+          "選択・比較・確定を管理"
+        ]
+      ]
+    },
+    {
+      "number": 5,
+      "type": "classes",
+      "title": "UML クラス図",
+      "sub": "名前・属性・メソッドの三段。矢印は参照可能な関連。",
+      "notes": [
+        "一つの Game が一つの Board を持ち、Board は 12 枚を保持。",
+        "first・second・pending は、それぞれ 0 または 1 枚を参照。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/ja/memory/play/"
+      ]
+    },
+    {
+      "number": 6,
+      "type": "objects",
+      "title": "同じ絵、異なるオブジェクト",
+      "sub": "固定の盤面：C01 と C02 の pair_id は moon",
+      "notes": [
+        "C01 と C02 は別の実体。face_up は個別に変わります。",
+        "Game.first と Board.cards[0] は同じカードを参照できます。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/ja/memory/play/",
+        "https://docs.python.org/3.12/reference/expressions.html#is-not"
+      ]
+    },
+    {
+      "number": 7,
+      "type": "table",
+      "title": "Card の三つの状態",
+      "sub": "二つの真偽値で表示状態を表す",
+      "notes": [
+        "一致済みのカードは表のまま。hide() でも裏に戻りません。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/ja/memory/play/"
+      ],
+      "values": [
+        [
+          "表示状態",
+          "face_up",
+          "matched"
+        ],
+        [
+          "裏向き",
+          "False",
+          "False"
+        ],
+        [
+          "表向き、未確定",
+          "True",
+          "False"
+        ],
+        [
+          "一致済み、表のまま",
+          "True",
+          "True"
+        ]
+      ]
+    },
+    {
+      "number": 8,
+      "type": "code",
+      "title": "Card：データとめくる動作",
+      "sub": "model.py · Card",
+      "notes": [
+        "表向き・一致済みのカードは reveal() で再度めくれません。",
+        "属性は直接変更可能ですが、ゲームはメソッドを通してルールを守ります。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/ja/memory/play/",
+        "https://docs.python.org/3.12/tutorial/classes.html"
+      ],
+      "code": "class Card:\n    def __init__(self, name, pair_id):\n        self.name = name\n        self.pair_id = pair_id\n        self.face_up = False\n        self.matched = False\n\n    def reveal(self):\n        if self.face_up or self.matched:\n            return False\n        self.face_up = True\n        return True",
+      "codeLanguage": "python",
+      "file": "model.py"
+    },
+    {
+      "number": 9,
+      "type": "code",
+      "title": "Board：カードの生成と保持",
+      "sub": "model.py · Board.__init__",
+      "notes": [
+        "Card(...) を呼ぶたび、新しい実体を生成します。",
+        "sample=True は固定順。通常のゲームではシャッフルします。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/ja/memory/play/",
+        "https://docs.python.org/3.12/tutorial/classes.html"
+      ],
+      "code": "def __init__(self, sample=False):\n    pairs = SAMPLE.copy()\n    if not sample:\n        shuffle(pairs)\n    self.cards = [Card(f'C{i+1:02}', pair)\n                  for i, pair in enumerate(pairs)]",
+      "codeLanguage": "python",
+      "file": "model.py"
+    },
+    {
+      "number": 10,
+      "type": "code",
+      "title": "選択：pending に参照を保存",
+      "sub": "model.py · Game.queue",
+      "notes": [
+        "選択だけでは face_up は変わらず、次のステップでめくります。",
+        "表向きの同じカードを二枚目として選ぶことはできません。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/ja/memory/play/"
+      ],
+      "code": "def queue(self, name):\n    if self.phase not in ('first', 'second') or self.pending:\n        return False\n    card = self.board.get(name)\n    if card is None or card.face_up or card.matched:\n        return False\n    self.pending = card\n    return True",
+      "codeLanguage": "python",
+      "file": "model.py"
+    },
+    {
+      "number": 11,
+      "type": "code",
+      "title": "一歩進む：待機中のカードをめくる",
+      "sub": "Game.step() のめくる分岐。他の分岐は compare() と settle() を呼ぶ",
+      "notes": [
+        "first・second は既存の Card への参照です。",
+        "一回の step() で一段階だけ進みます。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/ja/memory/play/"
+      ],
+      "code": "def step(self):\n    if self.pending and self.phase in ('first', 'second'):\n        card = self.pending\n        self.pending = None\n        card.reveal()\n        if self.phase == 'first':\n            self.first = card\n            self.phase = 'second'\n        else:\n            self.second = card\n            self.phase = 'compare'\n        return True",
+      "codeLanguage": "python",
+      "file": "model.py"
+    },
+    {
+      "number": 12,
+      "type": "code",
+      "title": "比較：pair_id の一致",
+      "sub": "model.py · Game.compare",
+      "notes": [
+        "絵の値を比較して、比較回数を 1 増やします。",
+        "確定するまで matched は False のままです。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/ja/memory/play/"
+      ],
+      "code": "def compare(self):\n    if self.phase != 'compare' or not (self.first and self.second):\n        return\n    self.result = self.first.pair_id == self.second.pair_id\n    self.turns += 1\n    self.phase = 'resolve'",
+      "codeLanguage": "python",
+      "file": "model.py"
+    },
+    {
+      "number": 13,
+      "type": "code",
+      "title": "確定：表のまま残すか裏返す",
+      "sub": "model.py · Game.settle",
+      "notes": [
+        "同じ絵は一致済みに、違う絵は hide() で裏返します。",
+        "一時参照を消しても、Board がカードを保持しています。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/ja/memory/play/"
+      ],
+      "code": "def settle(self):\n    if self.phase != 'resolve' or not (self.first and self.second):\n        return\n    if self.result:\n        self.first.mark_matched()\n        self.second.mark_matched()\n        self.matches += 1\n    else:\n        self.first.hide()\n        self.second.hide()\n    self.first = self.second = None\n    self.result = None\n    self.phase = 'won' if self.board.complete else 'first'",
+      "codeLanguage": "python",
+      "file": "model.py"
+    },
+    {
+      "number": 14,
+      "type": "table",
+      "title": "一致の例：C01 と C02",
+      "sub": "「一致」の例を読み込み、選択と N で進める",
+      "notes": [
+        "選択は待機させるだけ。N を押すたび一段階進みます。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/ja/memory/play/"
+      ],
+      "values": [
+        [
+          "操作",
+          "phase",
+          "観察結果"
+        ],
+        [
+          "C01 を選び N",
+          "second",
+          "first → C01、face_up = True"
+        ],
+        [
+          "C02 を選び N",
+          "compare",
+          "second → C02、二枚が表向き"
+        ],
+        [
+          "N：比較",
+          "resolve",
+          "result = True、turns = 1"
+        ],
+        [
+          "N：確定",
+          "first",
+          "matched = True、matches = 1"
+        ]
+      ]
+    },
+    {
+      "number": 15,
+      "type": "table",
+      "title": "不一致の例：C03 と C04",
+      "sub": "「不一致」の例を読み込み、leaf と sun を比較",
+      "notes": [
+        "裏返すのは元の Card。新しいカードは作りません。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/ja/memory/play/"
+      ],
+      "values": [
+        [
+          "操作",
+          "phase",
+          "観察結果"
+        ],
+        [
+          "C03、N；C04、N",
+          "compare",
+          "leaf と sun が表向き"
+        ],
+        [
+          "N：比較",
+          "resolve",
+          "result = False、turns = 1"
+        ],
+        [
+          "N：確定",
+          "first",
+          "両方の face_up = False"
+        ],
+        [
+          "Board.cards を確認",
+          "first",
+          "元の実体を保持、matches = 0"
+        ]
+      ]
+    },
+    {
+      "number": 16,
+      "type": "code",
+      "title": "参照・リセット・同一性",
+      "sub": "Python の is でオブジェクトの同一性を確認",
+      "notes": [
+        "新しいゲームは Board と Card を新しく生成します。",
+        "変数 card は前のゲームの実体を引き続き参照できます。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/ja/memory/play/",
+        "https://docs.python.org/3.12/reference/expressions.html#is-not"
+      ],
+      "code": "game = Game(sample=True)\ngame.play('C01')\ncard = game.first\nprint(card is game.board.cards[0])  # True\n\nnew_game = Game(sample=True)\nprint(card is new_game.board.cards[0])  # False\nprint(card.face_up)                    # True",
+      "codeLanguage": "python",
+      "file": "model.py"
+    },
+    {
+      "number": 17,
+      "type": "code",
+      "title": "Python サンプルの実行",
+      "sub": "Python 3.12 以降。追加パッケージ不要。",
+      "notes": [
+        "展開した memory_oop フォルダーでターミナルを開きます。",
+        "コマンド：pick C01、step、inspect C01、confirm、sample、quit。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/ja/memory/play/"
+      ],
+      "code": "python main.py --lang ja --sample\npython -m unittest discover -s tests -v",
+      "codeLanguage": "text",
+      "file": "Terminal / PowerShell"
+    },
+    {
+      "number": 18,
+      "type": "refs",
+      "title": "演習と参考資料",
+      "sub": "観察できる状態でルールを確認",
+      "notes": [
+        "一致後に hide() を呼び、表のままであることを確認。",
+        "card の参照を残して新しいゲームを作り、同一性を比較。",
+        "ウェブ版のオブジェクト同一性は ===、Python は is で確認します。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/ja/memory/play/"
+      ],
+      "links": [
+        [
+          "Python · Classes",
+          "https://docs.python.org/3.12/tutorial/classes.html"
+        ],
+        [
+          "Python · Identity",
+          "https://docs.python.org/3.12/reference/expressions.html#is-not"
+        ]
+      ]
+    }
+  ]
+}

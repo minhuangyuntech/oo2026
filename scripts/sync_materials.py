@@ -50,12 +50,14 @@ for lang in ['en','ja']:
         slide['body'] = [({'type':'table','rows':[row.split(' | ') for row in b[1:].split('\n')]} if b.startswith('|') else {'type':'text','text':b}) for b in t['body']]
     lessons[lang+'-4'] = {'source':SOURCE['zh-4']['file'], 'slides':slides}
 
+from sync_memory import sync_memory
 from sync_pygame import sync_pygame
 from sync_django import sync_django
 from sync_additional import sync_additional
 sync_additional(lessons, Path(sys.argv[1]) if len(sys.argv)>1 else None)
 sync_django(lessons, Path(sys.argv[1]) if len(sys.argv)>1 else None)
 sync_pygame(lessons, Path(sys.argv[1]) if len(sys.argv)>1 else None)
+sync_memory(lessons, Path(sys.argv[1]) if len(sys.argv)>1 else None)
 (ROOT/'content/lessons.json').write_text(json.dumps(lessons,ensure_ascii=False,separators=(',',':')),encoding='utf-8')
 if len(sys.argv)>1:
     folder = Path(sys.argv[1])

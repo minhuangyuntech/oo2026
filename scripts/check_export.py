@@ -35,7 +35,7 @@ class Page(HTMLParser):
 
 pages = {('/'+str(file.relative_to(OUT)).replace('\\','/').removesuffix('index.html')):Page(file) for file in OUT.rglob('index.html')}
 lessons=json.loads((ROOT/"content/lessons.json").read_text(encoding="utf-8"))
-units=[1,2,3,4,5,6,"gui","django","pygame"]
+units=[1,2,3,4,5,6,"gui","django","pygame","memory"]
 for locale, prefix, html_lang in [('zh','','zh-Hant'),('en','/en','en'),('ja','/ja','ja')]:
     home=pages[prefix+'/']
     assert home.lang == html_lang
@@ -81,7 +81,28 @@ for locale, prefix, html_lang in [('zh','','zh-Hant'),('en','/en','en'),('ja','/
     html = (OUT / route.lstrip('/') / 'index.html').read_text(encoding='utf-8')
     assert 'rel="canonical" href="https://minhuangyuntech.github.io' + BASE + route + '"' in html
 
-manifest=[source for name in ['source-manifest.json','additional-source-manifest.json','django-source-manifest.json','pygame-source-manifest.json'] for source in json.loads((ROOT/'content'/name).read_text(encoding='utf-8'))]
+for locale, prefix, html_lang in [('zh','','zh-Hant'),('en','/en','en'),('ja','/ja','ja')]:
+    route=prefix+'/memory/play/'
+    page=pages[route]
+    assert page.lang==html_lang and page.headings==1,route
+    assert {'memory-main','memory-board','memory-select'}<=page.ids,route
+    assert BASE+route in pages[prefix+'/'].links,(route,'missing home entry')
+    assert BASE+route in pages[prefix+'/memory/'].links,(route,'missing lesson entry')
+    assert BASE+prefix+'/memory/' in page.links,(route,'missing lesson return')
+    for url in page.links+page.assets:
+        parsed=urlsplit(url)
+        if parsed.scheme or parsed.netloc:continue
+        if not parsed.path:
+            assert unquote(parsed.fragment) in page.ids,(route,url)
+            continue
+        assert parsed.path.startswith(BASE+'/'),(route,'missing basePath',url)
+        target=OUT/unquote(parsed.path[len(BASE):]).lstrip('/')
+        if target.is_dir():target=target/'index.html'
+        assert target.exists(),(route,'missing file',url)
+    html=(OUT/route.lstrip('/')/'index.html').read_text(encoding='utf-8')
+    assert 'rel="canonical" href="https://minhuangyuntech.github.io'+BASE+route+'"' in html
+
+manifest=[source for name in ['source-manifest.json','additional-source-manifest.json','django-source-manifest.json','pygame-source-manifest.json','memory-source-manifest.json'] for source in json.loads((ROOT/'content'/name).read_text(encoding='utf-8'))]
 for source in manifest:
     file=ROOT/'public/materials'/source['download']
     assert hashlib.sha256(file.read_bytes()).hexdigest()==source['sha256'],source['source']
@@ -117,7 +138,7 @@ for source_key,deck in additional.items():
             ast.parse(code)
             codes+=1
 for lang in ['zh','en','ja']:
-    for unit in [5,6,'gui','django','pygame']:
+    for unit in [5,6,'gui','django','pygame','memory']:
         lesson=lessons[f'{lang}-{unit}']
         route=('' if lang=='zh' else '/'+lang)+(f'/{unit}/' if isinstance(unit,str) else f'/week/{unit}/')
         for name in [lesson['download'],lesson['examples']]:assert f'{BASE}/materials/{name}' in pages[route].links
@@ -157,5 +178,31 @@ for lang,deck in pygame_raw.items():
         assert [b['text'] for b in slide['body'] if b['type']=='text'][1:1+len(source['notes'])]==source['notes']
         if slide.get('code') and slide['codeLanguage']=='python':
             ast.parse(slide['code']);codes+=1
+memory_raw=json.loads((ROOT/'content/memory-slides.json').read_text(encoding='utf-8'))
+for lang,deck in memory_raw.items():
+    lesson=lessons[f'{lang}-memory']
+    assert len(lesson['slides'])==18
+    assert sum(bool(s.get('image')) for s in lesson['slides'])==3
+    prefix='' if lang=='zh' else '/'+lang
+    game_url='https://minhuangyuntech.github.io'+BASE+prefix+'/memory/play/'
+    assert game_url in pages[prefix+'/memory/'].links
+    with zipfile.ZipFile(ROOT/'public/materials'/lesson['download']) as pptx:
+        assert len([n for n in pptx.namelist() if re.fullmatch(r'ppt/slides/slide\d+\.xml',n)])==18
+        for number in [1,2]:assert game_url in pptx.read(f'ppt/slides/_rels/slide{number}.xml.rels').decode('utf-8')
+    for source,slide in zip(deck,lesson['slides']):
+        assert slide['title']==source['title']
+        assert slide.get('code')==source.get('code')
+        assert [b['text'] for b in slide['body'] if b['type']=='text'][1:1+len(source['notes'])]==source['notes']
+        if 'values' in source:assert next(b['rows'] for b in slide['body'] if b['type']=='table')==source['values']
+        if slide.get('code') and slide['codeLanguage']=='python':
+            ast.parse(slide['code']);codes+=1
+with zipfile.ZipFile(ROOT/'public/materials/memory-oop-trilingual.zip') as examples:
+    assert examples.read('memory_oop/browser/engine.ts')==(ROOT/'app/memory/engine.ts').read_bytes()
+    for lang in ['zh','en','ja']:
+        html=examples.read(f'memory_oop/docs/lesson-{lang}.html').decode('utf-8')
+        assert len(re.findall(r'<section id="slide-',html))==18
+    for name in examples.namelist():
+        assert '__pycache__' not in name and not name.endswith('.pyc')
+        if name.endswith('.py'):ast.parse(examples.read(name).decode('utf-8'))
 topics=sum(len(lesson['slides']) for lesson in lessons.values())
-print(f'PASS: 3 homepages, 27 localized lessons ({topics} topics), 3 playable game pages, 12 preserved later weeks, links/assets/anchors, 18 deck checksums, and {codes} Python excerpts.')
+print(f'PASS: 3 homepages, 30 localized lessons ({topics} topics), 6 playable game pages, 12 preserved later weeks, links/assets/anchors, 21 deck checksums, and {codes} Python excerpts.')

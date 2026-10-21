@@ -4,7 +4,9 @@ import {extraInfo,extraRanges,extraChapters,guiInfo,guiRanges,guiChapters} from 
 export {guiInfo,guiRanges,guiChapters};
 import {pygameInfo,pygameRanges,pygameChapters} from "./pygame-data";
 export {pygameInfo,pygameRanges,pygameChapters};
-export type UnitId = number | "gui" | "django" | "pygame";
+import {memoryInfo,memoryRanges,memoryChapters} from "./memory-data";
+export {memoryInfo,memoryRanges,memoryChapters};
+export type UnitId = number | "gui" | "django" | "pygame" | "memory";
 export type Language = "zh" | "en" | "ja";
 export type BodyBlock = { type: string; text?: string; rows?: string[][] };
 export type Snippet = {code:string;language:string;label?:string|null};
@@ -87,11 +89,12 @@ export function weekLabel(lang: Language, week: UnitId) {
   if(week==="gui")return "GUI";
   if(week==="django")return "Django";
   if(week==="pygame")return "Pygame";
+  if(week==="memory")return {zh:"翻牌配對",en:"Card matching",ja:"神経衰弱"}[lang];
   return `${ui[lang].week} ${String(week).padStart(2,"0")} ${ui[lang].weekSuffix}`.trim();
 }
 
 for(const lang of locales){weekInfo[lang].push(...extraInfo[lang]);chapterNames[lang].push(...extraChapters[lang]);}
 chapterRanges.push(...extraRanges);
-export function unitInfo(lang:Language,unit:UnitId){return unit==="pygame"?pygameInfo[lang]:unit==="django"?djangoInfo[lang]:unit==="gui"?guiInfo[lang]:weekInfo[lang][unit-1];}
-export function unitRanges(unit:UnitId){return unit==="pygame"?pygameRanges:unit==="django"?djangoRanges:unit==="gui"?guiRanges:chapterRanges[unit-1];}
-export function unitChapters(lang:Language,unit:UnitId){return unit==="pygame"?pygameChapters[lang]:unit==="django"?djangoChapters[lang]:unit==="gui"?guiChapters[lang]:chapterNames[lang][unit-1];}
+export function unitInfo(lang:Language,unit:UnitId){return unit==="memory"?memoryInfo[lang]:unit==="pygame"?pygameInfo[lang]:unit==="django"?djangoInfo[lang]:unit==="gui"?guiInfo[lang]:weekInfo[lang][unit-1];}
+export function unitRanges(unit:UnitId){return unit==="memory"?memoryRanges:unit==="pygame"?pygameRanges:unit==="django"?djangoRanges:unit==="gui"?guiRanges:chapterRanges[unit-1];}
+export function unitChapters(lang:Language,unit:UnitId){return unit==="memory"?memoryChapters[lang]:unit==="pygame"?pygameChapters[lang]:unit==="django"?djangoChapters[lang]:unit==="gui"?guiChapters[lang]:chapterNames[lang][unit-1];}

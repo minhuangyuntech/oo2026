@@ -10,7 +10,7 @@
     "build": "next build",
     "start": "next start",
     "test": "npm run build",
-    "test:game": "node --experimental-strip-types --test tests/shooter.test.mjs",
+    "test:game": "node --experimental-strip-types --test tests/shooter.test.mjs tests/memory.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate"
   },

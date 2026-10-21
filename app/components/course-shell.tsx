@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { basePath, coursePath, languageNames, locales, ui, weekInfo, weekLabel, guiInfo, djangoInfo, pygameInfo, type UnitId, type Language } from "../data";
+import { basePath, coursePath, languageNames, locales, ui, weekInfo, weekLabel, guiInfo, djangoInfo, pygameInfo, memoryInfo, type UnitId, type Language } from "../data";
 
 export default function CourseShell({lang,week,children}:{lang:Language;week?:UnitId;children:React.ReactNode}) {
   const t=ui[lang];
@@ -25,6 +25,7 @@ export default function CourseShell({lang,week,children}:{lang:Language;week?:Un
         <Link className={`nav-week ${week==="gui"?"active":""}`} href={coursePath(lang,"gui")} aria-current={week==="gui"?"page":undefined}><span className="nav-number">GUI</span><span><small>{guiInfo[lang].tag}</small><b>{guiInfo[lang].title}</b></span></Link>
         <Link className={`nav-week ${week==="django"?"active":""}`} href={coursePath(lang,"django")} aria-current={week==="django"?"page":undefined}><span className="nav-number">WEB</span><span><small>{djangoInfo[lang].tag}</small><b>{djangoInfo[lang].title}</b></span></Link>
         <Link className={`nav-week ${week==="pygame"?"active":""}`} href={coursePath(lang,"pygame")} aria-current={week==="pygame"?"page":undefined}><span className="nav-number">OOP</span><span><small>{pygameInfo[lang].tag}</small><b>{pygameInfo[lang].title}</b></span></Link>
+        <Link className={`nav-week ${week==="memory"?"active":""}`} href={coursePath(lang,"memory")} aria-current={week==="memory"?"page":undefined}><span className="nav-number">PAIR</span><span><small>{memoryInfo[lang].tag}</small><b>{memoryInfo[lang].title}</b></span></Link>
         <Link className="later-link" href={`${coursePath(lang)}#full-outline`}>{t.allWeeks}<span aria-hidden="true">↗</span></Link>
       </nav>
       <div className="sidebar-bottom"><span className="semester-dot"/>{t.term}<p>{t.school}<br/>{t.instructor}</p><a href="https://eclass.yuntech.edu.tw/" target="_blank" rel="noreferrer">eClass <span aria-hidden="true">↗</span></a></div>

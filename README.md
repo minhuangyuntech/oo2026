@@ -2,7 +2,7 @@
 
 以 Python 為主要實作語言的 18 週物件導向程式設計教材網站。
 
-第 1–6 週、GUI 入門、Django 網站入門與 Pygame 射擊遊戲已依最新版投影片同步，提供繁體中文、英文與日文完整網頁教材，共 334 個原始投影片主題、1002 個語言版本主題。第 7–18 週保留原有中文教材與網址。
+第 1–6 週、GUI 入門、Django 網站入門、Pygame 射擊遊戲與翻牌配對已依最新版投影片同步，提供繁體中文、英文與日文完整網頁教材，共 352 個原始投影片主題、1056 個語言版本主題。第 7–18 週保留原有中文教材與網址。
 
 - 中文：`/`、`/week/1/` 至 `/week/6/`、`/gui/`、`/django/`
 - 英文：`/en/`、`/en/week/1/` 至 `/en/week/6/`、`/en/gui/`、`/en/django/`
@@ -22,12 +22,13 @@
 | GUI | 五種常見做法・學生版 v2 | 中文 32 頁；五個工具家族與六個可執行範例 |
 | Django | 網站建立與專案檔案解析；中文 v3、英文 v2、日文 v3 | 各語言 53 頁，含對應語言的商品目錄專案 |
 | Pygame | 射擊遊戲、類別與物件觀察 | 中、英、日各 33 頁；第 31–33 頁為線上版連結、操作與暫停範例 |
+| 翻牌配對 | Card、Board、Game 的狀態與參照 | 中、英、日各 18 頁，含線上遊戲、類別圖、物件圖、單步範例與 Python 程式碼 |
 
 `content/source-manifest.json` 記錄完整原始檔名、下載檔名、頁數與 SHA-256。第 1–3 週英日文取自既有翻譯投影片，第 4 週翻譯位於 `content/week4-translations.json`。程式碼保留來源縮排，投影片片段不一律視為可獨立執行的程式。
 
 `content/slide-sources.json` 是原始投影片可見文字、表格與程式碼的結構化擷取；`scripts/sync_materials.py` 將其轉為 `content/lessons.json`。第 4 週四張機制示意圖重製為有文字內容、可縮放的網頁流程圖。
 
-`public/materials/` 提供 18 份原始 PPTX，以及第 3、4、5–6 週、GUI、Django 和 Pygame 的八個範例 ZIP。第 4 週 ZIP 另加入 `django_product_demo.py` 和三語操作說明，對應最新投影片 47–50 頁；原本的 `slide_XX.py` 檔名保留舊版頁碼，下載包已說明差異。
+`public/materials/` 提供 21 份 PPTX，以及第 3、4、5–6 週、GUI、Django、Pygame 和翻牌配對的九個範例 ZIP。第 4 週 ZIP 另加入 `django_product_demo.py` 和三語操作說明，對應最新投影片 47–50 頁；原本的 `slide_XX.py` 檔名保留舊版頁碼，下載包已說明差異。
 
 新增單元的原始擷取、完整英日文翻譯與來源雜湊位於 `content/additional-slide-sources.json`、`content/additional-translations.json`、`content/additional-source-manifest.json`。`scripts/sync_additional.py` 由主同步腳本呼叫，保留 Python 縮排並區分 PowerShell 命令。8 張參考／UML 圖以可縮放 SVG 重製，5 張 GUI 操作畫面直接取自最新版投影片。第 5、6 週沿用原投影片頁碼，因此第 6 週從第 12 頁開始。
 
@@ -76,3 +77,18 @@ python scripts/sync_materials.py ../output
 點選畫面角色或使用物件下拉選單可暫停並選取物件。「載入觀察範例」建立含兩顆子彈的全新暫停場景。群組保存物件參照；`kill()` 移除群組成員，檢視器仍可保留被移除物件的參照，對應教材的生命週期說明。瀏覽器以 `L` 切換物件標籤，保留 `Tab` 作一般焦點導覽。
 
 執行 `npm run test:game` 驗證物件身分、冷卻、移動、碰撞、計分、生命、暫停、單步、清除與勝敗。GitHub Actions 會在發布前自動執行。`scripts/check_export.py` 同時檢查三語遊戲頁面與首頁／教材入口。
+
+## 翻牌配對與單步觀察
+
+三語教材：`/memory/`、`/en/memory/`、`/ja/memory/`。遊戲網址為各教材路徑後加 `play/`。首頁與教材都有入口，遊戲免安裝，支援滑鼠、觸控與鍵盤。
+
+- `app/memory/engine.ts`：Card、Board、Game 三個類別。12 張牌、6 組配對，以參照保存 first、second、pending。
+- `app/components/memory-game.tsx`：一般遊玩、單步觀察、物件標籤、物件檢視器、方法呼叫記錄與固定範例。
+- `app/memory/text.ts`：完整三語介面。切換語言保留遊戲狀態。
+- `content/memory-slides.json`：三語投影片及網頁教材的共同內容來源。
+
+一般模式翻兩張牌後按「確認這一回合」。單步模式選牌只保存 pending，按 N 或「下一步」依序翻牌、比較、結算。比較後 matched 仍為 false，結算才標記配對或蓋回。成功範例是 C01/C02，失敗範例是 C03/C04。載入範例建立固定棋盤並開啟觀察模式。L 切換標籤，下拉選單只更換檢視對象。
+
+`python scripts/sync_memory.py ../output` 同步三語教材、18 頁 PPTX、3 張遊戲實照、6 張 SVG、ZIP 與 SHA-256 manifest。ZIP 包含可直接執行的 Python 模型與三語終端機介面、6 項測試、TypeScript 模型及三語離線 HTML 教材。Python 3.12+ 即可執行，不需額外套件。
+
+`npm run test:game` 同時執行射擊遊戲的 16 項測試與翻牌配對的 8 項測試。匯出檢查也驗證三語遊戲頁、教材入口、54 個新增主題、PPTX 內的遊戲超連結及範例 ZIP 中的模型。
