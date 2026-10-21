@@ -1,5 +1,7 @@
 "use client";
 
+import {variableText} from "../variable-text";
+
 import Link from "next/link";
 import {useCallback, useEffect, useRef, useState} from "react";
 import {basePath, coursePath, type Language} from "../data";
@@ -261,7 +263,7 @@ export default function ShooterGame({initialLang}: {initialLang: Language}) {
           <button className="sg-example" onClick={snapshot}>{t.snapshot} →</button><p className="sg-help">{t.snapshotNote}</p>
         </aside>
       </div>
-      <section className="sg-bottom"><div><h2>{t.goal}</h2><p>{t.rule}</p><p>{t.autoPause}</p></div><div><p>{t.port}</p><Link href={coursePath(lang, "pygame")}>{t.back} →</Link></div></section>
+      <section className="sg-bottom"><div><h2>{t.goal}</h2><p>{t.rule}</p><p>{t.autoPause}</p></div><div><p>{t.port}</p><Link href={coursePath(lang, "pygame")}>{t.back} →</Link><p><a href={`${basePath}${coursePath(lang,"pygame")}#variables`}>{variableText[lang].link} ↗</a></p></div></section>
     </main>
   </div>;
 }

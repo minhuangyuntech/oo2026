@@ -4,6 +4,10 @@
 
 第 1–6 週、GUI 入門、Django 網站入門、Pygame 射擊遊戲與翻牌配對已依最新版投影片同步，提供繁體中文、英文與日文完整網頁教材，共 361 個原始投影片主題、1083 個語言版本主題。第 7–18 週保留原有中文教材與網址。
 
+兩種遊戲另有獨立的三語「變數與物件屬性」網頁補充教材，位於各語言 `/pygame/#variables` 與 `/memory/#variables`。內容涵蓋設定值、物件屬性、參數、區域變數、參照關係與單步狀態，附變數搜尋及檔案／類別索引；教材上方、閱讀目錄、遊戲頁皆有入口。
+
+此補充內容由 `content/game-variables.json` 維護，文字陣列依序為中文、英文、日文；`app/components/variable-reference.tsx` 呈現。它獨立於投影片來源及同步腳本，更新時不需重新產生 PPTX 或範例 ZIP。`scripts/check_export.py` 會驗證六份變數說明、翻譯、入口和錨點。
+
 - 中文：`/`、`/week/1/` 至 `/week/6/`、`/gui/`、`/django/`
 - 英文：`/en/`、`/en/week/1/` 至 `/en/week/6/`、`/en/gui/`、`/en/django/`
 - 日文：`/ja/`、`/ja/week/1/` 至 `/ja/week/6/`、`/ja/gui/`、`/ja/django/`

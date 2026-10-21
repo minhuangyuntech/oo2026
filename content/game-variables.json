@@ -1,0 +1,1790 @@
+{
+  "pygame": {
+    "intro": [
+      "以下載包的 Python / Pygame 程式為準，涵蓋自訂設定、物件屬性、參數與區域變數。E01、B01、C01 是 name 的字串內容，不是 Python 變數名稱。",
+      "This reference covers settings, object attributes, parameters, and local variables in the downloadable Python / Pygame program. E01, B01, and C01 are string values stored in name, not Python variable names.",
+      "ダウンロード版の Python / Pygame コードにある設定・属性・引数・ローカル変数を説明します。E01・B01・C01 は name に保存する文字列であり、Python の変数名ではありません。"
+    ],
+    "sections": [
+      {
+        "id": "basics",
+        "title": [
+          "先分清楚名稱與物件",
+          "Names and objects",
+          "名前とオブジェクト"
+        ],
+        "file": "Python",
+        "rows": [
+          {
+            "name": "self",
+            "value": "object reference",
+            "meaning": [
+              "目前執行方法的物件；玩家的方法中就是該玩家。",
+              "The object receiving the method call; in a player method, that player.",
+              "メソッドを呼ばれたオブジェクト。自機のメソッドなら、その自機です。"
+            ]
+          },
+          {
+            "name": "self.attribute",
+            "value": "instance attribute",
+            "meaning": [
+              "保存在個別物件上的屬性。同名屬性可在不同物件中保存不同值。",
+              "An attribute stored on an individual object. Different objects can hold different values under the same attribute name.",
+              "各オブジェクトが持つ属性。同じ属性名でも、実体ごとに異なる値を持てます。"
+            ]
+          },
+          {
+            "name": "parameter / local",
+            "value": "function scope",
+            "meaning": [
+              "參數接收呼叫端傳入的值；區域變數保存本次呼叫的中間結果。同名區域變數不一定是同一個物件。",
+              "Parameters receive supplied values; locals hold intermediate results for one call. Equal local names do not imply identical objects.",
+              "引数は渡された値を受け取り、ローカル変数は一回の呼び出しの途中結果を保存します。同名でも同じ実体とは限りません。"
+            ]
+          },
+          {
+            "name": "UPPER_CASE",
+            "value": "module setting",
+            "meaning": [
+              "大寫表示當作常數使用的慣例；Python 不會因此禁止重新指定。",
+              "Uppercase names conventionally denote constants; Python does not enforce immutability of the binding.",
+              "大文字は定数として扱う慣例です。Python が再代入を禁止するわけではありません。"
+            ]
+          }
+        ],
+        "notes": []
+      },
+      {
+        "id": "settings",
+        "title": [
+          "全域設定與顏色",
+          "Global settings and colors",
+          "全体設定と色"
+        ],
+        "file": "settings.py",
+        "rows": [
+          {
+            "name": "WINDOW_SIZE",
+            "value": "(1200, 800)",
+            "meaning": [
+              "視窗寬、高，單位為像素。",
+              "Window width and height, in pixels.",
+              "ウィンドウの幅・高さ。単位はピクセル。"
+            ]
+          },
+          {
+            "name": "PLAY_AREA",
+            "value": "Rect(24, 112, 740, 612)",
+            "meaning": [
+              "遊戲區左上角 (24,112)，寬 740、高 612。",
+              "Playfield top-left (24,112), width 740, height 612.",
+              "盤面の左上 (24,112)、幅 740、高さ 612。"
+            ]
+          },
+          {
+            "name": "FPS",
+            "value": "60",
+            "meaning": [
+              "主迴圈每秒最多約 60 次；單步使用 1/60 秒。",
+              "Caps the loop near 60 frames per second; one observation step uses 1/60 second.",
+              "毎秒約 60 フレームを上限にします。観察の一歩は 1/60 秒です。"
+            ]
+          },
+          {
+            "name": "PLAYER_SPEED",
+            "value": "330 px/s",
+            "meaning": [
+              "玩家移動速度。",
+              "Player movement speed.",
+              "自機の移動速度。"
+            ]
+          },
+          {
+            "name": "BULLET_SPEED",
+            "value": "620 px/s",
+            "meaning": [
+              "子彈速度大小；往上移動時 y 速度為負。",
+              "Bullet speed magnitude; upward motion uses a negative y velocity.",
+              "弾の速さ。上向きの移動では y 速度が負になります。"
+            ]
+          },
+          {
+            "name": "SHOT_INTERVAL",
+            "value": "0.22 s",
+            "meaning": [
+              "兩次成功射擊之間的最短間隔。",
+              "Minimum interval between successful shots.",
+              "発射に成功してから次の発射までの最短間隔。"
+            ]
+          },
+          {
+            "name": "SPAWN_INTERVAL",
+            "value": "1.15 s",
+            "meaning": [
+              "自動產生敵人的間隔。",
+              "Interval between automatic enemy spawns.",
+              "敵を自動生成する間隔。"
+            ]
+          },
+          {
+            "name": "TARGET_SCORE",
+            "value": "200",
+            "meaning": [
+              "玩家仍有生命且分數達標時過關；同一步生命歸零時優先判定失敗。",
+              "Wins when the target is reached with HP remaining; losing all HP in the same update takes priority.",
+              "HP が残り、目標点に達すると勝利。同じ更新で HP が 0 なら敗北を優先します。"
+            ]
+          },
+          {
+            "name": "BG",
+            "value": "#0b1422",
+            "meaning": [
+              "整個畫面的背景色。",
+              "Whole-screen background.",
+              "画面全体の背景色。"
+            ]
+          },
+          {
+            "name": "PANEL",
+            "value": "#132238",
+            "meaning": [
+              "資訊面板背景。",
+              "Information panel background.",
+              "情報パネルの背景。"
+            ]
+          },
+          {
+            "name": "LINE",
+            "value": "#283d55",
+            "meaning": [
+              "邊框、分隔線與失去的生命格。",
+              "Borders, separators, and depleted life indicators.",
+              "枠・区切り線・失ったライフの表示。"
+            ]
+          },
+          {
+            "name": "WHITE",
+            "value": "#edf4fb",
+            "meaning": [
+              "主要文字與圖形細節。",
+              "Primary text and graphic details.",
+              "主な文字と図形の細部。"
+            ]
+          },
+          {
+            "name": "MUTED",
+            "value": "#91a9c2",
+            "meaning": [
+              "次要說明文字。",
+              "Secondary explanatory text.",
+              "補足の説明文。"
+            ]
+          },
+          {
+            "name": "MINT",
+            "value": "#68edbe",
+            "meaning": [
+              "玩家、生命格與重點文字。",
+              "Player, life indicators, and highlighted text.",
+              "自機・ライフ表示・強調文字。"
+            ]
+          },
+          {
+            "name": "CORAL",
+            "value": "#ff8b81",
+            "meaning": [
+              "一般敵人與敵人標籤。",
+              "Basic enemies and enemy labels.",
+              "通常の敵と敵のラベル。"
+            ]
+          },
+          {
+            "name": "YELLOW",
+            "value": "#ffd67b",
+            "meaning": [
+              "子彈與觀察資訊。",
+              "Bullets and inspection information.",
+              "弾と観察情報。"
+            ]
+          },
+          {
+            "name": "PURPLE",
+            "value": "#bca2ff",
+            "meaning": [
+              "初始生命較高的敵人。",
+              "Enemies with higher initial HP.",
+              "初期 HP が高い敵。"
+            ]
+          }
+        ],
+        "notes": []
+      },
+      {
+        "id": "actor",
+        "title": [
+          "Actor：三種角色共有的屬性",
+          "Actor: shared actor attributes",
+          "Actor：三種類の役者に共通する属性"
+        ],
+        "file": "actors.py · Actor",
+        "rows": [
+          {
+            "name": "name",
+            "value": "str",
+            "meaning": [
+              "物件名稱，例如 player、E01、B01。",
+              "Object label, such as player, E01, or B01.",
+              "player・E01・B01 などの実体名。"
+            ]
+          },
+          {
+            "name": "image",
+            "value": "pygame.Surface",
+            "meaning": [
+              "角色圖像；本例以 Pygame 繪圖指令建立。",
+              "Actor image, drawn with Pygame primitives in this example.",
+              "役者の画像。この例では Pygame の図形描画で作成します。"
+            ]
+          },
+          {
+            "name": "pos",
+            "value": "pygame.Vector2",
+            "meaning": [
+              "角色中心的精確位置，保留小數。",
+              "Precise center position, retaining fractional pixels.",
+              "役者の中心座標。小数部分を保持します。"
+            ]
+          },
+          {
+            "name": "rect",
+            "value": "pygame.Rect",
+            "meaning": [
+              "整數矩形，用於畫面定位及碰撞判斷。",
+              "Integer rectangle used for drawing placement and collision detection.",
+              "描画位置と衝突判定に使う整数の矩形。"
+            ]
+          },
+          {
+            "name": "velocity",
+            "value": "pygame.Vector2 · px/s",
+            "meaning": [
+              "水平與垂直速度；起始為 (0,0)。",
+              "Horizontal and vertical velocity, initially (0,0).",
+              "水平・垂直速度。初期値は (0,0)。"
+            ]
+          },
+          {
+            "name": "rect.center / centerx / centery",
+            "value": "(x, y) / x / y",
+            "meaning": [
+              "矩形中心點，或中心的單一座標。",
+              "Rectangle center, or one coordinate of its center.",
+              "矩形の中心、またはその x・y 座標。"
+            ]
+          },
+          {
+            "name": "rect.left / right / top / bottom",
+            "value": "px",
+            "meaning": [
+              "矩形的左、右、上、下邊界。",
+              "Left, right, top, and bottom edges.",
+              "左・右・上・下の境界。"
+            ]
+          },
+          {
+            "name": "rect.width / height / size / topleft",
+            "value": "px / tuples",
+            "meaning": [
+              "寬、高、(寬,高)、左上角座標。PLAY_AREA 也具有這些 Rect 屬性。",
+              "Width, height, (width,height), and top-left position. PLAY_AREA has these Rect attributes too.",
+              "幅・高さ・(幅,高さ)・左上座標。PLAY_AREA も同じ Rect 属性を持ちます。"
+            ]
+          }
+        ],
+        "notes": [
+          [
+            "座標原點在左上角，向右 x 增加，向下 y 增加。移動先更新 pos，再用 round() 將中心取整數後寫入 rect；不會每一步丟掉位置的小數。",
+            "The origin is at the top left. x increases rightward and y downward. Movement updates pos before rounding its center into rect, preserving fractional motion.",
+            "原点は左上。右へ x、下へ y が増えます。pos を更新してから中心を丸めて rect に反映し、移動の小数部分を保持します。"
+          ]
+        ],
+        "code": "self.pos += self.velocity * dt\nself.rect.center = (round(self.pos.x), round(self.pos.y))"
+      },
+      {
+        "id": "specialized",
+        "title": [
+          "Player、Enemy、Bullet 的專有狀態",
+          "Player, Enemy, and Bullet state",
+          "Player・Enemy・Bullet 固有の状態"
+        ],
+        "file": "actors.py",
+        "rows": [
+          {
+            "name": "Player.hp",
+            "value": "3 → 0",
+            "meaning": [
+              "玩家目前生命值。",
+              "Current player HP.",
+              "自機の現在 HP。"
+            ]
+          },
+          {
+            "name": "Player.cooldown",
+            "value": "0.0 / 0.22 s",
+            "meaning": [
+              "下一次可射擊前的剩餘等待秒數。",
+              "Seconds remaining until the next shot is allowed.",
+              "次の発射までの待ち時間の残り秒数。"
+            ]
+          },
+          {
+            "name": "Player.invulnerable",
+            "value": "0.0 / 0.8 s",
+            "meaning": [
+              "受傷後的無敵倒數；大於零時不再扣血。",
+              "Invulnerability countdown after damage; positive values block further damage.",
+              "被弾後の無敵時間。正の間は追加ダメージを受けません。"
+            ]
+          },
+          {
+            "name": "Enemy.hp",
+            "value": "1 or 2 → 0",
+            "meaning": [
+              "每個敵人獨立保存的目前生命值。",
+              "Current HP stored independently by each enemy.",
+              "各敵が独立して保持する現在 HP。"
+            ]
+          },
+          {
+            "name": "Enemy.max_hp",
+            "value": "initial hp",
+            "meaning": [
+              "建立時的生命上限；目前保存但尚未用於其他判斷或顯示。",
+              "Initial HP limit; stored but currently unused by other logic or rendering.",
+              "生成時の最大 HP。保存されますが、現状では他の判定や表示に未使用です。"
+            ]
+          },
+          {
+            "name": "Enemy.velocity.y",
+            "value": "positive px/s",
+            "meaning": [
+              "敵人的下降速度。",
+              "Enemy downward speed.",
+              "敵の下降速度。"
+            ]
+          },
+          {
+            "name": "Bullet.owner",
+            "value": "Player reference",
+            "meaning": [
+              "指向發射這顆子彈的玩家；不是玩家副本。",
+              "Reference to the player who fired this bullet, not a player copy.",
+              "この弾を発射した自機への参照。自機のコピーではありません。"
+            ]
+          },
+          {
+            "name": "Bullet.damage",
+            "value": "1",
+            "meaning": [
+              "命中敵人時造成的傷害。",
+              "Damage dealt on impact.",
+              "命中時に与えるダメージ。"
+            ]
+          },
+          {
+            "name": "Bullet.velocity.y",
+            "value": "-620 px/s",
+            "meaning": [
+              "負的 y 速度讓子彈向上飛行。",
+              "Negative y velocity moves the bullet upward.",
+              "負の y 速度で弾が上へ進みます。"
+            ]
+          }
+        ],
+        "notes": [
+          [
+            "每個角色都繼承 Actor 的五個屬性。兩顆 Bullet 可以是不同物件，owner 卻指向同一個 Player。",
+            "Every actor inherits the five Actor attributes. Two Bullets can be different objects while their owner attributes reference the same Player.",
+            "各役者は Actor の五つの属性を継承します。二つの Bullet は別の実体でも、owner は同じ Player を参照できます。"
+          ]
+        ]
+      },
+      {
+        "id": "actor-locals",
+        "title": [
+          "角色方法的參數與區域變數",
+          "Actor parameters and locals",
+          "役者メソッドの引数とローカル変数"
+        ],
+        "file": "actors.py",
+        "rows": [
+          {
+            "name": "name / position / size",
+            "value": "Actor.__init__",
+            "meaning": [
+              "新物件名稱、中心座標、圖像寬高。Player 44×48、Enemy 44×40、Bullet 8×20。",
+              "New object name, center, and image dimensions: Player 44×48, Enemy 44×40, Bullet 8×20.",
+              "新実体の名前・中心・画像サイズ。Player 44×48、Enemy 44×40、Bullet 8×20。"
+            ]
+          },
+          {
+            "name": "dt",
+            "value": "update · seconds",
+            "meaning": [
+              "本次更新推進的秒數；速度乘上 dt 就是位移。",
+              "Seconds simulated by this update; velocity multiplied by dt gives displacement.",
+              "今回進める秒数。速度 × dt が変位です。"
+            ]
+          },
+          {
+            "name": "x / y / direction",
+            "value": "Player.set_direction",
+            "meaning": [
+              "方向輸入通常為 -1、0、1；direction 是方向向量，斜向時正規化以維持相同速度。",
+              "Direction inputs are normally -1, 0, or 1. direction is normalized for diagonal movement so speed stays constant.",
+              "方向入力は通常 -1・0・1。direction は方向ベクトルで、斜め移動時に正規化して速さを一定にします。"
+            ]
+          },
+          {
+            "name": "name",
+            "value": "Player.shoot",
+            "meaning": [
+              "給新子彈的名稱。",
+              "Name assigned to a new bullet.",
+              "新しい弾に付ける名前。"
+            ]
+          },
+          {
+            "name": "speed / hp",
+            "value": "Enemy.__init__",
+            "meaning": [
+              "傳入的下降速度與初始生命；預設為 80 與 1。",
+              "Supplied downward speed and initial HP; defaults are 80 and 1.",
+              "渡された下降速度と初期 HP。既定値は 80 と 1。"
+            ]
+          },
+          {
+            "name": "color",
+            "value": "Enemy.__init__",
+            "meaning": [
+              "依初始 hp 選擇紅色或紫色。",
+              "Red or purple chosen from initial HP.",
+              "初期 HP に応じて選ぶ赤または紫。"
+            ]
+          },
+          {
+            "name": "damage",
+            "value": "Enemy.take_hit",
+            "meaning": [
+              "本次收到的傷害量。",
+              "Incoming damage for this hit.",
+              "今回受けるダメージ量。"
+            ]
+          },
+          {
+            "name": "owner / position",
+            "value": "Bullet.__init__",
+            "meaning": [
+              "owner 是傳入的玩家；position 是算出的出生中心，位於玩家頂端上方 9 像素。",
+              "owner is the supplied player. position is the computed spawn center, 9 pixels above the player’s top edge.",
+              "owner は渡された自機。position は計算した弾の中心で、自機の上端より 9 ピクセル上です。"
+            ]
+          }
+        ],
+        "notes": [
+          [
+            "例如 dt = 1/60、velocity.y = -620，一步向上移動約 10.33 像素。dt 表示經過時間，不是影格編號。",
+            "With dt = 1/60 and velocity.y = -620, one step moves upward about 10.33 pixels. dt is elapsed time, not a frame number.",
+            "dt = 1/60、velocity.y = -620 なら、一歩で約 10.33 ピクセル上へ進みます。dt はフレーム番号ではなく経過時間です。"
+          ]
+        ]
+      },
+      {
+        "id": "game",
+        "title": [
+          "Game：整局遊戲的屬性",
+          "Game: whole-game attributes",
+          "Game：ゲーム全体の属性"
+        ],
+        "file": "game.py · Game",
+        "rows": [
+          {
+            "name": "lang",
+            "value": "zh / en / ja",
+            "meaning": [
+              "介面語言。",
+              "UI language.",
+              "画面の言語。"
+            ]
+          },
+          {
+            "name": "screen",
+            "value": "pygame.Surface",
+            "meaning": [
+              "遊戲視窗的繪圖表面。",
+              "Drawing surface of the game window.",
+              "ゲームウィンドウの描画面。"
+            ]
+          },
+          {
+            "name": "clock",
+            "value": "pygame.time.Clock",
+            "meaning": [
+              "限制更新頻率並測量經過時間。",
+              "Limits frame rate and measures elapsed time.",
+              "更新頻度の制限と経過時間の測定。"
+            ]
+          },
+          {
+            "name": "fonts",
+            "value": "dict[str, Font]",
+            "meaning": [
+              "保存不同大小、用途的字型。",
+              "Fonts for different sizes and purposes.",
+              "用途・サイズ別のフォント。"
+            ]
+          },
+          {
+            "name": "rng",
+            "value": "random.Random",
+            "meaning": [
+              "本遊戲專用的亂數產生器。",
+              "Random generator belonging to this game.",
+              "このゲーム用の乱数生成器。"
+            ]
+          },
+          {
+            "name": "running",
+            "value": "True / False",
+            "meaning": [
+              "主迴圈是否繼續；關閉視窗或 Esc 設為 False。",
+              "Whether the application loop continues; closing or Esc sets False.",
+              "メインループを続けるか。閉じる操作や Esc で False。"
+            ]
+          },
+          {
+            "name": "show_labels",
+            "value": "True / False",
+            "meaning": [
+              "是否顯示名稱與碰撞框。",
+              "Whether names and collision boxes are shown.",
+              "名前と衝突枠を表示するか。"
+            ]
+          },
+          {
+            "name": "player",
+            "value": "Player reference",
+            "meaning": [
+              "這一局唯一的玩家物件。",
+              "The single player object in this round.",
+              "このラウンドの一つの自機オブジェクト。"
+            ]
+          },
+          {
+            "name": "all_sprites",
+            "value": "pygame.sprite.Group",
+            "meaning": [
+              "場上全部角色，供統一更新與繪圖。",
+              "All active actors for group updates and drawing.",
+              "一括更新と描画に使う、場にいる全役者。"
+            ]
+          },
+          {
+            "name": "enemies / bullets",
+            "value": "pygame.sprite.Group",
+            "meaning": [
+              "分別保存敵人、子彈的參照。",
+              "Groups holding enemy and bullet references respectively.",
+              "それぞれ敵・弾への参照を保持するグループ。"
+            ]
+          },
+          {
+            "name": "score",
+            "value": "0; TARGET_SCORE=200",
+            "meaning": [
+              "目前分數；每擊破一個敵人加 10。",
+              "Current score; each defeated enemy adds 10.",
+              "現在の得点。敵一体の撃破で 10 加算。"
+            ]
+          },
+          {
+            "name": "state",
+            "value": "ready / playing / paused / won / lost",
+            "meaning": [
+              "依序表示等待開始、遊玩中、暫停、勝利、失敗。",
+              "Ready to start, playing, paused, won, or lost.",
+              "開始待ち・プレイ中・一時停止・勝利・敗北。"
+            ]
+          },
+          {
+            "name": "spawn_timer",
+            "value": "1.15 → 0 s",
+            "meaning": [
+              "距離下次自動生成敵人的剩餘秒數。",
+              "Seconds until the next automatic spawn.",
+              "次の敵の自動生成までの残り秒数。"
+            ]
+          },
+          {
+            "name": "next_enemy / next_bullet",
+            "value": "1, 2, 3, …",
+            "meaning": [
+              "下一個名稱的流水號，不是場上數量；數量用 len(enemies) 或 len(bullets)。",
+              "Sequence numbers for the next names, not active counts. Use len(enemies) or len(bullets) for counts.",
+              "次の名前の通し番号であり、場の個数ではありません。個数は len(enemies)・len(bullets)。"
+            ]
+          },
+          {
+            "name": "events",
+            "value": "deque(maxlen=3)",
+            "meaning": [
+              "最多三筆遊戲文字紀錄，與鍵盤／視窗事件不同。",
+              "Up to three game log strings, separate from keyboard/window events.",
+              "最大三件のゲーム記録文字列。キーボード・ウィンドウのイベントとは別です。"
+            ]
+          }
+        ],
+        "notes": [
+          [
+            "暫停時 running 仍為 True，畫面與輸入持續運作。同一個敵人可同時屬於 enemies 與 all_sprites；群組不會複製敵人。",
+            "While paused, running remains True so rendering and input continue. The same enemy can belong to enemies and all_sprites without being copied.",
+            "停止中も running は True で、表示と入力は続きます。同じ敵が enemies と all_sprites に所属しても、敵はコピーされません。"
+          ]
+        ]
+      },
+      {
+        "id": "game-locals",
+        "title": [
+          "遊戲流程中的暫存資料",
+          "Temporary data in game flow",
+          "ゲーム進行の一時データ"
+        ],
+        "file": "game.py",
+        "rows": [
+          {
+            "name": "seed / lang",
+            "value": "Game.__init__",
+            "meaning": [
+              "亂數種子與語言；固定種子可重現亂數序列。",
+              "Random seed and language; a fixed seed reproduces the random sequence.",
+              "乱数の種と表示言語。同じ種なら乱数列を再現できます。"
+            ]
+          },
+          {
+            "name": "actor / x / y / speed / hp",
+            "value": "reset",
+            "meaning": [
+              "逐一清除的角色，以及三個初始敵人的座標、速度與生命。",
+              "Actors being removed and the coordinates, speeds, and HP of the three initial enemies.",
+              "除去中の役者と、初期の敵三体の座標・速度・HP。"
+            ]
+          },
+          {
+            "name": "position / speed / hp",
+            "value": "spawn_enemy",
+            "meaning": [
+              "未指定時，出生 x 隨機、y 在遊戲區上方；速度 65～110，生命從 [1,1,2] 選取。",
+              "When omitted: random spawn x above the field, speed 65–110, and HP selected from [1,1,2].",
+              "省略時は盤面上方のランダムな x、速度 65～110、HP は [1,1,2] から選択。"
+            ]
+          },
+          {
+            "name": "enemy / bullet",
+            "value": "local references",
+            "meaning": [
+              "目前建立、碰撞或檢查的物件。射擊失敗時 bullet 為 None。",
+              "Objects currently created, collided with, or inspected. bullet is None when shooting fails.",
+              "生成・衝突・確認の対象。発射できなければ bullet は None。"
+            ]
+          },
+          {
+            "name": "hits",
+            "value": "list[Enemy]",
+            "meaning": [
+              "與這顆子彈碰撞的敵人清單；只處理第一個以免重複命中。",
+              "Enemies overlapping this bullet; only the first is processed to avoid multiple hits.",
+              "この弾と重なる敵のリスト。複数命中を避けるため先頭だけ処理します。"
+            ]
+          },
+          {
+            "name": "destroyed",
+            "value": "bool",
+            "meaning": [
+              "本次攻擊是否擊破敵人。",
+              "Whether this hit defeated the enemy.",
+              "今回の攻撃で敵を倒したか。"
+            ]
+          },
+          {
+            "name": "touching / escaped",
+            "value": "bool",
+            "meaning": [
+              "敵人是否撞到玩家／完全穿過底部防線。",
+              "Whether the enemy touches the player / has fully crossed the bottom boundary.",
+              "敵が自機に接触したか／下端を完全に通過したか。"
+            ]
+          },
+          {
+            "name": "reason",
+            "value": "str",
+            "meaning": [
+              "扣血紀錄中的碰撞或漏接原因。",
+              "Collision or missed-enemy reason used in the log.",
+              "記録に使う接触・敵の通過という被害理由。"
+            ]
+          },
+          {
+            "name": "events / event",
+            "value": "handle_events",
+            "meaning": [
+              "輸入事件集合與目前的一個事件；event.type / key 是 Pygame 提供的欄位。",
+              "Input event collection and the current event; event.type / key are Pygame fields.",
+              "入力イベントの集合と現在の一件。event.type・key は Pygame の属性です。"
+            ]
+          },
+          {
+            "name": "dt / keys / direction / shooting",
+            "value": "run / tick",
+            "meaning": [
+              "經過秒數、按鍵狀態、方向 (x,y)、是否射擊。dt 最多 1/30 秒，避免一次跳動過遠。",
+              "Elapsed seconds, held keys, (x,y) direction, and shooting flag. dt is capped at 1/30 second to limit jumps.",
+              "経過秒数・キー状態・方向 (x,y)・発射フラグ。大きな飛びを防ぐため dt は最大 1/30 秒。"
+            ]
+          },
+          {
+            "name": "name / y / bullet",
+            "value": "prepare_snapshot",
+            "meaning": [
+              "固定預覽場景中的子彈名稱、高度與子彈參照。",
+              "Bullet name, vertical coordinate, and reference in the fixed preview scene.",
+              "固定プレビューでの弾の名前・高さ・参照。"
+            ]
+          }
+        ],
+        "notes": []
+      },
+      {
+        "id": "view",
+        "title": [
+          "畫面、字型與顯示暫存值",
+          "Drawing, fonts, and display values",
+          "描画・フォント・表示用の値"
+        ],
+        "file": "view.py",
+        "rows": [
+          {
+            "name": "game / screen",
+            "value": "Game / Surface",
+            "meaning": [
+              "傳入的遊戲及其畫面；screen 與 game.screen 指向同一個 Surface。",
+              "Supplied game and its drawing surface; screen refers to game.screen.",
+              "渡されたゲームと描画面。screen は game.screen と同じ Surface を参照します。"
+            ]
+          },
+          {
+            "name": "lang / candidates / path",
+            "value": "load_fonts",
+            "meaning": [
+              "語言、候選字型路徑清單、目前檢查的路徑。",
+              "Language, candidate font paths, and the path currently checked.",
+              "言語・フォント候補のパス一覧・確認中のパス。"
+            ]
+          },
+          {
+            "name": "cjk / mono",
+            "value": "font path / None",
+            "meaning": [
+              "中文字／日文字型與等寬字型的路徑；找不到時可為 None，使用預設字型。",
+              "CJK and monospace font paths; None allows a default font.",
+              "日中用・等幅フォントのパス。None なら既定フォントを使用。"
+            ]
+          },
+          {
+            "name": "value / position / color / size",
+            "value": "text(...)",
+            "meaning": [
+              "要畫的文字、左上角位置、顏色、字型鍵。size 是 small、body、subtitle、title、number 或 code。",
+              "Text, top-left position, color, and font key: small, body, subtitle, title, number, or code.",
+              "文字・左上位置・色・フォントキー。size は small・body・subtitle・title・number・code。"
+            ]
+          },
+          {
+            "name": "image",
+            "value": "Surface",
+            "meaning": [
+              "文字 render() 後的圖片，隨後貼到 screen。",
+              "Rendered text surface, then blitted to screen.",
+              "render() で作る文字の画像。その後 screen に描画します。"
+            ]
+          },
+          {
+            "name": "rect / border",
+            "value": "card(...)",
+            "meaning": [
+              "面板矩形與框線色。這裡 card 是畫面板的函式。",
+              "Panel rectangle and border color. Here card is a panel-drawing function.",
+              "パネルの矩形と枠線色。ここの card はパネル描画関数です。"
+            ]
+          },
+          {
+            "name": "old_clip",
+            "value": "Rect",
+            "meaning": [
+              "原本的裁切範圍；畫完遊戲區後還原。",
+              "Previous clipping rectangle, restored after drawing the field.",
+              "元の描画範囲。盤面の描画後に戻します。"
+            ]
+          },
+          {
+            "name": "row / col / x / y",
+            "value": "int",
+            "meaning": [
+              "背景網格的列、欄及繪圖座標；其他函式的 x、y 是各元件位置。",
+              "Grid row/column and drawing coordinates; x/y elsewhere position UI elements.",
+              "背景の行・列と描画座標。他の関数の x・y は各 UI 部品の位置。"
+            ]
+          },
+          {
+            "name": "actor / color / label / width",
+            "value": "draw_field",
+            "meaning": [
+              "目前角色、標籤顏色、名稱文字、文字寬度。width 用來避免文字超出邊界。",
+              "Current actor, label color, label text, and text width used to keep labels within bounds.",
+              "現在の役者・ラベル色・名前の文字・文字幅。width は文字のはみ出しを防ぎます。"
+            ]
+          },
+          {
+            "name": "layer / labels / title / subtitle / action",
+            "value": "draw_overlay",
+            "meaning": [
+              "半透明遮罩、狀態對應的文字表、標題、副標題、操作文字。",
+              "Translucent layer, state-to-text map, title, subtitle, and control text.",
+              "半透明レイヤー・状態別の文言表・見出し・副見出し・操作の文言。"
+            ]
+          },
+          {
+            "name": "i / name / count / color",
+            "value": "draw_inspector / draw",
+            "meaning": [
+              "迴圈序號、類別名稱、物件數量、顏色；draw 的 i 也用來畫三格生命。",
+              "Loop index, class name, object count, and color; draw also uses i for the three life indicators.",
+              "ループ番号・クラス名・個数・色。draw の i は三つの残機表示にも使用。"
+            ]
+          },
+          {
+            "name": "enemy / names",
+            "value": "draw_inspector",
+            "meaning": [
+              "逐一讀取的敵人，以及最多四個敵人名稱組成的字串。",
+              "Enemy being read and a string of up to four enemy names.",
+              "読み取り中の敵と、最大四体の名前をまとめた文字列。"
+            ]
+          },
+          {
+            "name": "bullet / reference",
+            "value": "draw_inspector",
+            "meaning": [
+              "第一顆子彈或 None，以及 owner 參照關係的顯示文字。",
+              "First bullet or None, and display text describing its owner reference.",
+              "先頭の弾または None と、owner の参照関係を示す文字列。"
+            ]
+          },
+          {
+            "name": "event / state_name",
+            "value": "str",
+            "meaning": [
+              "event 是一筆遊戲紀錄文字；state_name 是 READY 等畫面狀態名稱。",
+              "event is a game log string; state_name is a label such as READY.",
+              "event は記録の文字列。state_name は READY などの表示名。"
+            ]
+          }
+        ],
+        "notes": [
+          [
+            "同名不代表同一份資料：text() 的 size 是字型鍵，Actor 的 size 是圖片寬高；view.py 的 event 是文字，game.py 處理輸入時的 event 是 Pygame 事件物件。",
+            "The same name can have different meanings: text() size is a font key; Actor size is image dimensions. view.py event is text, while an input event in game.py is a Pygame object.",
+            "同名でも意味は文脈次第です。text() の size はフォントキー、Actor の size は画像の幅・高さ。view.py の event は文字列、game.py の入力 event は Pygame オブジェクトです。"
+          ]
+        ]
+      },
+      {
+        "id": "language-startup",
+        "title": [
+          "語言與程式入口",
+          "Localization and startup",
+          "言語と起動処理"
+        ],
+        "file": "i18n.py · main.py",
+        "rows": [
+          {
+            "name": "TEXT / PATTERNS",
+            "value": "dict / list",
+            "meaning": [
+              "固定文字翻譯表，以及含分數、物件名稱等動態文字的正規表示式翻譯規則。",
+              "Fixed translation dictionary and regex rules for dynamic text such as scores and names.",
+              "固定文の翻訳辞書と、得点・名前などを含む動的な文の正規表現ルール。"
+            ]
+          },
+          {
+            "name": "value / lang / index",
+            "value": "translate",
+            "meaning": [
+              "原文、目標語言、翻譯索引：英文 0、日文 1；中文直接回傳原文。",
+              "Source text, target language, and translation index: 0 for English, 1 for Japanese; Chinese returns the source.",
+              "原文・対象言語・翻訳の添字。英語 0、日本語 1。中国語は原文を返します。"
+            ]
+          },
+          {
+            "name": "pattern / versions / match",
+            "value": "translate",
+            "meaning": [
+              "目前規則、英日版本、比對結果。match.groups() 取出名稱或數字填回翻譯。",
+              "Current rule, English/Japanese versions, and match result. match.groups() supplies captured names or numbers.",
+              "現在のルール・英日訳・照合結果。match.groups() から名前や数値を取り出します。"
+            ]
+          },
+          {
+            "name": "parser / args",
+            "value": "argparse",
+            "meaning": [
+              "命令列解析器與解析結果。",
+              "Command-line parser and parsed arguments.",
+              "コマンドライン解析器と解析結果。"
+            ]
+          },
+          {
+            "name": "args.lang / args.snapshot / game",
+            "value": "main",
+            "meaning": [
+              "指定語言、快照輸出路徑或 None、建立的 Game。快照模式用 seed=7。",
+              "Language, snapshot output path or None, and the created Game. Snapshot mode uses seed=7.",
+              "指定言語・画像の保存先または None・作成した Game。画像保存時は seed=7。"
+            ]
+          },
+          {
+            "name": "__name__",
+            "value": "__main__",
+            "meaning": [
+              "Python 提供的模組名稱；直接執行此檔案時等於 __main__。",
+              "Python module name; equals __main__ when this file is executed directly.",
+              "Python のモジュール名。このファイルを直接実行すると __main__。"
+            ]
+          },
+          {
+            "name": "PYGAME_HIDE_SUPPORT_PROMPT / SDL_VIDEODRIVER",
+            "value": "environment",
+            "meaning": [
+              "環境設定鍵：隱藏啟動訊息，以及快照時用 dummy 在無視窗模式繪圖。",
+              "Environment keys: hide the startup banner and use dummy video for headless snapshots.",
+              "環境設定キー。起動メッセージを隠し、画像保存時は dummy でウィンドウなし描画を行います。"
+            ]
+          }
+        ],
+        "notes": []
+      },
+      {
+        "id": "references",
+        "title": [
+          "把變數對回物件",
+          "Connect variables to objects",
+          "変数とオブジェクトを結ぶ"
+        ],
+        "file": "Game → Player / Enemy / Bullet",
+        "rows": [],
+        "notes": [
+          [
+            "bullet.owner 和 game.player 參照同一個 Player。修改 player.hp，從 owner.hp 也會讀到新值。",
+            "bullet.owner and game.player reference the same Player. Changing player.hp is also visible through owner.hp.",
+            "bullet.owner と game.player は同じ Player を参照します。player.hp の変更は owner.hp からも見えます。"
+          ],
+          [
+            "enemy.kill() 將敵人從所有群組移除；若區域變數 enemy 仍參照它，物件仍可存在。名稱 E01 只是物件的標籤。",
+            "enemy.kill() removes the enemy from all groups. A local enemy reference can still keep the object alive. E01 is just its label.",
+            "enemy.kill() は敵を全グループから除きます。ローカル変数 enemy の参照が残ればオブジェクトは存続できます。E01 はラベルです。"
+          ],
+          [
+            "網頁版也保留相同關係，但語法使用 JavaScript 的 ===、null、Set；請勿直接把 Python 的 is、None、Group 寫法混用。",
+            "The browser version preserves these relationships using JavaScript ===, null, and Set. Python uses is, None, and Group.",
+            "ブラウザー版も同じ関係を保ちますが、JavaScript の ===・null・Set を使います。Python では is・None・Group を使います。"
+          ]
+        ],
+        "code": "bullet = game.player.shoot(\"B01\")\nif bullet is not None:\n    print(bullet.owner is game.player)  # True"
+      }
+    ]
+  },
+  "memory": {
+    "intro": [
+      "以下載包的 Python / Pygame 程式為準，涵蓋自訂設定、物件屬性、參數與區域變數。E01、B01、C01 是 name 的字串內容，不是 Python 變數名稱。",
+      "This reference covers settings, object attributes, parameters, and local variables in the downloadable Python / Pygame program. E01, B01, and C01 are string values stored in name, not Python variable names.",
+      "ダウンロード版の Python / Pygame コードにある設定・属性・引数・ローカル変数を説明します。E01・B01・C01 は name に保存する文字列であり、Python の変数名ではありません。"
+    ],
+    "sections": [
+      {
+        "id": "basics",
+        "title": [
+          "先分清楚名稱與物件",
+          "Names and objects",
+          "名前とオブジェクト"
+        ],
+        "file": "Python",
+        "rows": [
+          {
+            "name": "self",
+            "value": "object reference",
+            "meaning": [
+              "目前執行方法的物件；玩家的方法中就是該玩家。",
+              "The object receiving the method call; in a player method, that player.",
+              "メソッドを呼ばれたオブジェクト。自機のメソッドなら、その自機です。"
+            ]
+          },
+          {
+            "name": "self.attribute",
+            "value": "instance attribute",
+            "meaning": [
+              "保存在個別物件上的屬性。同名屬性可在不同物件中保存不同值。",
+              "An attribute stored on an individual object. Different objects can hold different values under the same attribute name.",
+              "各オブジェクトが持つ属性。同じ属性名でも、実体ごとに異なる値を持てます。"
+            ]
+          },
+          {
+            "name": "parameter / local",
+            "value": "function scope",
+            "meaning": [
+              "參數接收呼叫端傳入的值；區域變數保存本次呼叫的中間結果。同名區域變數不一定是同一個物件。",
+              "Parameters receive supplied values; locals hold intermediate results for one call. Equal local names do not imply identical objects.",
+              "引数は渡された値を受け取り、ローカル変数は一回の呼び出しの途中結果を保存します。同名でも同じ実体とは限りません。"
+            ]
+          },
+          {
+            "name": "UPPER_CASE",
+            "value": "module setting",
+            "meaning": [
+              "大寫表示當作常數使用的慣例；Python 不會因此禁止重新指定。",
+              "Uppercase names conventionally denote constants; Python does not enforce immutability of the binding.",
+              "大文字は定数として扱う慣例です。Python が再代入を禁止するわけではありません。"
+            ]
+          }
+        ],
+        "notes": []
+      },
+      {
+        "id": "card-board",
+        "title": [
+          "Card 與 Board：卡片和牌桌",
+          "Card and Board: cards and the board",
+          "Card と Board：カードと盤面"
+        ],
+        "file": "model.py",
+        "rows": [
+          {
+            "name": "SAMPLE",
+            "value": "list[str] · 12",
+            "meaning": [
+              "固定範例排列：moon, moon, leaf, sun, leaf, sun, star, gem, star, flower, gem, flower。共有六對。",
+              "Fixed arrangement: moon, moon, leaf, sun, leaf, sun, star, gem, star, flower, gem, flower. Six pairs in total.",
+              "固定配列：moon, moon, leaf, sun, leaf, sun, star, gem, star, flower, gem, flower。計六組。"
+            ]
+          },
+          {
+            "name": "Card.name",
+            "value": "C01 … C12",
+            "meaning": [
+              "區分每一張卡片的物件標籤。C01、C02 是不同卡片，即使圖案相同。",
+              "Unique card label. C01 and C02 are different cards even when their symbols match.",
+              "カードを識別するラベル。図柄が同じでも C01 と C02 は別のカードです。"
+            ]
+          },
+          {
+            "name": "Card.pair_id",
+            "value": "moon / leaf / sun / star / gem / flower",
+            "meaning": [
+              "配對依據；兩張卡片的 pair_id 相等才算配對。",
+              "Matching key; two cards match when their pair_id values are equal.",
+              "ペア判定のキー。二枚の pair_id が等しければ一致。"
+            ]
+          },
+          {
+            "name": "Card.face_up",
+            "value": "False → True",
+            "meaning": [
+              "是否正面朝上，決定是否顯示圖案。",
+              "Whether the card faces up and shows its symbol.",
+              "表向きで図柄を表示しているか。"
+            ]
+          },
+          {
+            "name": "Card.matched",
+            "value": "False → True",
+            "meaning": [
+              "是否已完成配對；完成後保持正面，不能再次選取。",
+              "Whether the pair is settled; matched cards remain face up and cannot be picked again.",
+              "ペアが確定したか。確定後は表向きを保ち、再選択できません。"
+            ]
+          },
+          {
+            "name": "Board.cards",
+            "value": "list[Card]",
+            "meaning": [
+              "12 個 Card 物件的參照清單；cards[0] 是 C01。",
+              "List of references to 12 Card objects; cards[0] is C01.",
+              "12 個の Card への参照リスト。cards[0] は C01。"
+            ]
+          },
+          {
+            "name": "Board.complete",
+            "value": "@property → bool",
+            "meaning": [
+              "讀取時檢查全部卡片的 matched；不是另外儲存的旗標。",
+              "Computed from every card’s matched value when read; not a separate stored flag.",
+              "読むたびに全カードの matched を調べる計算プロパティ。別に保存するフラグではありません。"
+            ]
+          },
+          {
+            "name": "sample / pairs / i / pair",
+            "value": "Board.__init__",
+            "meaning": [
+              "是否固定排列、SAMPLE 的副本、從 0 起算的索引、該位置的配對代號。非範例會打亂 pairs。",
+              "Fixed-layout flag, a copy of SAMPLE, zero-based index, and the pair key at that position. Non-sample boards shuffle pairs.",
+              "固定配置フラグ・SAMPLE のコピー・0 始まりの添字・その位置の図柄キー。通常は pairs をシャッフルします。"
+            ]
+          },
+          {
+            "name": "name / pair_id / c",
+            "value": "parameters / local",
+            "meaning": [
+              "建構或查找用的名稱、建構用圖案代號、走訪清單時目前的卡片。Board.get(name) 找不到會回傳 None。",
+              "Name for construction/lookup, symbol key for construction, and current card during iteration. Board.get(name) returns None if absent.",
+              "生成・検索の名前、生成時の図柄キー、走査中のカード。Board.get(name) は未発見なら None。"
+            ]
+          }
+        ],
+        "notes": []
+      },
+      {
+        "id": "memory-game",
+        "title": [
+          "Game：配對流程的狀態",
+          "Game: matching state",
+          "Game：ペア合わせの状態"
+        ],
+        "file": "model.py · Game",
+        "rows": [
+          {
+            "name": "board",
+            "value": "Board reference",
+            "meaning": [
+              "這一局的牌桌；牌桌再管理 12 張卡片。",
+              "Board for this round, which holds the 12 cards.",
+              "このラウンドの盤面。さらに盤面が 12 枚のカードを管理します。"
+            ]
+          },
+          {
+            "name": "first / second",
+            "value": "Card / None",
+            "meaning": [
+              "本回合已翻開的第一張、第二張卡片參照；還沒有時為 None。",
+              "References to the first and second revealed cards of the turn; None when absent.",
+              "この手番で開いた一枚目・二枚目への参照。未選択なら None。"
+            ]
+          },
+          {
+            "name": "pending",
+            "value": "Card / None",
+            "meaning": [
+              "已排入下一步、但尚未翻開的卡片。queue() 只設定參照，step() 才翻牌。",
+              "Card queued for the next step but not yet revealed. queue() stores the reference; step() reveals it.",
+              "次の一歩に予約した、まだ開いていないカード。queue() は参照を設定し、step() が開きます。"
+            ]
+          },
+          {
+            "name": "phase",
+            "value": "first / second / compare / resolve / won",
+            "meaning": [
+              "依序為等第一張、等第二張、待比較、待結算、全部完成。",
+              "Waiting for first card, second card, comparison, resolution, or all pairs completed.",
+              "一枚目待ち・二枚目待ち・比較待ち・確定待ち・全組完了。"
+            ]
+          },
+          {
+            "name": "result",
+            "value": "None / True / False",
+            "meaning": [
+              "尚未比較／圖案相同／圖案不同。True 表示比較成功，還要結算才會改 matched。",
+              "Not compared / symbols match / symbols differ. True still requires settlement before matched changes.",
+              "比較前／一致／不一致。True でも確定処理までは matched は変わりません。"
+            ]
+          },
+          {
+            "name": "turns",
+            "value": "0, 1, 2, …",
+            "meaning": [
+              "已比較的回合數；compare() 加 1，不是點擊或翻牌次數。",
+              "Number of compared turns; compare() adds 1. Not clicks or individual reveals.",
+              "比較済みの手番数。compare() で 1 増加。クリック数や開いた枚数ではありません。"
+            ]
+          },
+          {
+            "name": "matches",
+            "value": "0 … 6",
+            "meaning": [
+              "已結算成功的配對數；settle() 成功時加 1。",
+              "Settled successful pairs; increments on successful settle().",
+              "確定済みの一致ペア数。settle() 成功時に 1 増加。"
+            ]
+          },
+          {
+            "name": "can_step",
+            "value": "@property → bool",
+            "meaning": [
+              "有 pending 或 phase 是 compare／resolve 時可前進；每次讀取都依目前狀態計算。",
+              "True when pending exists or phase is compare/resolve; calculated from current state on each read.",
+              "pending があるか phase が compare・resolve なら進めます。読むたびに現状から計算します。"
+            ]
+          },
+          {
+            "name": "sample / name / card",
+            "value": "Game methods",
+            "meaning": [
+              "是否固定排列、要選的卡片名稱、暫存的卡片參照。step() 先把 pending 存到 card，再清空 pending。",
+              "Fixed-layout flag, chosen card name, and temporary card reference. step() saves pending in card before clearing pending.",
+              "固定配置フラグ・選ぶカード名・一時的なカード参照。step() は pending を card に保存してから pending を空にします。"
+            ]
+          }
+        ],
+        "notes": [
+          [
+            "清空 first、second、pending 只會解除這些參照。Card 仍在 board.cards 中；settle() 不會刪除卡片。",
+            "Clearing first, second, or pending removes those references. Cards remain in board.cards; settle() does not delete them.",
+            "first・second・pending を空にしても、その参照が外れるだけです。Card は board.cards に残り、settle() はカードを削除しません。"
+          ]
+        ]
+      },
+      {
+        "id": "step-example",
+        "title": [
+          "單步範例：C01 與 C02",
+          "Step example: C01 and C02",
+          "一歩ずつ：C01 と C02"
+        ],
+        "file": "model.py · Game(sample=True)",
+        "rows": [
+          {
+            "name": "queue(\"C01\")",
+            "value": "pending=C01; phase=first",
+            "meaning": [
+              "尚未翻牌；first、second 都是 None。",
+              "Card remains covered; first and second are None.",
+              "まだ裏向き。first・second は None。"
+            ]
+          },
+          {
+            "name": "step()",
+            "value": "first=C01; pending=None; phase=second",
+            "meaning": [
+              "C01.face_up 變 True，等待第二張。",
+              "C01.face_up becomes True; waiting for the second card.",
+              "C01.face_up が True になり、二枚目を待ちます。"
+            ]
+          },
+          {
+            "name": "queue(\"C02\"); step()",
+            "value": "second=C02; phase=compare",
+            "meaning": [
+              "C02 翻開，兩張尚未比較。",
+              "C02 is revealed; comparison has not run yet.",
+              "C02 が開きます。比較はまだです。"
+            ]
+          },
+          {
+            "name": "step() → compare()",
+            "value": "result=True; turns=1; phase=resolve",
+            "meaning": [
+              "圖案相同，但 matches 仍是 0、matched 仍是 False。",
+              "Symbols match, but matches is still 0 and matched is still False.",
+              "図柄は一致。ただし matches は 0、matched は False のまま。"
+            ]
+          },
+          {
+            "name": "step() → settle()",
+            "value": "matches=1; phase=first",
+            "meaning": [
+              "兩張 matched=True；first、second、result 清為 None。",
+              "Both cards have matched=True; first, second, and result become None.",
+              "二枚とも matched=True。first・second・result は None。"
+            ]
+          }
+        ],
+        "notes": [
+          [
+            "改用 C03（leaf）與 C04（sun），比較結果為 False，結算會把兩張蓋回。繪圖迴圈不會自動比較或結算，遊戲狀態由操作推進。",
+            "With C03 (leaf) and C04 (sun), result is False and settlement covers both cards. Rendering never compares or settles automatically; actions advance the state.",
+            "C03（leaf）と C04（sun）なら result は False で、確定時に両方を裏返します。描画ループが自動で比較・確定することはなく、操作で状態を進めます。"
+          ]
+        ],
+        "code": "game = Game(sample=True)\ngame.queue(\"C01\")\nprint(game.pending is game.board.cards[0])  # True\ngame.step()\nprint(game.first is game.board.cards[0])    # True\nprint(game.pending)                        # None"
+      },
+      {
+        "id": "app",
+        "title": [
+          "PygameApp：視窗與操作狀態",
+          "PygameApp: window and controls",
+          "PygameApp：ウィンドウと操作状態"
+        ],
+        "file": "pygame_app.py · PygameApp",
+        "rows": [
+          {
+            "name": "window / screen",
+            "value": "Surface / Surface",
+            "meaning": [
+              "window 是可調整大小的實際視窗；screen 是固定 1280×800 的邏輯畫布。",
+              "window is the resizable display; screen is the fixed 1280×800 logical canvas.",
+              "window は可変サイズの実ウィンドウ。screen は固定 1280×800 の論理描画面。"
+            ]
+          },
+          {
+            "name": "clock",
+            "value": "pygame.time.Clock",
+            "meaning": [
+              "將畫面更新限制為每秒最多 60 次，不會替遊戲自動前進一步。",
+              "Caps rendering at 60 frames per second; does not advance game steps.",
+              "描画を毎秒最大 60 回に制限。ゲームの手順は自動で進めません。"
+            ]
+          },
+          {
+            "name": "game",
+            "value": "Game reference",
+            "meaning": [
+              "目前一局的規則與資料；重新開始時換成新的 Game。",
+              "Current round’s rules and data; replaced with a new Game on reset.",
+              "現在のルールとデータ。再開時に新しい Game へ置き換えます。"
+            ]
+          },
+          {
+            "name": "lang / t",
+            "value": "zh / en / ja; @property",
+            "meaning": [
+              "語言代碼與 TEXT[lang] 文字字典；t 是讀取時計算的屬性。",
+              "Language code and TEXT[lang] dictionary; t is a computed property.",
+              "言語コードと TEXT[lang] 辞書。t は読み取り時に求めるプロパティ。"
+            ]
+          },
+          {
+            "name": "observe",
+            "value": "bool",
+            "meaning": [
+              "是否使用單步觀察：點卡先 queue，按下一步才 reveal。",
+              "Step observation mode: picking queues a card; advancing reveals it.",
+              "一歩ずつ観察するモード。選択で予約し、次へ進むと開きます。"
+            ]
+          },
+          {
+            "name": "labels",
+            "value": "True / False",
+            "meaning": [
+              "是否顯示 C01: Card 等物件標籤。",
+              "Whether labels such as C01: Card are visible.",
+              "C01: Card などの物体ラベルを表示するか。"
+            ]
+          },
+          {
+            "name": "selected",
+            "value": "int · 0 … 11",
+            "meaning": [
+              "檢查器選取的索引；0 表示 C01。它不是 Card 參照，也不等於 first。",
+              "Inspector selection index; 0 means C01. It is neither a Card reference nor first.",
+              "検査対象の添字。0 は C01。Card への参照や first ではありません。"
+            ]
+          },
+          {
+            "name": "sample / running",
+            "value": "bool / bool",
+            "meaning": [
+              "是否固定範例排列／主迴圈是否繼續。觀察模式時 running 仍為 True。",
+              "Fixed sample layout / application loop continues. running stays True in observation mode.",
+              "固定配置か／メインループを続けるか。観察中も running は True。"
+            ]
+          },
+          {
+            "name": "fonts",
+            "value": "dict[int, Font]",
+            "meaning": [
+              "16、18、20、22、28、34 像素大小的字型。",
+              "Fonts sized 16, 18, 20, 22, 28, and 34 pixels.",
+              "16・18・20・22・28・34 ピクセルのフォント。"
+            ]
+          },
+          {
+            "name": "card_rects",
+            "value": "list[Rect]",
+            "meaning": [
+              "12 張卡片的顯示及點擊區域，4 欄 × 3 列。",
+              "Display and hit-test rectangles for 12 cards, in 4 columns × 3 rows.",
+              "12 枚の描画・クリック範囲。4 列 × 3 行。"
+            ]
+          },
+          {
+            "name": "buttons",
+            "value": "dict[str, Rect]",
+            "meaning": [
+              "按鈕名稱對應畫面矩形，例如 advance、match、miss、zh。",
+              "Maps button names to rectangles, e.g. advance, match, miss, zh.",
+              "ボタン名と矩形の対応表。例：advance・match・miss・zh。"
+            ]
+          }
+        ],
+        "notes": []
+      },
+      {
+        "id": "appearance",
+        "title": [
+          "畫面設定常數",
+          "Display constants",
+          "表示の定数"
+        ],
+        "file": "pygame_app.py",
+        "rows": [
+          {
+            "name": "WIDTH / HEIGHT",
+            "value": "1280 / 800",
+            "meaning": [
+              "邏輯畫布的寬與高；視窗縮放不會改變這兩個值。",
+              "Logical canvas dimensions, unchanged by window resizing.",
+              "論理描画面の幅・高さ。ウィンドウを伸縮しても不変。"
+            ]
+          },
+          {
+            "name": "BG / INK / MUTED",
+            "value": "#F4F5F0 / #17373C / #637777",
+            "meaning": [
+              "背景、主要文字、次要文字色。",
+              "Background, primary text, and secondary text colors.",
+              "背景・本文・補助文字の色。"
+            ]
+          },
+          {
+            "name": "GREEN / PURPLE / LINE",
+            "value": "#16695F / #8260AE / #D5DDD6",
+            "meaning": [
+              "強調色、選取框色、框線或停用按鈕底色。",
+              "Accent, selection border, and border/disabled-button colors.",
+              "強調色・選択枠・枠線や無効ボタンの背景色。"
+            ]
+          },
+          {
+            "name": "WHITE / BACK / FACE",
+            "value": "#FFFFFF / #183E43 / #FAF7EF",
+            "meaning": [
+              "白色、卡背色、卡片正面色。",
+              "White, card back, and card face colors.",
+              "白・カード裏面・表面の色。"
+            ]
+          }
+        ],
+        "notes": []
+      },
+      {
+        "id": "input-locals",
+        "title": [
+          "座標換算與輸入變數",
+          "Coordinate and input variables",
+          "座標変換と入力の変数"
+        ],
+        "file": "pygame_app.py",
+        "rows": [
+          {
+            "name": "lang / sample / info",
+            "value": "__init__",
+            "meaning": [
+              "初始語言、是否固定範例、顯示器資訊（current_w、current_h）。",
+              "Initial language, fixed-layout flag, and display information (current_w/current_h).",
+              "初期言語・固定配置フラグ・ディスプレイ情報（current_w・current_h）。"
+            ]
+          },
+          {
+            "name": "scale / size / font / i",
+            "value": "__init__",
+            "meaning": [
+              "初始縮放比、視窗尺寸、字型檔路徑、卡片矩形索引。fonts 推導式的 size 則是單一字型大小。",
+              "Initial scale, window dimensions, font file path, and card index. In the fonts comprehension, size is a font size.",
+              "初期倍率・ウィンドウ寸法・フォントパス・カード番号。fonts の内包表記内の size はフォントサイズ。"
+            ]
+          },
+          {
+            "name": "example",
+            "value": "None / match / miss",
+            "meaning": [
+              "重新開始的模式；match、miss 使用固定排列並開啟觀察，miss 選取索引 2。",
+              "Reset mode; match/miss use fixed layout and observation. miss selects index 2.",
+              "再開モード。match・miss は固定配置と観察を使用。miss は添字 2 を選択。"
+            ]
+          },
+          {
+            "name": "index / card",
+            "value": "pick / click_card",
+            "meaning": [
+              "卡片索引與由 board.cards[index] 取得的 Card 參照。",
+              "Card index and the Card reference from board.cards[index].",
+              "カードの添字と board.cards[index] から得る Card 参照。"
+            ]
+          },
+          {
+            "name": "w / h / scale / size / rect",
+            "value": "viewport / logical_point",
+            "meaning": [
+              "實際視窗寬高、等比例縮放比、縮放後尺寸、置中顯示範圍；多餘空間形成邊框。",
+              "Actual dimensions, aspect-preserving scale, scaled dimensions, and centered viewport; excess space becomes margins.",
+              "実寸・縦横比を保つ倍率・拡大縮小後の寸法・中央の表示範囲。余った領域は余白。"
+            ]
+          },
+          {
+            "name": "pos / point",
+            "value": "click / logical_point",
+            "meaning": [
+              "視窗點擊座標與換算後的邏輯座標；落在畫布外時 point 為 None。click_card 的 pos 已是邏輯座標。",
+              "Window click coordinates and converted logical coordinates; point is None outside the canvas. click_card receives logical pos.",
+              "ウィンドウ座標と変換後の論理座標。描画面外なら point は None。click_card の pos は論理座標です。"
+            ]
+          },
+          {
+            "name": "button / inspect_only",
+            "value": "1 / 3; bool",
+            "meaning": [
+              "滑鼠按鈕 1 是左鍵、3 是右鍵；inspect_only=True 只選取檢查，不翻牌。",
+              "Mouse button 1 is left, 3 is right. inspect_only=True selects for inspection without revealing.",
+              "マウスの 1 は左、3 は右ボタン。inspect_only=True は開かずに検査対象を選択。"
+            ]
+          },
+          {
+            "name": "name / rect",
+            "value": "click",
+            "meaning": [
+              "目前檢查的按鈕名稱與範圍。",
+              "Button name and rectangle currently being hit-tested.",
+              "クリック判定中のボタン名と範囲。"
+            ]
+          },
+          {
+            "name": "event / key / delta",
+            "value": "handle_event / handle_key",
+            "meaning": [
+              "Pygame 事件、按鍵代碼、選取索引位移：左右 −1/+1，上下 −4/+4，最後 %12 循環。",
+              "Pygame event, key code, and selection offset: left/right −1/+1, up/down −4/+4, wrapped with %12.",
+              "Pygame イベント・キーコード・添字の移動量。左右 −1/+1、上下 −4/+4、%12 で循環。"
+            ]
+          }
+        ],
+        "notes": [
+          [
+            "event.type、pos、button、key、repeat 是 Pygame 的事件欄位。略過 repeat 可避免長按一次觸發多個觀察步驟。",
+            "event.type, pos, button, key, and repeat are Pygame event fields. Ignoring repeat avoids advancing several steps from one held key.",
+            "event.type・pos・button・key・repeat は Pygame イベントの属性。repeat を無視して、長押しによる複数ステップを防ぎます。"
+          ]
+        ]
+      },
+      {
+        "id": "drawing-locals",
+        "title": [
+          "繪圖與檢查器的暫存變數",
+          "Drawing and inspector locals",
+          "描画と検査表示の一時変数"
+        ],
+        "file": "pygame_app.py",
+        "rows": [
+          {
+            "name": "value / pos / size / color / image",
+            "value": "text",
+            "meaning": [
+              "文字、左上角、字型大小、顏色、render() 得到的文字圖片。",
+              "Text, top-left position, font size, color, and rendered text surface.",
+              "文字・左上位置・フォントサイズ・色・描画した文字画像。"
+            ]
+          },
+          {
+            "name": "name / label / active / enabled / rect",
+            "value": "button",
+            "meaning": [
+              "按鈕鍵、文字、是否強調、是否顯示可用樣式、範圍。enabled 控制外觀，動作有效性由模型再檢查。",
+              "Button key, caption, accent flag, enabled appearance, and bounds. enabled controls styling; the model validates actions.",
+              "ボタンキー・表示文・強調フラグ・有効表示・範囲。enabled は見た目を変え、動作の妥当性はモデルが確認。"
+            ]
+          },
+          {
+            "name": "pair_id / center / x / y / color",
+            "value": "draw_symbol",
+            "meaning": [
+              "圖案代號、中心座標及其 x/y 分量、圖案顏色。",
+              "Symbol key, center coordinates and x/y components, and symbol color.",
+              "図柄キー・中心座標と x/y 成分・図柄の色。"
+            ]
+          },
+          {
+            "name": "i / angle / points / r",
+            "value": "draw_symbol",
+            "meaning": [
+              "線段或花瓣索引、弧度角、頂點座標清單、太陽光線的兩個半徑 20/27。",
+              "Ray/petal index, angle in radians, vertex coordinates, and sun-ray radii 20/27.",
+              "光線・花びらの番号、ラジアン角、頂点座標、太陽光線の半径 20/27。"
+            ]
+          },
+          {
+            "name": "card / rect / selected / color / label / image",
+            "value": "draw_card",
+            "meaning": [
+              "要畫的卡、矩形、是否加選取框、底色、文字及圖片。此處 selected 是 bool；self.selected 是索引。",
+              "Card, rectangle, selection-border flag, fill color, label, and text image. Here selected is bool; self.selected is an index.",
+              "描くカード・矩形・選択枠フラグ・背景色・文字・画像。ここでの selected は bool、self.selected は添字。"
+            ]
+          },
+          {
+            "name": "card / x / y / pair / key / value / i / ref",
+            "value": "draw_inspector",
+            "meaning": [
+              "選取的卡、文字位置、可顯示的圖案或隱藏文字、屬性鍵、屬性值、列序號、first/second/pending 取得的參照。",
+              "Selected card, text position, visible symbol or hidden label, attribute key/value, row index, and a first/second/pending reference.",
+              "選択カード・文字位置・表示図柄または伏せ字・属性キーと値・行番号・first/second/pending の参照。"
+            ]
+          },
+          {
+            "name": "card / key",
+            "value": "draw_identity",
+            "meaning": [
+              "檢查的 Card 與參照屬性名稱；用 is 判斷是否為同一個物件。",
+              "Inspected Card and reference attribute name; is checks object identity.",
+              "検査対象の Card と参照属性名。is で同じオブジェクトか調べます。"
+            ]
+          },
+          {
+            "name": "lang / label / i / card",
+            "value": "draw",
+            "meaning": [
+              "語言按鈕代碼與文字、下一步文字、逐張繪圖的卡片索引與參照。",
+              "Language button code/caption, next-action caption, and each card’s index/reference during drawing.",
+              "言語ボタンのコードと文言、次の動作の文言、描画中のカード番号と参照。"
+            ]
+          },
+          {
+            "name": "rect / image / event",
+            "value": "present / run",
+            "meaning": [
+              "縮放目標範圍、縮放後畫面、事件迴圈目前處理的輸入。",
+              "Target viewport, scaled screen surface, and current input event.",
+              "拡大縮小の対象範囲・変換後の画像・現在処理中の入力イベント。"
+            ]
+          }
+        ],
+        "notes": []
+      },
+      {
+        "id": "text-startup",
+        "title": [
+          "語言與兩種程式入口",
+          "Localization and two entry points",
+          "言語と二つの起動方法"
+        ],
+        "file": "pygame_text.py · pygame_app.py · main.py",
+        "rows": [
+          {
+            "name": "TEXT / t",
+            "value": "dict / localized data",
+            "meaning": [
+              "pygame_text.py 的 TEXT 是三語 UI 字典；PygameApp.t 讀取目前語言。main.py 的 TEXT、t 則是終端機版的文字表。",
+              "pygame_text.py TEXT is the trilingual UI dictionary; PygameApp.t selects a language. main.py TEXT/t belong to the terminal version.",
+              "pygame_text.py の TEXT は三言語 UI 辞書。PygameApp.t は言語を選択。main.py の TEXT・t は端末版の文言表。"
+            ]
+          },
+          {
+            "name": "parser / args / args.lang / args.sample",
+            "value": "argparse",
+            "meaning": [
+              "解析器、解析結果、指定語言、是否使用固定範例排列。",
+              "Parser, parsed arguments, language, and fixed-layout flag.",
+              "解析器・解析結果・言語・固定配置フラグ。"
+            ]
+          },
+          {
+            "name": "game / lang / start / c / key",
+            "value": "main.py · show",
+            "meaning": [
+              "遊戲、顯示語言、每列起點 0/4/8、目前卡片，以及用來列出參照的屬性名稱 first／second／pending。",
+              "Game, language, row start 0/4/8, current card, and reference attribute name first/second/pending.",
+              "ゲーム・表示言語・行の先頭 0/4/8・現在のカード・参照の表示に使う属性名 first/second/pending。"
+            ]
+          },
+          {
+            "name": "parts / cmd / card",
+            "value": "main.py · main",
+            "meaning": [
+              "輸入文字切開的單字、第一個指令字（小寫）、inspect 要查看的卡片參照。",
+              "Split input tokens, lowercase first command token, and card inspected by inspect.",
+              "入力を分割した語・小文字化した先頭コマンド・inspect で調べるカード参照。"
+            ]
+          },
+          {
+            "name": "__name__",
+            "value": "__main__",
+            "meaning": [
+              "直接執行檔案時啟動 main()；匯入檔案時不會自動開啟遊戲。",
+              "Runs main() on direct execution; importing does not launch the game.",
+              "直接実行した場合に main() を呼び、インポートだけでは起動しません。"
+            ]
+          }
+        ],
+        "notes": [
+          [
+            "TEXT 裡的 pairs、phases 是字典鍵。reveal()、compare()、settle() 是方法；它們是行為名稱，不是儲存狀態的變數。",
+            "pairs and phases inside TEXT are dictionary keys. reveal(), compare(), and settle() are methods: behaviors rather than stored state.",
+            "TEXT の pairs・phases は辞書キー。reveal()・compare()・settle() はメソッドで、保存状態ではなく振る舞いです。"
+          ]
+        ]
+      },
+      {
+        "id": "browser",
+        "title": [
+          "與網頁觀察欄位對照",
+          "Map to the browser inspector",
+          "ブラウザーの検査表示との対応"
+        ],
+        "file": "Python ↔ browser",
+        "rows": [
+          {
+            "name": "first / second / pending / board.cards",
+            "value": "same relationships",
+            "meaning": [
+              "Python 用 is；網頁版用 === 檢查同一物件。兩種版本都共享卡片參照，沒有複製卡片。",
+              "Python uses is and the browser uses === for identity. Both share references without copying cards.",
+              "同一性は Python の is、ブラウザーの === で確認。どちらもカードを複製せず参照を共有します。"
+            ]
+          },
+          {
+            "name": "None ↔ null / undefined",
+            "value": "empty reference / lookup",
+            "meaning": [
+              "Python 空參照使用 None；網頁 first/second/pending 用 null，找不到卡片時可回傳 undefined。",
+              "Python uses None; browser first/second/pending use null, and failed lookup can return undefined.",
+              "Python は None。ブラウザーの first/second/pending は null、検索の未発見は undefined。"
+            ]
+          },
+          {
+            "name": "selected",
+            "value": "Python: 0 … 11; browser: C01 … C12",
+            "meaning": [
+              "Pygame 用整數索引，網頁 UI 用卡片名稱；都只決定檢查器顯示哪張卡。",
+              "Pygame uses an integer index; the browser UI uses a card name. Both choose which card to inspect.",
+              "Pygame は整数の添字、Web UI はカード名。どちらも検査対象を指定します。"
+            ]
+          },
+          {
+            "name": "events",
+            "value": "browser only",
+            "meaning": [
+              "網頁 Game 保留最多六筆事件紀錄（kind、names）。Python model.Game 沒有 events 屬性。",
+              "Browser Game retains up to six log entries (kind, names). Python model.Game has no events attribute.",
+              "ブラウザーの Game は最大六件の記録（kind・names）を保持。Python の model.Game に events 属性はありません。"
+            ]
+          }
+        ],
+        "notes": []
+      }
+    ]
+  }
+}

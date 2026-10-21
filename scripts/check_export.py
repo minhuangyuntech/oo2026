@@ -209,4 +209,29 @@ with zipfile.ZipFile(ROOT/'public/materials/memory-oop-trilingual.zip') as examp
         assert '__pycache__' not in name and not name.endswith('.pyc')
         if name.endswith('.py'):ast.parse(examples.read(name).decode('utf-8'))
 topics=sum(len(lesson['slides']) for lesson in lessons.values())
+guides=json.loads((ROOT/'content/game-variables.json').read_text(encoding='utf-8'))
+for unit,guide in guides.items():
+    assert len({s['id'] for s in guide['sections']})==len(guide['sections'])
+    translations=[guide['intro']]
+    for section in guide['sections']:
+        translations += [section['title'], *section['notes'], *[r['meaning'] for r in section['rows']]]
+        if section.get('code'):ast.parse(section['code'])
+    assert all(len(value)==3 and all(isinstance(t,str) and t.strip() for t in value) for value in translations)
+    for index,lang in enumerate(['zh','en','ja']):
+        prefix='' if lang=='zh' else '/'+lang
+        route=prefix+'/'+unit+'/'
+        page=pages[route]
+        assert {'variables','variable-search',*[f"variables-{s['id']}" for s in guide['sections']]}<=page.ids
+        assert '#variables' in page.links
+        assert BASE+route+'#variables' in pages[route+'play/'].links
+        html=(OUT/route.lstrip('/')/'index.html').read_text(encoding='utf-8')
+        from html import unescape
+        html=unescape(html)
+        for section in guide['sections']:
+            assert section['title'][index] in html
+            for row in section['rows']:
+                assert row['name'] in html and row['meaning'][index] in html,(route,row['name'])
+        for other in ['','/en','/ja']:
+            assert BASE+other+'/'+unit+'/#variables' in page.links
+print('PASS: 6 localized variable guides, translations, code snippets, lesson/game entry links, and language anchors.')
 print(f'PASS: 3 homepages, 30 localized lessons ({topics} topics), 6 playable game pages, 12 preserved later weeks, links/assets/anchors, 21 deck checksums, and {codes} Python excerpts.')
