@@ -620,6 +620,96 @@
           "https://minhuangyuntech.github.io/oo2026/pygame/"
         ]
       ]
+    },
+    {
+      "number": 31,
+      "type": "browser-link",
+      "title": "開啟線上遊戲",
+      "sub": "免安裝，用瀏覽器讓五個類別動起來。",
+      "notes": [
+        "開啟網址後，按「開始遊戲」；玩家、敵人與子彈各自是一個物件。",
+        "上方可切換中文、English、日本語；切換時保留當前場景與分數。",
+        "線上版以 TypeScript / Canvas 實作；類別責任與規則對應原 Pygame 範例。"
+      ],
+      "links": [
+        [
+          "點選連結，開始遊戲",
+          "https://minhuangyuntech.github.io/oo2026/pygame/play/"
+        ]
+      ],
+      "sources": [
+        [
+          "OOP Star Lab — browser edition",
+          "https://minhuangyuntech.github.io/oo2026/pygame/play/"
+        ]
+      ]
+    },
+    {
+      "number": 32,
+      "type": "browser-controls",
+      "title": "線上版：鍵盤與觸控操作",
+      "sub": "先點選遊戲畫面，再使用鍵盤；也可使用畫面上的按鈕。",
+      "values": [
+        [
+          "按鍵",
+          "動作"
+        ],
+        [
+          "Enter",
+          "開始／繼續遊戲"
+        ],
+        [
+          "方向鍵 / WASD",
+          "移動玩家"
+        ],
+        [
+          "按住 Space",
+          "連續射擊"
+        ],
+        [
+          "P",
+          "暫停／繼續"
+        ],
+        [
+          "N",
+          "暫停時前進 1/60 秒，不自動射擊"
+        ],
+        [
+          "L",
+          "顯示／隱藏物件標籤"
+        ],
+        [
+          "R",
+          "重新開始，回到準備畫面"
+        ]
+      ],
+      "notes": [
+        "觸控：按住方向與射擊按鈕；用「暫停觀察」與「單步 +1/60 秒」觀察。",
+        "標籤切換：線上版用 L；原 Pygame 版用 Tab。瀏覽器的 Tab 用來移動焦點。"
+      ],
+      "sources": [
+        [
+          "OOP Star Lab — browser edition",
+          "https://minhuangyuntech.github.io/oo2026/pygame/play/"
+        ]
+      ]
+    },
+    {
+      "number": 33,
+      "type": "browser-snapshot",
+      "title": "暫停觀察：兩顆子彈，一個玩家",
+      "sub": "停止時間，追蹤同一個物件的參照與座標變化。",
+      "notes": [
+        "1  按「載入觀察範例」：重設為暫停場景，含 1 個 Player、3 個 Enemy、2 個 Bullet。",
+        "2  依序選取 B01、B02。兩者的 owner 都指向同一個 player，沒有複製玩家。",
+        "3  按一次 N：B01.y 從 490.0 變成 479.7。時間前進 1/60 秒，不自動射擊。"
+      ],
+      "sources": [
+        [
+          "OOP Star Lab — browser edition",
+          "https://minhuangyuntech.github.io/oo2026/pygame/play/"
+        ]
+      ]
     }
   ],
   "en": [
@@ -1243,6 +1333,96 @@
           "https://minhuangyuntech.github.io/oo2026/en/pygame/"
         ]
       ]
+    },
+    {
+      "number": 31,
+      "type": "browser-link",
+      "title": "Play in your browser",
+      "sub": "No installation. Bring the five classes to life.",
+      "notes": [
+        "Open the link and choose “Start game”. Each player, enemy, and bullet is an object.",
+        "Switch between 中文, English, and 日本語 at the top. The scene and score are preserved.",
+        "The browser edition uses TypeScript / Canvas, with the same class responsibilities and rules as the Pygame example."
+      ],
+      "links": [
+        [
+          "Open the game",
+          "https://minhuangyuntech.github.io/oo2026/en/pygame/play/"
+        ]
+      ],
+      "sources": [
+        [
+          "OOP Star Lab — browser edition",
+          "https://minhuangyuntech.github.io/oo2026/en/pygame/play/"
+        ]
+      ]
+    },
+    {
+      "number": 32,
+      "type": "browser-controls",
+      "title": "Browser controls: keyboard & touch",
+      "sub": "Click the playfield before using keys, or use the on-screen buttons.",
+      "values": [
+        [
+          "Key",
+          "Action"
+        ],
+        [
+          "Enter",
+          "Start / resume"
+        ],
+        [
+          "Arrows / WASD",
+          "Move the player"
+        ],
+        [
+          "Hold Space",
+          "Fire continuously"
+        ],
+        [
+          "P",
+          "Pause / resume"
+        ],
+        [
+          "N",
+          "Advance 1/60 s while paused; no automatic shot"
+        ],
+        [
+          "L",
+          "Show / hide object labels"
+        ],
+        [
+          "R",
+          "Restart at the ready screen"
+        ]
+      ],
+      "notes": [
+        "Touch: hold the direction and Fire buttons; use “Pause & inspect” and “Step +1/60 s”.",
+        "Labels: L in the browser; Tab in Pygame. Browser Tab moves keyboard focus."
+      ],
+      "sources": [
+        [
+          "OOP Star Lab — browser edition",
+          "https://minhuangyuntech.github.io/oo2026/en/pygame/play/"
+        ]
+      ]
+    },
+    {
+      "number": 33,
+      "type": "browser-snapshot",
+      "title": "Pause: two bullets, one player",
+      "sub": "Freeze time. Follow object references and position changes.",
+      "notes": [
+        "1  Choose “Load example scene”. This resets to a paused scene: 1 Player, 3 Enemies, and 2 Bullets.",
+        "2  Select B01, then B02. Both owner references point to the same player. The player is not copied.",
+        "3  Press N once: B01.y changes from 490.0 to 479.7. Time advances 1/60 s; no automatic shot."
+      ],
+      "sources": [
+        [
+          "OOP Star Lab — browser edition",
+          "https://minhuangyuntech.github.io/oo2026/en/pygame/play/"
+        ]
+      ]
     }
   ],
   "ja": [
@@ -1864,6 +2044,96 @@
         [
           "Course · Pygame",
           "https://minhuangyuntech.github.io/oo2026/ja/pygame/"
+        ]
+      ]
+    },
+    {
+      "number": 31,
+      "type": "browser-link",
+      "title": "ブラウザーで遊ぶ",
+      "sub": "インストール不要。五つのクラスを動かそう。",
+      "notes": [
+        "リンクを開いて「ゲーム開始」を押します。自機・敵・弾はそれぞれオブジェクトです。",
+        "上部で中文・English・日本語を切り替えられます。場面とスコアは維持されます。",
+        "ブラウザー版は TypeScript / Canvas で実装。クラスの責任とルールは Pygame 版と共通です。"
+      ],
+      "links": [
+        [
+          "ゲームを開く",
+          "https://minhuangyuntech.github.io/oo2026/ja/pygame/play/"
+        ]
+      ],
+      "sources": [
+        [
+          "OOP Star Lab — browser edition",
+          "https://minhuangyuntech.github.io/oo2026/ja/pygame/play/"
+        ]
+      ]
+    },
+    {
+      "number": 32,
+      "type": "browser-controls",
+      "title": "ブラウザー版：キーとタッチ操作",
+      "sub": "画面をクリックしてからキーを使います。画面上のボタンでも操作できます。",
+      "values": [
+        [
+          "キー",
+          "動作"
+        ],
+        [
+          "Enter",
+          "開始／再開"
+        ],
+        [
+          "矢印 / WASD",
+          "自機を移動"
+        ],
+        [
+          "Space を長押し",
+          "連続発射"
+        ],
+        [
+          "P",
+          "一時停止／再開"
+        ],
+        [
+          "N",
+          "停止中に 1/60 秒進む（自動発射なし）"
+        ],
+        [
+          "L",
+          "オブジェクト名の表示／非表示"
+        ],
+        [
+          "R",
+          "準備画面にリセット"
+        ]
+      ],
+      "notes": [
+        "タッチ：方向・発射ボタンを長押し。「止めて観察」「1 コマ進む +1/60 秒」で観察。",
+        "名前の切替はブラウザー版が L、Pygame 版が Tab。ブラウザーの Tab はフォーカス移動。"
+      ],
+      "sources": [
+        [
+          "OOP Star Lab — browser edition",
+          "https://minhuangyuntech.github.io/oo2026/ja/pygame/play/"
+        ]
+      ]
+    },
+    {
+      "number": 33,
+      "type": "browser-snapshot",
+      "title": "止めて観察：二つの弾、一つの自機",
+      "sub": "時間を止め、参照と座標の変化を追ってみよう。",
+      "notes": [
+        "1  「観察用シーンを読み込む」\n新しい停止場面を作成：\nPlayer × 1、Enemy × 3、Bullet × 2。",
+        "2  B01 と B02 を順に選び、\nowner を確認。どちらも同じ player を\n参照し、自機はコピーされません。",
+        "3  N を 1 回押して座標を確認：\nB01.y：490.0 → 479.7\n1/60 秒進み、自動発射はありません。"
+      ],
+      "sources": [
+        [
+          "OOP Star Lab — browser edition",
+          "https://minhuangyuntech.github.io/oo2026/ja/pygame/play/"
         ]
       ]
     }

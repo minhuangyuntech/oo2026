@@ -4,23 +4,23 @@
     "language": "zh",
     "source": "Pygame_物件導向射擊遊戲_繁體中文.pptx",
     "download": "pygame-zh.pptx",
-    "slides": 30,
-    "sha256": "27afd5b8f15cdb1802eca4e9e8de8a4b3341e3f7290896d91047282a9ee829f5"
+    "slides": 33,
+    "sha256": "7fbe3c91b29651a4fe13af1fbb59cb3132c7c4e4f78e0c092901736cbc0aa167"
   },
   {
     "unit": "pygame",
     "language": "en",
     "source": "Pygame_OOP_Shooter_English.pptx",
     "download": "pygame-en.pptx",
-    "slides": 30,
-    "sha256": "217ba0d4362c4c13b5c665f4ee9942bc16f8efdac088de0a3ef5d1fe9bd2b113"
+    "slides": 33,
+    "sha256": "77f430623db67a8b6fe5b4915c379065e1b70113d612b96e7998e2e5fbfe974b"
   },
   {
     "unit": "pygame",
     "language": "ja",
     "source": "Pygame_オブジェクト指向シューティング_日本語.pptx",
     "download": "pygame-ja.pptx",
-    "slides": 30,
-    "sha256": "9cf6842c328f122b002a4c91a1d76ee5a42b8631a6385df85b6937fa531ee67c"
+    "slides": 33,
+    "sha256": "52847111a1ff70a3cd9ba7c1cbbcc9aa1cce5c027cc385581b265ffdeb5b55da"
   }
 ]

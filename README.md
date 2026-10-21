@@ -2,7 +2,7 @@
 
 以 Python 為主要實作語言的 18 週物件導向程式設計教材網站。
 
-第 1–6 週、GUI 入門與 Django 網站入門已依最新版投影片同步，提供繁體中文、英文與日文完整網頁教材，共 301 個原始投影片主題、903 個語言版本主題。第 7–18 週保留原有中文教材與網址。
+第 1–6 週、GUI 入門、Django 網站入門與 Pygame 射擊遊戲已依最新版投影片同步，提供繁體中文、英文與日文完整網頁教材，共 334 個原始投影片主題、1002 個語言版本主題。第 7–18 週保留原有中文教材與網址。
 
 - 中文：`/`、`/week/1/` 至 `/week/6/`、`/gui/`、`/django/`
 - 英文：`/en/`、`/en/week/1/` 至 `/en/week/6/`、`/en/gui/`、`/en/django/`
@@ -21,12 +21,13 @@
 | 5–6 | 生命週期與 UML・學生版 UML 加強版 | 中文 30 頁；第 5 週 1–11 頁、第 6 週 12–30 頁 |
 | GUI | 五種常見做法・學生版 v2 | 中文 32 頁；五個工具家族與六個可執行範例 |
 | Django | 網站建立與專案檔案解析；中文 v3、英文 v2、日文 v3 | 各語言 53 頁，含對應語言的商品目錄專案 |
+| Pygame | 射擊遊戲、類別與物件觀察 | 中、英、日各 33 頁；第 31–33 頁為線上版連結、操作與暫停範例 |
 
 `content/source-manifest.json` 記錄完整原始檔名、下載檔名、頁數與 SHA-256。第 1–3 週英日文取自既有翻譯投影片，第 4 週翻譯位於 `content/week4-translations.json`。程式碼保留來源縮排，投影片片段不一律視為可獨立執行的程式。
 
 `content/slide-sources.json` 是原始投影片可見文字、表格與程式碼的結構化擷取；`scripts/sync_materials.py` 將其轉為 `content/lessons.json`。第 4 週四張機制示意圖重製為有文字內容、可縮放的網頁流程圖。
 
-`public/materials/` 提供 15 份原始 PPTX，以及第 3、4、5–6 週、GUI 和 Django 的七個範例 ZIP。第 4 週 ZIP 另加入 `django_product_demo.py` 和三語操作說明，對應最新投影片 47–50 頁；原本的 `slide_XX.py` 檔名保留舊版頁碼，下載包已說明差異。
+`public/materials/` 提供 18 份原始 PPTX，以及第 3、4、5–6 週、GUI、Django 和 Pygame 的八個範例 ZIP。第 4 週 ZIP 另加入 `django_product_demo.py` 和三語操作說明，對應最新投影片 47–50 頁；原本的 `slide_XX.py` 檔名保留舊版頁碼，下載包已說明差異。
 
 新增單元的原始擷取、完整英日文翻譯與來源雜湊位於 `content/additional-slide-sources.json`、`content/additional-translations.json`、`content/additional-source-manifest.json`。`scripts/sync_additional.py` 由主同步腳本呼叫，保留 Python 縮排並區分 PowerShell 命令。8 張參考／UML 圖以可縮放 SVG 重製，5 張 GUI 操作畫面直接取自最新版投影片。第 5、6 週沿用原投影片頁碼，因此第 6 週從第 12 頁開始。
 
@@ -62,6 +63,8 @@ python scripts/sync_materials.py ../output
 檢查工具驗證三語頁面、主題完整性、下載檔案雜湊、站內連結、錨點、靜態資產、原始程式行及 Python 語法。Django 範例另以 5.2.x 執行驗證；帳戶範例沿用其 13 項公開契約測試。
 
 ## Pygame 瀏覽器遊戲
+
+三語教材第八章（第 31–33 頁）包含各語言的遊戲網址、鍵盤／觸控操作與實際暫停畫面。範例追蹤 B01、B02 的共同 owner，以及單步後 B01.y 從 490.0 變為 479.7。`content/pygame-slides.json` 是共同內容來源；`python scripts/sync_pygame.py ../output` 同步三語網頁、PPTX、圖片、ZIP 與來源雜湊。ZIP 的三語 HTML 教材也收錄這三個主題。
 
 課程首頁與 Pygame 教材皆有遊戲入口：`/pygame/play/`、`/en/pygame/play/`、`/ja/pygame/play/`。這是原 Pygame 範例的 TypeScript / Canvas 移植版，無須安裝 Python、套件或瀏覽器外掛。切換語言保留現有場景、分數、標籤設定與選取物件；重新整理網頁則重新開始。
 

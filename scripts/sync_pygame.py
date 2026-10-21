@@ -31,6 +31,10 @@ def sync_pygame(lessons, folder=None):
                 slide.update(image=f"/materials/pygame-{lang}-preview.png",
                              imageAlt=source["title"],imageLayout="wide",
                              imageWidth=1200,imageHeight=800)
+            if source["type"] == "browser-snapshot":
+                slide.update(image=f"/materials/pygame-{lang}-browser-observe.png",
+                             imageAlt=source["title"],imageLayout="wide",
+                             imageWidth=470,imageHeight=388)
             if "links" in source:
                 slide["body"] += [{"type":"text","text":f"{label}: {url}"} for label,url in source["links"]]
             result.append(slide)
@@ -45,6 +49,8 @@ def sync_pygame(lessons, folder=None):
                              "sha256":hashlib.sha256(source.read_bytes()).hexdigest()})
             shutil.copyfile(folder/f"pygame_oop_shooter/docs/game-preview-{lang}.png",
                             ROOT/f"public/materials/pygame-{lang}-preview.png")
+            shutil.copyfile(folder/f"pygame_oop_shooter/docs/browser-observe-{lang}.png",
+                            ROOT/f"public/materials/pygame-{lang}-browser-observe.png")
     if folder:
         shutil.copyfile(folder/"Pygame_OOP_Shooter_Trilingual.zip",ROOT/"public/materials/pygame-oop-shooter.zip")
         (ROOT/"content/pygame-source-manifest.json").write_text(json.dumps(manifest,ensure_ascii=False,indent=2),encoding="utf-8")
@@ -54,4 +60,4 @@ if __name__=="__main__":
     lessons=json.loads((ROOT/"content/lessons.json").read_text(encoding="utf-8"))
     sync_pygame(lessons,Path(sys.argv[1]) if len(sys.argv)>1 else None)
     (ROOT/"content/lessons.json").write_text(json.dumps(lessons,ensure_ascii=False,separators=(",",":")),encoding="utf-8")
-    print("Synced 3 Pygame lessons, 90 topics.")
+    print(f"Synced 3 Pygame lessons, {sum(len(lessons[f'{lang}-pygame']['slides']) for lang in FILES)} topics.")

@@ -5,6 +5,8 @@ from urllib.parse import unquote, urlsplit
 import ast
 import hashlib
 import json
+import re
+import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'out'
@@ -141,12 +143,19 @@ for lang,deck in django_raw.items():
 pygame_raw=json.loads((ROOT/'content/pygame-slides.json').read_text(encoding='utf-8'))
 for lang,deck in pygame_raw.items():
     lesson=lessons[f'{lang}-pygame']
-    assert len(lesson['slides'])==30
-    assert sum(bool(s.get('image')) for s in lesson['slides'])==5
+    assert len(lesson['slides'])==33
+    assert sum(bool(s.get('image')) for s in lesson['slides'])==6
+    prefix='' if lang=='zh' else '/'+lang
+    game_url='https://minhuangyuntech.github.io'+BASE+prefix+'/pygame/play/'
+    assert game_url in pages[prefix+'/pygame/'].links
+    with zipfile.ZipFile(ROOT/'public/materials'/lesson['download']) as pptx:
+        assert len([n for n in pptx.namelist() if re.fullmatch(r'ppt/slides/slide\d+\.xml',n)])==33
+        assert game_url in pptx.read('ppt/slides/_rels/slide31.xml.rels').decode('utf-8')
     for source,slide in zip(deck,lesson['slides']):
         assert slide.get('code')==source.get('code')
         assert slide['title']==source['title']
         assert [b['text'] for b in slide['body'] if b['type']=='text'][1:1+len(source['notes'])]==source['notes']
         if slide.get('code') and slide['codeLanguage']=='python':
             ast.parse(slide['code']);codes+=1
-print(f'PASS: 3 homepages, 27 localized lessons (993 topics), 3 playable game pages, 12 preserved later weeks, links/assets/anchors, 18 deck checksums, and {codes} Python excerpts.')
+topics=sum(len(lesson['slides']) for lesson in lessons.values())
+print(f'PASS: 3 homepages, 27 localized lessons ({topics} topics), 3 playable game pages, 12 preserved later weeks, links/assets/anchors, 18 deck checksums, and {codes} Python excerpts.')
