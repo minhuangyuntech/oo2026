@@ -1,0 +1,26 @@
+[
+  {
+    "week": 8,
+    "language": "zh",
+    "source": "Week8_多型抽象化與介面_繁體中文.pptx",
+    "download": "week-8-zh.pptx",
+    "slides": 32,
+    "sha256": "a35160503968c9fd322a1c54d6d0314fa127cbba0536a398e2859e50b2446cc7"
+  },
+  {
+    "week": 8,
+    "language": "en",
+    "source": "Week8_Polymorphism_Abstraction_Interfaces_English.pptx",
+    "download": "week-8-en.pptx",
+    "slides": 32,
+    "sha256": "aad573f63c25c10a430d94a19d9c045233cc1a426afef41c24b15957e5216bdc"
+  },
+  {
+    "week": 8,
+    "language": "ja",
+    "source": "Week8_多態性抽象化インターフェース_日本語.pptx",
+    "download": "week-8-ja.pptx",
+    "slides": 32,
+    "sha256": "98ff3023beecf6c7989da79ffe149d3342f035670e0c634eafe5080a0c67766c"
+  }
+]

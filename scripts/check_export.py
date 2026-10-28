@@ -35,7 +35,7 @@ class Page(HTMLParser):
 
 pages = {('/'+str(file.relative_to(OUT)).replace('\\','/').removesuffix('index.html')):Page(file) for file in OUT.rglob('index.html')}
 lessons=json.loads((ROOT/"content/lessons.json").read_text(encoding="utf-8"))
-units=[1,2,3,4,5,6,"gui","django","pygame","memory"]
+units=[1,2,3,4,5,6,8,"gui","django","pygame","memory"]
 for locale, prefix, html_lang in [('zh','','zh-Hant'),('en','/en','en'),('ja','/ja','ja')]:
     home=pages[prefix+'/']
     assert home.lang == html_lang
@@ -104,7 +104,7 @@ for locale, prefix, html_lang in [('zh','','zh-Hant'),('en','/en','en'),('ja','/
     html=(OUT/route.lstrip('/')/'index.html').read_text(encoding='utf-8')
     assert 'rel="canonical" href="https://minhuangyuntech.github.io'+BASE+route+'"' in html
 
-manifest=[source for name in ['source-manifest.json','additional-source-manifest.json','django-source-manifest.json','pygame-source-manifest.json','memory-source-manifest.json'] for source in json.loads((ROOT/'content'/name).read_text(encoding='utf-8'))]
+manifest=[source for name in ['source-manifest.json','additional-source-manifest.json','django-source-manifest.json','pygame-source-manifest.json','memory-source-manifest.json','week8-source-manifest.json'] for source in json.loads((ROOT/'content'/name).read_text(encoding='utf-8'))]
 for source in manifest:
     file=ROOT/'public/materials'/source['download']
     assert hashlib.sha256(file.read_bytes()).hexdigest()==source['sha256'],source['source']
@@ -140,7 +140,7 @@ for source_key,deck in additional.items():
             ast.parse(code)
             codes+=1
 for lang in ['zh','en','ja']:
-    for unit in [5,6,'gui','django','pygame','memory']:
+    for unit in [5,6,8,'gui','django','pygame','memory']:
         lesson=lessons[f'{lang}-{unit}']
         route=('' if lang=='zh' else '/'+lang)+(f'/{unit}/' if isinstance(unit,str) else f'/week/{unit}/')
         for name in [lesson['download'],lesson['examples']]:assert f'{BASE}/materials/{name}' in pages[route].links
@@ -208,6 +208,27 @@ with zipfile.ZipFile(ROOT/'public/materials/memory-oop-trilingual.zip') as examp
     for name in examples.namelist():
         assert '__pycache__' not in name and not name.endswith('.pyc')
         if name.endswith('.py'):ast.parse(examples.read(name).decode('utf-8'))
+week8_raw=json.loads((ROOT/'content/week8-slides.json').read_text(encoding='utf-8'))
+for lang,deck in week8_raw.items():
+    lesson=lessons[f'{lang}-8']
+    prefix='' if lang=='zh' else '/'+lang
+    route=prefix+'/week/8/'
+    assert len(lesson['slides'])==len(deck)==32
+    assert sum(bool(s.get('image')) for s in lesson['slides'])==2
+    assert BASE+route in pages[prefix+'/'].links
+    for locale in ['','/en','/ja']:assert BASE+locale+'/week/8/' in pages[route].links
+    game_url='https://minhuangyuntech.github.io'+BASE+prefix+'/pygame/play/'
+    assert game_url in pages[route].links
+    with zipfile.ZipFile(ROOT/'public/materials'/lesson['download']) as pptx:
+        assert len([n for n in pptx.namelist() if re.fullmatch(r'ppt/slides/slide\d+\.xml',n)])==32
+        assert game_url in pptx.read('ppt/slides/_rels/slide28.xml.rels').decode('utf-8')
+        assert 'week-8-examples.zip' in pptx.read('ppt/slides/_rels/slide29.xml.rels').decode('utf-8')
+    for source,slide in zip(deck,lesson['slides']):
+        assert slide['title']==source['title'].replace('\n',' ')
+        assert slide.get('code')==source.get('code')
+        assert [b['text'] for b in slide['body'] if b['type']=='text'][1:1+len(source['notes'])]==source['notes']
+        if 'values' in source:assert next(b['rows'] for b in slide['body'] if b['type']=='table')==source['values']
+        if slide.get('code') and slide['codeLanguage']=='python':ast.parse(slide['code']);codes+=1
 topics=sum(len(lesson['slides']) for lesson in lessons.values())
 guides=json.loads((ROOT/'content/game-variables.json').read_text(encoding='utf-8'))
 for unit,guide in guides.items():
@@ -234,4 +255,4 @@ for unit,guide in guides.items():
         for other in ['','/en','/ja']:
             assert BASE+other+'/'+unit+'/#variables' in page.links
 print('PASS: 6 localized variable guides, translations, code snippets, lesson/game entry links, and language anchors.')
-print(f'PASS: 3 homepages, 30 localized lessons ({topics} topics), 6 playable game pages, 12 preserved later weeks, links/assets/anchors, 21 deck checksums, and {codes} Python excerpts.')
+print(f'PASS: 3 homepages, 33 localized lessons ({topics} topics), 6 playable game pages, 11 preserved legacy weeks, links/assets/anchors, 24 deck checksums, and {codes} Python excerpts.')

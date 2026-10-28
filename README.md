@@ -2,7 +2,7 @@
 
 以 Python 為主要實作語言的 18 週物件導向程式設計教材網站。
 
-第 1–6 週、GUI 入門、Django 網站入門、Pygame 射擊遊戲與翻牌配對已依最新版投影片同步，提供繁體中文、英文與日文完整網頁教材，共 361 個原始投影片主題、1083 個語言版本主題。第 7–18 週保留原有中文教材與網址。
+第 1–6、8 週、GUI 入門、Django 網站入門、Pygame 射擊遊戲與翻牌配對已依最新版投影片同步，提供繁體中文、英文與日文完整網頁教材，共 393 個原始投影片主題、1179 個語言版本主題。第 7、9–18 週保留原有中文教材與網址。
 
 兩種遊戲另有獨立的三語「變數與物件屬性」網頁補充教材，位於各語言 `/pygame/#variables` 與 `/memory/#variables`。內容涵蓋設定值、物件屬性、參數、區域變數、參照關係與單步狀態，附變數搜尋及檔案／類別索引；教材上方、閱讀目錄、遊戲頁皆有入口。
 
@@ -23,6 +23,7 @@
 | 3 | 類別、物件與物件模型；英、日文 v2 | 中、英、日各 40 頁 |
 | 4 | 封裝與資訊隱藏・Django 版 | 中文 56 頁；網頁另補英、日文 |
 | 5–6 | 生命週期與 UML・學生版 UML 加強版 | 中文 30 頁；第 5 週 1–11 頁、第 6 週 12–30 頁 |
+| 8 | 多型、抽象化與介面；射擊遊戲延伸 | 中、英、日各 32 頁，含 ABC、Protocol、移動策略與可執行下載包 |
 | GUI | 五種常見做法・學生版 v2 | 中文 32 頁；五個工具家族與六個可執行範例 |
 | Django | 網站建立與專案檔案解析；中文 v3、英文 v2、日文 v3 | 各語言 53 頁，含對應語言的商品目錄專案 |
 | Pygame | 射擊遊戲、類別與物件觀察 | 中、英、日各 33 頁；第 31–33 頁為線上版連結、操作與暫停範例 |
@@ -32,7 +33,7 @@
 
 `content/slide-sources.json` 是原始投影片可見文字、表格與程式碼的結構化擷取；`scripts/sync_materials.py` 將其轉為 `content/lessons.json`。第 4 週四張機制示意圖重製為有文字內容、可縮放的網頁流程圖。
 
-`public/materials/` 提供 21 份 PPTX，以及第 3、4、5–6 週、GUI、Django、Pygame 和翻牌配對的九個範例 ZIP。第 4 週 ZIP 另加入 `django_product_demo.py` 和三語操作說明，對應最新投影片 47–50 頁；原本的 `slide_XX.py` 檔名保留舊版頁碼，下載包已說明差異。
+`public/materials/` 提供 24 份 PPTX，以及第 3、4、5–6、8 週、GUI、Django、Pygame 和翻牌配對的十個範例 ZIP。第 4 週 ZIP 另加入 `django_product_demo.py` 和三語操作說明，對應最新投影片 47–50 頁；原本的 `slide_XX.py` 檔名保留舊版頁碼，下載包已說明差異。
 
 新增單元的原始擷取、完整英日文翻譯與來源雜湊位於 `content/additional-slide-sources.json`、`content/additional-translations.json`、`content/additional-source-manifest.json`。`scripts/sync_additional.py` 由主同步腳本呼叫，保留 Python 縮排並區分 PowerShell 命令。8 張參考／UML 圖以可縮放 SVG 重製，5 張 GUI 操作畫面直接取自最新版投影片。第 5、6 週沿用原投影片頁碼，因此第 6 週從第 12 頁開始。
 
@@ -41,6 +42,12 @@
 Django 單元使用 `content/django-slide-sources.json`，由 `scripts/sync_django.py` 保留三語投影片內容與 12 張原始圖像。命令、目錄、Python、模板 HTML 與 CSS 分開顯示及複製。`content/django-example-sources.json` 保存三語完整範例，含補齊的本機 `config/settings.py`；打包時使用固定 ZIP 時間戳。每個語言專案有 24 個檔案，皆不含資料庫、虛擬環境或使用者資料。`content/django-source-manifest.json` 記錄三份原始投影片雜湊。
 
 ## 本機預覽
+
+第 8 週新增 `/week/8/`、`/en/week/8/`、`/ja/week/8/`。共同來源是 `content/week8-slides.json`，`python scripts/sync_week8.py ../output` 同步三語網頁、32 頁 PPTX、範例 ZIP 與 `week8-source-manifest.json`。主同步腳本也會保留這個單元。
+
+下載包 `materials/week-8-examples.zip` 包含原射擊遊戲與新 `WeavingEnemy`、`StrategyEnemy`，以 `python demo_game.py --lang zh` 執行；另有 ABC／Protocol 範例、三種 Motion、三語 README 和離線 HTML。C 切換既有策略敵人的直線／擺動方式，P 暫停，N 單步。瀏覽器射擊遊戲維持原版。
+
+`python scripts/check_week8_package.py` 驗證實際 ZIP 的 7 項行為測試、成功的型別檢查與刻意失敗的 `typing_error.py`。需要 pygame==2.6.1 與 mypy==2.4.0；GitHub Actions 也會執行。
 
 ```bash
 npm ci

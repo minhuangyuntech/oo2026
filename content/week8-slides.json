@@ -1,0 +1,1847 @@
+{
+  "zh": [
+    {
+      "number": 1,
+      "type": "cover",
+      "title": "多型、抽象化與介面",
+      "sub": "第 8 週",
+      "notes": [
+        "以射擊遊戲理解共同介面與可替換物件"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip"
+      ]
+    },
+    {
+      "number": 2,
+      "type": "text",
+      "title": "本週學習內容",
+      "sub": "同一個呼叫，可以交給不同物件完成",
+      "notes": [
+        "追蹤 update(dt)，理解多型與動態繫結。",
+        "比較鴨子型別、ABC 與 Protocol。",
+        "新增敵人行為，並以組合替換移動策略。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip"
+      ]
+    },
+    {
+      "number": 3,
+      "type": "image",
+      "title": "原射擊遊戲中的物件",
+      "sub": "Game 管理 Player、Enemy 與 Bullet",
+      "notes": [
+        "每個角色保存自己的位置、速度與狀態。",
+        "Game 透過群組呼叫更新，角色負責自己的行為。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/pygame-oop-shooter.zip",
+        "https://www.pygame.org/docs/ref/sprite.html#pygame.sprite.Group.update"
+      ],
+      "image": "pygame-zh-preview.png"
+    },
+    {
+      "number": 4,
+      "type": "table",
+      "title": "既有類別與更新責任",
+      "sub": "Enemy 直接沿用 Actor.update()",
+      "notes": [
+        "繼承的方法也能參與多型，不必每個子類別都覆寫。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/pygame-oop-shooter.zip"
+      ],
+      "values": [
+        [
+          "類別",
+          "更新方式"
+        ],
+        [
+          "Actor",
+          "依 velocity 移動並同步 rect"
+        ],
+        [
+          "Player",
+          "共同移動，再限制範圍與更新冷卻"
+        ],
+        [
+          "Enemy",
+          "沿用 Actor 的移動"
+        ],
+        [
+          "Bullet",
+          "共同移動，再移除離開畫面的子彈"
+        ]
+      ]
+    },
+    {
+      "number": 5,
+      "type": "code",
+      "title": "一次呼叫，更新整個群組",
+      "sub": "原遊戲 game.py 的 Game.update()",
+      "notes": [
+        "Group.update(dt) 把同一個 dt 傳給每個 Sprite 的 update。",
+        "群組不會收集各 update 的回傳值。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/pygame-oop-shooter.zip",
+        "https://www.pygame.org/docs/ref/sprite.html#pygame.sprite.Group.update"
+      ],
+      "code": "self.all_sprites.update(dt)\n\n# Conceptual equivalent:\nfor actor in self.all_sprites:\n    actor.update(dt)",
+      "file": "game.py / Game.update"
+    },
+    {
+      "number": 6,
+      "type": "table",
+      "title": "動態繫結的呼叫路徑",
+      "sub": "呼叫時依物件的實際類別尋找方法",
+      "notes": [
+        "迴圈變數都叫 actor，實際參照的物件可以不同。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/pygame-oop-shooter.zip",
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance"
+      ],
+      "values": [
+        [
+          "實際物件",
+          "找到的方法",
+          "後續呼叫"
+        ],
+        [
+          "player: Player",
+          "Player.update",
+          "super().update(dt)"
+        ],
+        [
+          "E01: Enemy",
+          "Actor.update",
+          "直接移動"
+        ],
+        [
+          "B01: Bullet",
+          "Bullet.update",
+          "super().update(dt)"
+        ]
+      ]
+    },
+    {
+      "number": 7,
+      "type": "code",
+      "title": "共同移動與 dt",
+      "sub": "dt 的單位是秒，velocity 的單位是像素／秒",
+      "notes": [
+        "子彈速度 −620，dt=0.5 時，y 減少 310 像素。",
+        "pos 保留小數，rect 使用整數座標進行繪圖與碰撞。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/pygame-oop-shooter.zip"
+      ],
+      "code": "def update(self, dt):\n    self.pos += self.velocity * dt\n    self.rect.center = (round(self.pos.x), round(self.pos.y))",
+      "file": "actors.py / Actor.update"
+    },
+    {
+      "number": 8,
+      "type": "code",
+      "title": "覆寫與 super()",
+      "sub": "Bullet 在共同移動後加入自己的規則",
+      "notes": [
+        "此單一繼承鏈中，super().update(dt) 呼叫 Actor.update。",
+        "子彈離開上方邊界時，kill() 將它從所有群組移除。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/pygame-oop-shooter.zip",
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance"
+      ],
+      "code": "def update(self, dt):\n    super().update(dt)\n    if self.rect.bottom < PLAY_AREA.top:\n        self.kill()",
+      "file": "actors.py / Bullet.update"
+    },
+    {
+      "number": 9,
+      "type": "code",
+      "title": "新增左右擺動的敵人",
+      "sub": "第 8 週新增的 WeavingEnemy",
+      "notes": [
+        "elapsed 累積秒數，cos() 讓水平速度週期變化。",
+        "生命值、受傷與群組操作仍沿用 Enemy。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip"
+      ],
+      "code": "class WeavingEnemy(Enemy):\n    def __init__(self, name, position, speed=80, hp=1):\n        super().__init__(name, position, speed, hp)\n        self.elapsed = 0.0\n\n    def update(self, dt):\n        self.elapsed += dt\n        self.velocity.x = 100 * cos(3 * self.elapsed)\n        super().update(dt)",
+      "file": "extension.py / WeavingEnemy"
+    },
+    {
+      "number": 10,
+      "type": "code",
+      "title": "新敵人加入同一群組",
+      "sub": "物件建立處選類別，更新處維持共同呼叫",
+      "notes": [
+        "原版 Enemy 與新敵人都能接收 update(dt)。",
+        "完整遊戲的生成邏輯在 demo_game.py。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip",
+        "https://www.pygame.org/docs/ref/sprite.html#pygame.sprite.Group.update"
+      ],
+      "code": "from actors import Enemy\nfrom extension import WeavingEnemy\n\na = Enemy(\"E01\", (180, 180))\nb = WeavingEnemy(\"E02\", (395, 235))\ngroup = pygame.sprite.Group(a, b)\ngroup.update(1 / 60)",
+      "file": "demo_game.py / Week8Game.spawn_enemy (concept)"
+    },
+    {
+      "number": 11,
+      "type": "code",
+      "title": "鴨子型別與 Spark",
+      "sub": "能回應需要的操作，就能參與該流程",
+      "notes": [
+        "Spark 保存剩餘時間 ttl，與 Enemy 沒有繼承關係。",
+        "Spark 可放入一般更新清單。Pygame 群組仍需要 Sprite 的配合。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip",
+        "https://docs.python.org/3.12/library/typing.html#typing.Protocol",
+        "https://www.pygame.org/docs/ref/sprite.html#pygame.sprite.Group.update"
+      ],
+      "code": "class Spark:\n    def __init__(self) -> None:\n        self.ttl = 1.0\n\n    def update(self, dt: float) -> None:\n        self.ttl = max(0.0, self.ttl - dt)",
+      "file": "contracts.py / Spark"
+    },
+    {
+      "number": 12,
+      "type": "code",
+      "title": "呼叫需要相容的方法",
+      "sub": "方法名稱與參數都會影響實際呼叫",
+      "notes": [
+        "沒有 update 時會發生 AttributeError。",
+        "update 存在，但不接受 dt，也無法完成這次呼叫。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip",
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance"
+      ],
+      "code": "class BadClock:\n    def update(self):\n        pass\n\nbad = BadClock()\nbad.update(0.5)  # TypeError",
+      "file": "contracts.py / BadClock"
+    },
+    {
+      "number": 13,
+      "type": "table",
+      "title": "更新介面的契約",
+      "sub": "共同介面也包含行為與單位的約定",
+      "notes": [
+        "抽象化讓使用者只依賴必要的操作，將實作細節留在物件內部。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip"
+      ],
+      "values": [
+        [
+          "項目",
+          "本例的約定"
+        ],
+        [
+          "輸入",
+          "dt: float"
+        ],
+        [
+          "單位",
+          "經過秒數，dt ≥ 0"
+        ],
+        [
+          "副作用",
+          "更新自身狀態，必要時同步 rect"
+        ],
+        [
+          "回傳",
+          "None"
+        ]
+      ]
+    },
+    {
+      "number": 14,
+      "type": "code",
+      "title": "抽象類別 ABC",
+      "sub": "用抽象方法表達子類別必須完成的操作",
+      "notes": [
+        "這是獨立的簡化模型，原遊戲 Actor 仍是具體類別。",
+        "ABC 來自 abc 模組，abstractmethod 標記必要的方法。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip",
+        "https://docs.python.org/3.12/library/abc.html"
+      ],
+      "code": "from abc import ABC, abstractmethod\n\nclass UpdateableABC(ABC):\n    @abstractmethod\n    def update(self, dt: float) -> None:\n        pass",
+      "file": "contracts.py / UpdateableABC"
+    },
+    {
+      "number": 15,
+      "type": "code",
+      "title": "尚未完成的抽象方法",
+      "sub": "抽象方法未完成時，Python 拒絕建立實體",
+      "notes": [
+        "pass 本身不會建立抽象規則，關鍵是 ABC 與裝飾器。",
+        "ABC 不會完整檢查覆寫方法的簽章與行為。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/library/abc.html"
+      ],
+      "code": "class Incomplete(UpdateableABC):\n    pass\n\nIncomplete()  # TypeError\n\n# Still abstract:\nUpdateableABC()  # TypeError",
+      "file": "contracts.py / abstract-class example"
+    },
+    {
+      "number": 16,
+      "type": "code",
+      "title": "完成抽象規格的子類別",
+      "sub": "FallingTarget 完成 update(dt)",
+      "notes": [
+        "建立物件後，update(0.5) 讓 y 從 0.0 變成 40.0。",
+        "抽象類別也可提供共用實作或一般方法。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip",
+        "https://docs.python.org/3.12/library/abc.html"
+      ],
+      "code": "class FallingTarget(UpdateableABC):\n    def __init__(self) -> None:\n        self.y = 0.0\n\n    def update(self, dt: float) -> None:\n        self.y += 80.0 * dt",
+      "file": "contracts.py / FallingTarget"
+    },
+    {
+      "number": 17,
+      "type": "code",
+      "title": "Protocol 描述需要的能力",
+      "sub": "依結構判定相容性，不要求明確繼承",
+      "notes": [
+        "tick_all 只需要每個項目能接收 update(dt)。",
+        "Iterable 允許清單、元組等可走訪的來源。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip",
+        "https://docs.python.org/3.12/library/typing.html#typing.Protocol"
+      ],
+      "code": "from typing import Protocol\nfrom collections.abc import Iterable\n\nclass Updatable(Protocol):\n    def update(self, dt: float) -> None: ...\n\ndef tick_all(items: Iterable[Updatable], dt: float) -> None:\n    for item in items:\n        item.update(dt)",
+      "file": "contracts.py / Updatable, tick_all"
+    },
+    {
+      "number": 18,
+      "type": "code",
+      "title": "不同類別共用一個更新函式",
+      "sub": "FallingTarget 與 Spark 都符合 Updatable",
+      "notes": [
+        "Spark 不必寫 class Spark(Updatable)。",
+        "同一個 dt 對不同物件產生不同狀態變化。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip",
+        "https://docs.python.org/3.12/library/typing.html#typing.Protocol"
+      ],
+      "code": "from contracts import FallingTarget, Spark, tick_all\n\ntarget = FallingTarget()\nspark = Spark()\ntick_all([target, spark], 0.5)\n\nprint(target.y, spark.ttl)\n# 40.0 0.5",
+      "file": "contracts.py / executable example"
+    },
+    {
+      "number": 19,
+      "type": "code",
+      "title": "靜態檢查找出不相容的方法",
+      "sub": "typing_error.py 是刻意保留的錯誤範例",
+      "notes": [
+        "mypy 預期 update(self, dt: float)，但 BadClock 缺少 dt。",
+        "型別提示支援檢查，Python 不會自動執行 mypy。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip",
+        "https://docs.python.org/3.12/library/typing.html#typing.Protocol",
+        "https://mypy.readthedocs.io/en/stable/protocols.html"
+      ],
+      "code": "from contracts import BadClock, Updatable\n\nbad: Updatable = BadClock()\n\n# mypy: incompatible types in assignment",
+      "file": "typing_error.py"
+    },
+    {
+      "number": 20,
+      "type": "code",
+      "title": "runtime_checkable 的範圍",
+      "sub": "執行時檢查成員存在，不驗證完整方法簽章",
+      "notes": [
+        "isinstance 回傳 True，不代表 update(0.5) 一定成功。",
+        "一般 Protocol 未加此裝飾器時，不能拿來做這種 isinstance 檢查。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip",
+        "https://docs.python.org/3.12/library/typing.html#typing.Protocol"
+      ],
+      "code": "from typing import Protocol, runtime_checkable\nfrom contracts import BadClock\n\n@runtime_checkable\nclass CanUpdate(Protocol):\n    def update(self, dt: float) -> None: ...\n\nprint(isinstance(BadClock(), CanUpdate))\n# True",
+      "file": "contracts.py / CanUpdate"
+    },
+    {
+      "number": 21,
+      "type": "table",
+      "title": "三種介面方式的比較",
+      "sub": "依需要選擇約束與檢查方式",
+      "notes": [
+        "三種方式都能配合多型。ABC 與 Protocol 也可以在同一專案共存。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/library/abc.html",
+        "https://docs.python.org/3.12/library/typing.html#typing.Protocol",
+        "https://mypy.readthedocs.io/en/stable/protocols.html"
+      ],
+      "values": [
+        [
+          "方式",
+          "相容依據",
+          "主要檢查時機"
+        ],
+        [
+          "鴨子型別",
+          "實際呼叫需要的操作",
+          "執行呼叫時"
+        ],
+        [
+          "ABC",
+          "繼承及抽象方法實作",
+          "建立實體時"
+        ],
+        [
+          "Protocol",
+          "方法與屬性的結構",
+          "主要由靜態檢查器檢查"
+        ]
+      ]
+    },
+    {
+      "number": 22,
+      "type": "text",
+      "title": "型別相容與行為正確",
+      "sub": "介面定義可接受的呼叫，測試檢查狀態變化",
+      "notes": [
+        "update(dt) 的 dt 都以秒為單位，避免一個類別誤用毫秒。",
+        "覆寫方法仍接受原本呼叫，不新增必填參數。",
+        "測試也檢查位置、生命與 rect 是否維持一致。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip",
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/typing.html#typing.Protocol"
+      ]
+    },
+    {
+      "number": 23,
+      "type": "code",
+      "title": "以組合分離移動行為",
+      "sub": "Enemy 持有 Motion，將速度計算交給它",
+      "notes": [
+        "Motion 只描述 velocity(dt)，回傳 (vx, vy)。",
+        "回傳值是速度，尚未乘上 dt。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip"
+      ],
+      "code": "from typing import Protocol\n\nclass Motion(Protocol):\n    def velocity(self, dt: float) -> tuple[float, float]: ...",
+      "file": "motion.py / Motion"
+    },
+    {
+      "number": 24,
+      "type": "code",
+      "title": "直線與擺動兩種策略",
+      "sub": "相同 velocity(dt)，產生不同速度",
+      "notes": [
+        "Straight 不需保存時間，Weave 用 elapsed 保存自己的進度。",
+        "每個敵人建立自己的 Weave，避免共用可變時間狀態。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip"
+      ],
+      "code": "from math import cos\n\nclass Straight:\n    def velocity(self, dt: float) -> tuple[float, float]:\n        return (0.0, 80.0)\n\nclass Weave:\n    def __init__(self) -> None:\n        self.elapsed = 0.0\n\n    def velocity(self, dt: float) -> tuple[float, float]:\n        self.elapsed += dt\n        return (100.0 * cos(3.0 * self.elapsed), 80.0)",
+      "file": "motion.py / Straight, Weave"
+    },
+    {
+      "number": 25,
+      "type": "code",
+      "title": "StrategyEnemy 委派速度計算",
+      "sub": "繼承 Enemy 的角色功能，同時持有移動策略",
+      "notes": [
+        "先取得速度，再由 Actor.update 將速度乘上 dt。",
+        "本例使用物件參照合作，不能只憑持有屬性就判定 UML 強組合。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip"
+      ],
+      "code": "class StrategyEnemy(Enemy):\n    def __init__(self, name, position, motion: Motion):\n        super().__init__(name, position)\n        self.motion = motion\n\n    def update(self, dt):\n        vx, vy = self.motion.velocity(dt)\n        self.velocity.update(vx, vy)\n        super().update(dt)",
+      "file": "extension.py / StrategyEnemy"
+    },
+    {
+      "number": 26,
+      "type": "code",
+      "title": "保留敵人物件，替換策略",
+      "sub": "改變 motion 參照，不必重建 Enemy",
+      "notes": [
+        "enemy 的身分、位置及 hp 保留。下一次更新使用新策略。",
+        "第 8 週遊戲按 C 切換 StrategyEnemy 的直線／擺動策略。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip"
+      ],
+      "code": "from extension import StrategyEnemy\nfrom motion import Straight, Weave\n\nenemy = StrategyEnemy(\"E03\", (620, 175), Weave())\noriginal = enemy\nenemy.motion = Straight()\nprint(enemy is original)  # True",
+      "file": "extension.py + motion.py"
+    },
+    {
+      "number": 27,
+      "type": "table",
+      "title": "繼承與組合的選擇",
+      "sub": "依物件身分與行為變化決定關係",
+      "notes": [
+        "StrategyEnemy 同時使用繼承與組合，兩者可以互補。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip"
+      ],
+      "values": [
+        [
+          "情況",
+          "選擇",
+          "例子"
+        ],
+        [
+          "是一種 Enemy，沿用受傷規則",
+          "繼承",
+          "WeavingEnemy(Enemy)"
+        ],
+        [
+          "同一敵人需要切換移動方式",
+          "組合",
+          "enemy.motion = Straight()"
+        ],
+        [
+          "無共同父類別但能更新",
+          "Protocol",
+          "tick_all([target, spark], dt)"
+        ]
+      ]
+    },
+    {
+      "number": 28,
+      "type": "image",
+      "title": "線上版的暫停觀察",
+      "sub": "線上版保留原遊戲，新增策略在第 8 週下載包",
+      "notes": [
+        "載入觀察範例，選 B01，再按 N 前進一影格。",
+        "B01.y 約從 490.0 變為 479.7，owner 仍是同一個 Player。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/pygame-oop-shooter.zip",
+        "https://minhuangyuntech.github.io/oo2026/pygame/play/"
+      ],
+      "image": "pygame-zh-browser-observe.png",
+      "links": [
+        [
+          "開啟原版線上遊戲",
+          "https://minhuangyuntech.github.io/oo2026/pygame/play/"
+        ]
+      ]
+    },
+    {
+      "number": 29,
+      "type": "code",
+      "title": "下載與執行第 8 週範例",
+      "sub": "解壓縮 ZIP 後，在 week8_examples 資料夾執行",
+      "notes": [
+        "Python 3.12+。一般操作沿用原遊戲，C 切換策略，P 暫停、N 單步。",
+        "英文／日文介面把 zh 改為 en／ja。typing_error.py 應回報型別錯誤。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip"
+      ],
+      "code": "python -m pip install -r requirements.txt\npython contracts.py\npython demo_game.py --lang zh\npython -m mypy --strict contracts.py motion.py\npython -m mypy --strict typing_error.py\npython -m unittest discover -s tests -v",
+      "file": "week8_examples/",
+      "codeLanguage": "bash",
+      "links": [
+        [
+          "下載第 8 週範例 ZIP",
+          "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip"
+        ]
+      ]
+    },
+    {
+      "number": 30,
+      "type": "text",
+      "title": "練習：停止移動的策略",
+      "sub": "新增 Freeze，讓既有敵人停在原地",
+      "notes": [
+        "實作 velocity(dt)，回傳水平與垂直速度 0。",
+        "把 enemy.motion 換成 Freeze()，再呼叫 update(0.5)。",
+        "確認位置不變，且 enemy 身分與 hp 都保留。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip"
+      ]
+    },
+    {
+      "number": 31,
+      "type": "code",
+      "title": "練習解答與狀態檢查",
+      "sub": "更換行為物件即可重用原本更新流程",
+      "notes": [
+        "Freeze 依結構符合 Motion，不必明確繼承 Motion。",
+        "完整測試也確認 hp、rect 與群組關係。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip"
+      ],
+      "code": "class Freeze:\n    def velocity(self, dt: float) -> tuple[float, float]:\n        return (0.0, 0.0)\n\nenemy.motion = Freeze()\nbefore = tuple(enemy.pos)\noriginal = enemy\nenemy.update(0.5)\nassert tuple(enemy.pos) == before\nassert enemy is original",
+      "file": "motion.py / Freeze; tests/test_week8.py"
+    },
+    {
+      "number": 32,
+      "type": "text",
+      "title": "本週重點與參考",
+      "sub": "共同介面讓物件能夠替換與合作",
+      "notes": [
+        "多型依實際物件選擇行為，繼承與鴨子型別都能支援。",
+        "ABC 規範實作責任，Protocol 描述結構相容性。",
+        "組合讓行為可替換，測試確認介面背後的約定。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/library/abc.html",
+        "https://docs.python.org/3.12/library/typing.html#typing.Protocol",
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://www.pygame.org/docs/ref/sprite.html#pygame.sprite.Group.update",
+        "https://mypy.readthedocs.io/en/stable/protocols.html"
+      ],
+      "links": [
+        [
+          "Python 抽象類別",
+          "https://docs.python.org/3.12/library/abc.html"
+        ],
+        [
+          "Python Protocol",
+          "https://docs.python.org/3.12/library/typing.html#typing.Protocol"
+        ]
+      ]
+    }
+  ],
+  "en": [
+    {
+      "number": 1,
+      "type": "cover",
+      "title": "Polymorphism, abstraction\nand interfaces",
+      "sub": "Week 8",
+      "notes": [
+        "Shared interfaces and replaceable objects in the shooter"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip"
+      ]
+    },
+    {
+      "number": 2,
+      "type": "text",
+      "title": "This week’s topics",
+      "sub": "Different objects can respond to the same call",
+      "notes": [
+        "Trace update(dt) to understand polymorphism and dynamic dispatch.",
+        "Compare duck typing, ABCs, and Protocols.",
+        "Add enemy behavior and replace movement through composition."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip"
+      ]
+    },
+    {
+      "number": 3,
+      "type": "image",
+      "title": "Objects in the original shooter",
+      "sub": "Game manages Player, Enemy, and Bullet",
+      "notes": [
+        "Each actor holds its own position, velocity, and state.",
+        "Game updates the group. Actors handle their own behavior."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/pygame-oop-shooter.zip",
+        "https://www.pygame.org/docs/ref/sprite.html#pygame.sprite.Group.update"
+      ],
+      "image": "pygame-en-preview.png"
+    },
+    {
+      "number": 4,
+      "type": "table",
+      "title": "Existing classes and update behavior",
+      "sub": "Enemy inherits Actor.update() unchanged",
+      "notes": [
+        "Inherited methods also participate in polymorphism. Not every subclass needs an override."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/pygame-oop-shooter.zip"
+      ],
+      "values": [
+        [
+          "Class",
+          "Update behavior"
+        ],
+        [
+          "Actor",
+          "Move by velocity and synchronize rect"
+        ],
+        [
+          "Player",
+          "Shared motion, bounds, and cooldown"
+        ],
+        [
+          "Enemy",
+          "Use Actor movement"
+        ],
+        [
+          "Bullet",
+          "Shared motion, then remove offscreen bullets"
+        ]
+      ]
+    },
+    {
+      "number": 5,
+      "type": "code",
+      "title": "One call updates the group",
+      "sub": "Game.update() in the original game.py",
+      "notes": [
+        "Group.update(dt) forwards the same dt to each Sprite’s update.",
+        "The group does not collect update return values."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/pygame-oop-shooter.zip",
+        "https://www.pygame.org/docs/ref/sprite.html#pygame.sprite.Group.update"
+      ],
+      "code": "self.all_sprites.update(dt)\n\n# Conceptual equivalent:\nfor actor in self.all_sprites:\n    actor.update(dt)",
+      "file": "game.py / Game.update"
+    },
+    {
+      "number": 6,
+      "type": "table",
+      "title": "Dynamic dispatch paths",
+      "sub": "Method lookup follows the object’s actual class",
+      "notes": [
+        "The loop name stays actor while the referenced object changes."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/pygame-oop-shooter.zip",
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance"
+      ],
+      "values": [
+        [
+          "Actual object",
+          "Method found",
+          "Further call"
+        ],
+        [
+          "player: Player",
+          "Player.update",
+          "super().update(dt)"
+        ],
+        [
+          "E01: Enemy",
+          "Actor.update",
+          "Move directly"
+        ],
+        [
+          "B01: Bullet",
+          "Bullet.update",
+          "super().update(dt)"
+        ]
+      ]
+    },
+    {
+      "number": 7,
+      "type": "code",
+      "title": "Shared movement and dt",
+      "sub": "dt is in seconds. Velocity is in pixels per second.",
+      "notes": [
+        "At velocity −620 and dt=0.5, bullet y decreases by 310 pixels.",
+        "pos retains fractions. rect uses integers for drawing and collision."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/pygame-oop-shooter.zip"
+      ],
+      "code": "def update(self, dt):\n    self.pos += self.velocity * dt\n    self.rect.center = (round(self.pos.x), round(self.pos.y))",
+      "file": "actors.py / Actor.update"
+    },
+    {
+      "number": 8,
+      "type": "code",
+      "title": "Overriding and super()",
+      "sub": "Bullet adds its rule after shared movement",
+      "notes": [
+        "In this inheritance chain, super().update(dt) calls Actor.update.",
+        "When the bullet leaves the top edge, kill() removes it from all groups."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/pygame-oop-shooter.zip",
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance"
+      ],
+      "code": "def update(self, dt):\n    super().update(dt)\n    if self.rect.bottom < PLAY_AREA.top:\n        self.kill()",
+      "file": "actors.py / Bullet.update"
+    },
+    {
+      "number": 9,
+      "type": "code",
+      "title": "An enemy that weaves sideways",
+      "sub": "WeavingEnemy is a Week 8 extension",
+      "notes": [
+        "elapsed accumulates seconds. cos() varies horizontal velocity.",
+        "HP, damage handling, and group operations remain inherited."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip"
+      ],
+      "code": "class WeavingEnemy(Enemy):\n    def __init__(self, name, position, speed=80, hp=1):\n        super().__init__(name, position, speed, hp)\n        self.elapsed = 0.0\n\n    def update(self, dt):\n        self.elapsed += dt\n        self.velocity.x = 100 * cos(3 * self.elapsed)\n        super().update(dt)",
+      "file": "extension.py / WeavingEnemy"
+    },
+    {
+      "number": 10,
+      "type": "code",
+      "title": "The new enemy joins the same group",
+      "sub": "Choose the class at creation. Keep the shared update call.",
+      "notes": [
+        "Both the original Enemy and the new enemy accept update(dt).",
+        "The complete spawn logic is in demo_game.py."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip",
+        "https://www.pygame.org/docs/ref/sprite.html#pygame.sprite.Group.update"
+      ],
+      "code": "from actors import Enemy\nfrom extension import WeavingEnemy\n\na = Enemy(\"E01\", (180, 180))\nb = WeavingEnemy(\"E02\", (395, 235))\ngroup = pygame.sprite.Group(a, b)\ngroup.update(1 / 60)",
+      "file": "demo_game.py / Week8Game.spawn_enemy (concept)"
+    },
+    {
+      "number": 11,
+      "type": "code",
+      "title": "Duck typing with Spark",
+      "sub": "An object can participate when it supports the required operation",
+      "notes": [
+        "Spark stores a remaining lifetime, ttl. It does not inherit from Enemy.",
+        "Spark fits an ordinary update list. Pygame groups still need Sprite support."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip",
+        "https://docs.python.org/3.12/library/typing.html#typing.Protocol",
+        "https://www.pygame.org/docs/ref/sprite.html#pygame.sprite.Group.update"
+      ],
+      "code": "class Spark:\n    def __init__(self) -> None:\n        self.ttl = 1.0\n\n    def update(self, dt: float) -> None:\n        self.ttl = max(0.0, self.ttl - dt)",
+      "file": "contracts.py / Spark"
+    },
+    {
+      "number": 12,
+      "type": "code",
+      "title": "Calls need compatible methods",
+      "sub": "Both the method name and its parameters affect the call",
+      "notes": [
+        "A missing update method raises AttributeError.",
+        "An update method without a dt parameter also fails this call."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip",
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance"
+      ],
+      "code": "class BadClock:\n    def update(self):\n        pass\n\nbad = BadClock()\nbad.update(0.5)  # TypeError",
+      "file": "contracts.py / BadClock"
+    },
+    {
+      "number": 13,
+      "type": "table",
+      "title": "The update contract",
+      "sub": "A shared interface includes behavior and units",
+      "notes": [
+        "Abstraction exposes required operations while keeping implementation details inside objects."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip"
+      ],
+      "values": [
+        [
+          "Item",
+          "Contract in this example"
+        ],
+        [
+          "Input",
+          "dt: float"
+        ],
+        [
+          "Units",
+          "Elapsed seconds, dt ≥ 0"
+        ],
+        [
+          "Side effects",
+          "Update own state and synchronize rect when needed"
+        ],
+        [
+          "Return",
+          "None"
+        ]
+      ]
+    },
+    {
+      "number": 14,
+      "type": "code",
+      "title": "Abstract base classes",
+      "sub": "Abstract methods declare operations subclasses must complete",
+      "notes": [
+        "This is a separate simplified model. The original Actor remains concrete.",
+        "ABC and abstractmethod come from the abc module."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip",
+        "https://docs.python.org/3.12/library/abc.html"
+      ],
+      "code": "from abc import ABC, abstractmethod\n\nclass UpdateableABC(ABC):\n    @abstractmethod\n    def update(self, dt: float) -> None:\n        pass",
+      "file": "contracts.py / UpdateableABC"
+    },
+    {
+      "number": 15,
+      "type": "code",
+      "title": "Unimplemented abstract methods",
+      "sub": "Python blocks instantiation while abstract methods remain",
+      "notes": [
+        "pass alone creates no abstract contract. ABC and the decorator do.",
+        "ABCs do not fully validate override signatures or behavior."
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/library/abc.html"
+      ],
+      "code": "class Incomplete(UpdateableABC):\n    pass\n\nIncomplete()  # TypeError\n\n# Still abstract:\nUpdateableABC()  # TypeError",
+      "file": "contracts.py / abstract-class example"
+    },
+    {
+      "number": 16,
+      "type": "code",
+      "title": "A concrete implementation",
+      "sub": "FallingTarget implements update(dt)",
+      "notes": [
+        "After creation, update(0.5) changes y from 0.0 to 40.0.",
+        "An abstract class can also provide shared implementations and regular methods."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip",
+        "https://docs.python.org/3.12/library/abc.html"
+      ],
+      "code": "class FallingTarget(UpdateableABC):\n    def __init__(self) -> None:\n        self.y = 0.0\n\n    def update(self, dt: float) -> None:\n        self.y += 80.0 * dt",
+      "file": "contracts.py / FallingTarget"
+    },
+    {
+      "number": 17,
+      "type": "code",
+      "title": "Protocol describes required capabilities",
+      "sub": "Compatibility follows structure without explicit inheritance",
+      "notes": [
+        "tick_all only needs each item to accept update(dt).",
+        "Iterable accepts sources such as lists and tuples."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip",
+        "https://docs.python.org/3.12/library/typing.html#typing.Protocol"
+      ],
+      "code": "from typing import Protocol\nfrom collections.abc import Iterable\n\nclass Updatable(Protocol):\n    def update(self, dt: float) -> None: ...\n\ndef tick_all(items: Iterable[Updatable], dt: float) -> None:\n    for item in items:\n        item.update(dt)",
+      "file": "contracts.py / Updatable, tick_all"
+    },
+    {
+      "number": 18,
+      "type": "code",
+      "title": "Different classes share one update function",
+      "sub": "FallingTarget and Spark both satisfy Updatable",
+      "notes": [
+        "Spark does not need to declare class Spark(Updatable).",
+        "The same dt produces different state changes in different objects."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip",
+        "https://docs.python.org/3.12/library/typing.html#typing.Protocol"
+      ],
+      "code": "from contracts import FallingTarget, Spark, tick_all\n\ntarget = FallingTarget()\nspark = Spark()\ntick_all([target, spark], 0.5)\n\nprint(target.y, spark.ttl)\n# 40.0 0.5",
+      "file": "contracts.py / executable example"
+    },
+    {
+      "number": 19,
+      "type": "code",
+      "title": "Static checking finds incompatible methods",
+      "sub": "typing_error.py intentionally contains a type error",
+      "notes": [
+        "mypy expects update(self, dt: float), but BadClock has no dt.",
+        "Type hints support checking. Python does not run mypy automatically."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip",
+        "https://docs.python.org/3.12/library/typing.html#typing.Protocol",
+        "https://mypy.readthedocs.io/en/stable/protocols.html"
+      ],
+      "code": "from contracts import BadClock, Updatable\n\nbad: Updatable = BadClock()\n\n# mypy: incompatible types in assignment",
+      "file": "typing_error.py"
+    },
+    {
+      "number": 20,
+      "type": "code",
+      "title": "Limits of runtime_checkable",
+      "sub": "Runtime checks look for members, not complete signatures",
+      "notes": [
+        "isinstance returning True does not guarantee update(0.5) succeeds.",
+        "An ordinary Protocol needs this decorator for this isinstance check."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip",
+        "https://docs.python.org/3.12/library/typing.html#typing.Protocol"
+      ],
+      "code": "from typing import Protocol, runtime_checkable\nfrom contracts import BadClock\n\n@runtime_checkable\nclass CanUpdate(Protocol):\n    def update(self, dt: float) -> None: ...\n\nprint(isinstance(BadClock(), CanUpdate))\n# True",
+      "file": "contracts.py / CanUpdate"
+    },
+    {
+      "number": 21,
+      "type": "table",
+      "title": "Three ways to express an interface",
+      "sub": "Choose the contract and checking approach you need",
+      "notes": [
+        "All three support polymorphism. ABCs and Protocols can coexist in one project."
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/library/abc.html",
+        "https://docs.python.org/3.12/library/typing.html#typing.Protocol",
+        "https://mypy.readthedocs.io/en/stable/protocols.html"
+      ],
+      "values": [
+        [
+          "Approach",
+          "Compatibility",
+          "Main check"
+        ],
+        [
+          "Duck typing",
+          "Required operation works",
+          "At the call"
+        ],
+        [
+          "ABC",
+          "Inheritance and implementations",
+          "At instantiation"
+        ],
+        [
+          "Protocol",
+          "Method and attribute structure",
+          "Primarily static checking"
+        ]
+      ]
+    },
+    {
+      "number": 22,
+      "type": "text",
+      "title": "Type compatibility and correct behavior",
+      "sub": "Interfaces describe calls. Tests check state changes.",
+      "notes": [
+        "Every update(dt) uses seconds. One class must not silently use milliseconds.",
+        "An override still accepts existing calls without extra required arguments.",
+        "Tests also check position, HP, and rect consistency."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip",
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/typing.html#typing.Protocol"
+      ]
+    },
+    {
+      "number": 23,
+      "type": "code",
+      "title": "Separate movement through composition",
+      "sub": "Enemy holds a Motion object to calculate velocity",
+      "notes": [
+        "Motion describes velocity(dt), returning (vx, vy).",
+        "The returned values are velocities, not yet multiplied by dt."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip"
+      ],
+      "code": "from typing import Protocol\n\nclass Motion(Protocol):\n    def velocity(self, dt: float) -> tuple[float, float]: ...",
+      "file": "motion.py / Motion"
+    },
+    {
+      "number": 24,
+      "type": "code",
+      "title": "Straight and weaving strategies",
+      "sub": "The same velocity(dt) interface produces different velocities",
+      "notes": [
+        "Straight needs no timer. Weave keeps its own elapsed time.",
+        "Create a separate Weave for each enemy to avoid sharing mutable time state."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip"
+      ],
+      "code": "from math import cos\n\nclass Straight:\n    def velocity(self, dt: float) -> tuple[float, float]:\n        return (0.0, 80.0)\n\nclass Weave:\n    def __init__(self) -> None:\n        self.elapsed = 0.0\n\n    def velocity(self, dt: float) -> tuple[float, float]:\n        self.elapsed += dt\n        return (100.0 * cos(3.0 * self.elapsed), 80.0)",
+      "file": "motion.py / Straight, Weave"
+    },
+    {
+      "number": 25,
+      "type": "code",
+      "title": "StrategyEnemy delegates velocity",
+      "sub": "Inherit Enemy behavior while holding a movement strategy",
+      "notes": [
+        "Get velocity first. Actor.update then multiplies it by dt.",
+        "This is object composition by reference. A field alone does not prove UML composite ownership."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip"
+      ],
+      "code": "class StrategyEnemy(Enemy):\n    def __init__(self, name, position, motion: Motion):\n        super().__init__(name, position)\n        self.motion = motion\n\n    def update(self, dt):\n        vx, vy = self.motion.velocity(dt)\n        self.velocity.update(vx, vy)\n        super().update(dt)",
+      "file": "extension.py / StrategyEnemy"
+    },
+    {
+      "number": 26,
+      "type": "code",
+      "title": "Keep the enemy and replace its strategy",
+      "sub": "Change the motion reference without rebuilding Enemy",
+      "notes": [
+        "Enemy identity, position, and HP remain. The next update uses the new strategy.",
+        "Press C in the Week 8 game to switch StrategyEnemy between straight and weaving motion."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip"
+      ],
+      "code": "from extension import StrategyEnemy\nfrom motion import Straight, Weave\n\nenemy = StrategyEnemy(\"E03\", (620, 175), Weave())\noriginal = enemy\nenemy.motion = Straight()\nprint(enemy is original)  # True",
+      "file": "extension.py + motion.py"
+    },
+    {
+      "number": 27,
+      "type": "table",
+      "title": "Choosing inheritance or composition",
+      "sub": "Decide from identity and how behavior changes",
+      "notes": [
+        "StrategyEnemy uses both inheritance and composition. They can complement each other."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip"
+      ],
+      "values": [
+        [
+          "Situation",
+          "Choice",
+          "Example"
+        ],
+        [
+          "A kind of Enemy sharing damage rules",
+          "Inheritance",
+          "WeavingEnemy(Enemy)"
+        ],
+        [
+          "One enemy switches movement behavior",
+          "Composition",
+          "enemy.motion = Straight()"
+        ],
+        [
+          "Unrelated objects can update",
+          "Protocol",
+          "tick_all([target, spark], dt)"
+        ]
+      ]
+    },
+    {
+      "number": 28,
+      "type": "image",
+      "title": "Pause and inspect the browser game",
+      "sub": "The browser keeps the original game. New strategies are in the Week 8 download.",
+      "notes": [
+        "Load the observation example, select B01, then press N for one frame.",
+        "B01.y changes from about 490.0 to 479.7. Its owner stays the same Player."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/pygame-oop-shooter.zip",
+        "https://minhuangyuntech.github.io/oo2026/pygame/play/"
+      ],
+      "image": "pygame-en-browser-observe.png",
+      "links": [
+        [
+          "Open the original browser game",
+          "https://minhuangyuntech.github.io/oo2026/en/pygame/play/"
+        ]
+      ]
+    },
+    {
+      "number": 29,
+      "type": "code",
+      "title": "Run the Week 8 examples",
+      "sub": "Run inside week8_examples after extracting the ZIP",
+      "notes": [
+        "Python 3.12+. Original controls remain. C switches strategy, P pauses, N steps.",
+        "Use en or ja for English or Japanese. typing_error.py should report a type error."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip"
+      ],
+      "code": "python -m pip install -r requirements.txt\npython contracts.py\npython demo_game.py --lang en\npython -m mypy --strict contracts.py motion.py\npython -m mypy --strict typing_error.py\npython -m unittest discover -s tests -v",
+      "file": "week8_examples/",
+      "codeLanguage": "bash",
+      "links": [
+        [
+          "Download Week 8 examples",
+          "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip"
+        ]
+      ]
+    },
+    {
+      "number": 30,
+      "type": "text",
+      "title": "Exercise: a motion-freeze strategy",
+      "sub": "Add Freeze so an existing enemy stays in place",
+      "notes": [
+        "Implement velocity(dt) and return zero horizontal and vertical velocity.",
+        "Assign Freeze() to enemy.motion, then call update(0.5).",
+        "Check that position is unchanged while identity and HP remain."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip"
+      ]
+    },
+    {
+      "number": 31,
+      "type": "code",
+      "title": "Exercise solution and state checks",
+      "sub": "Replace the behavior object and reuse the update flow",
+      "notes": [
+        "Freeze satisfies Motion structurally without explicit inheritance.",
+        "The complete tests also check HP, rect, and group membership."
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip"
+      ],
+      "code": "class Freeze:\n    def velocity(self, dt: float) -> tuple[float, float]:\n        return (0.0, 0.0)\n\nenemy.motion = Freeze()\nbefore = tuple(enemy.pos)\noriginal = enemy\nenemy.update(0.5)\nassert tuple(enemy.pos) == before\nassert enemy is original",
+      "file": "motion.py / Freeze; tests/test_week8.py"
+    },
+    {
+      "number": 32,
+      "type": "text",
+      "title": "Key ideas and references",
+      "sub": "Shared interfaces let objects cooperate and be replaced",
+      "notes": [
+        "Polymorphism selects behavior by object. Inheritance and duck typing both support it.",
+        "ABCs require implementations. Protocols describe structural compatibility.",
+        "Composition enables replaceable behavior. Tests check the contract behind the interface."
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/library/abc.html",
+        "https://docs.python.org/3.12/library/typing.html#typing.Protocol",
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://www.pygame.org/docs/ref/sprite.html#pygame.sprite.Group.update",
+        "https://mypy.readthedocs.io/en/stable/protocols.html"
+      ],
+      "links": [
+        [
+          "Python abstract classes",
+          "https://docs.python.org/3.12/library/abc.html"
+        ],
+        [
+          "Python Protocol",
+          "https://docs.python.org/3.12/library/typing.html#typing.Protocol"
+        ]
+      ]
+    }
+  ],
+  "ja": [
+    {
+      "number": 1,
+      "type": "cover",
+      "title": "多態性・抽象化・\nインターフェース",
+      "sub": "第 8 週",
+      "notes": [
+        "シューティングゲームで学ぶ共通の操作と差し替え"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip"
+      ]
+    },
+    {
+      "number": 2,
+      "type": "text",
+      "title": "今週の学習内容",
+      "sub": "同じ呼び出しに、異なるオブジェクトが応える",
+      "notes": [
+        "update(dt) を追跡し、多態性と動的ディスパッチを理解する。",
+        "ダックタイピング・ABC・Protocol を比較する。",
+        "敵の振る舞いを追加し、コンポジションで移動を差し替える。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip"
+      ]
+    },
+    {
+      "number": 3,
+      "type": "image",
+      "title": "元のゲームのオブジェクト",
+      "sub": "Game が Player・Enemy・Bullet を管理する",
+      "notes": [
+        "各役者は位置・速度・状態を持つ。",
+        "Game はグループを更新し、役者が自分の処理を行う。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/pygame-oop-shooter.zip",
+        "https://www.pygame.org/docs/ref/sprite.html#pygame.sprite.Group.update"
+      ],
+      "image": "pygame-ja-preview.png"
+    },
+    {
+      "number": 4,
+      "type": "table",
+      "title": "既存クラスと更新の役割",
+      "sub": "Enemy は Actor.update() をそのまま継承する",
+      "notes": [
+        "継承したメソッドも多態性に参加する。全サブクラスでのオーバーライドは不要。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/pygame-oop-shooter.zip"
+      ],
+      "values": [
+        [
+          "クラス",
+          "更新処理"
+        ],
+        [
+          "Actor",
+          "velocity で移動し rect を同期"
+        ],
+        [
+          "Player",
+          "共通移動・範囲制限・クールダウン"
+        ],
+        [
+          "Enemy",
+          "Actor の移動を利用"
+        ],
+        [
+          "Bullet",
+          "共通移動後、画面外の弾を除去"
+        ]
+      ]
+    },
+    {
+      "number": 5,
+      "type": "code",
+      "title": "一回の呼び出しでグループを更新",
+      "sub": "元の game.py の Game.update()",
+      "notes": [
+        "Group.update(dt) は各 Sprite の update に同じ dt を渡す。",
+        "グループは update の戻り値を収集しない。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/pygame-oop-shooter.zip",
+        "https://www.pygame.org/docs/ref/sprite.html#pygame.sprite.Group.update"
+      ],
+      "code": "self.all_sprites.update(dt)\n\n# Conceptual equivalent:\nfor actor in self.all_sprites:\n    actor.update(dt)",
+      "file": "game.py / Game.update"
+    },
+    {
+      "number": 6,
+      "type": "table",
+      "title": "動的ディスパッチの呼び出し先",
+      "sub": "呼び出す際に実際のクラスからメソッドを探す",
+      "notes": [
+        "ループ変数は actor のままでも、参照する実体は変わる。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/pygame-oop-shooter.zip",
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance"
+      ],
+      "values": [
+        [
+          "実際のオブジェクト",
+          "見つかるメソッド",
+          "続く呼び出し"
+        ],
+        [
+          "player: Player",
+          "Player.update",
+          "super().update(dt)"
+        ],
+        [
+          "E01: Enemy",
+          "Actor.update",
+          "直接移動"
+        ],
+        [
+          "B01: Bullet",
+          "Bullet.update",
+          "super().update(dt)"
+        ]
+      ]
+    },
+    {
+      "number": 7,
+      "type": "code",
+      "title": "共通の移動と dt",
+      "sub": "dt は秒、velocity はピクセル毎秒",
+      "notes": [
+        "弾の速度 −620、dt=0.5 なら y は 310 ピクセル減る。",
+        "pos は小数を保持し、rect は描画と衝突に整数座標を使う。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/pygame-oop-shooter.zip"
+      ],
+      "code": "def update(self, dt):\n    self.pos += self.velocity * dt\n    self.rect.center = (round(self.pos.x), round(self.pos.y))",
+      "file": "actors.py / Actor.update"
+    },
+    {
+      "number": 8,
+      "type": "code",
+      "title": "オーバーライドと super()",
+      "sub": "Bullet は共通の移動後に固有のルールを実行",
+      "notes": [
+        "この継承関係では super().update(dt) が Actor.update を呼ぶ。",
+        "弾が上端を出ると kill() が全グループから除く。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/pygame-oop-shooter.zip",
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance"
+      ],
+      "code": "def update(self, dt):\n    super().update(dt)\n    if self.rect.bottom < PLAY_AREA.top:\n        self.kill()",
+      "file": "actors.py / Bullet.update"
+    },
+    {
+      "number": 9,
+      "type": "code",
+      "title": "左右に揺れる敵を追加",
+      "sub": "第 8 週で追加する WeavingEnemy",
+      "notes": [
+        "elapsed は経過秒数。cos() で横方向の速度を周期的に変える。",
+        "HP・被弾・グループ操作は Enemy から継承する。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip"
+      ],
+      "code": "class WeavingEnemy(Enemy):\n    def __init__(self, name, position, speed=80, hp=1):\n        super().__init__(name, position, speed, hp)\n        self.elapsed = 0.0\n\n    def update(self, dt):\n        self.elapsed += dt\n        self.velocity.x = 100 * cos(3 * self.elapsed)\n        super().update(dt)",
+      "file": "extension.py / WeavingEnemy"
+    },
+    {
+      "number": 10,
+      "type": "code",
+      "title": "新しい敵を同じグループへ",
+      "sub": "生成時にクラスを選び、共通の更新呼び出しを使う",
+      "notes": [
+        "元の Enemy も新しい敵も update(dt) を受け取れる。",
+        "完全な生成処理は demo_game.py にある。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip",
+        "https://www.pygame.org/docs/ref/sprite.html#pygame.sprite.Group.update"
+      ],
+      "code": "from actors import Enemy\nfrom extension import WeavingEnemy\n\na = Enemy(\"E01\", (180, 180))\nb = WeavingEnemy(\"E02\", (395, 235))\ngroup = pygame.sprite.Group(a, b)\ngroup.update(1 / 60)",
+      "file": "demo_game.py / Week8Game.spawn_enemy (concept)"
+    },
+    {
+      "number": 11,
+      "type": "code",
+      "title": "Spark とダックタイピング",
+      "sub": "必要な操作に応えられるオブジェクトを使う",
+      "notes": [
+        "Spark は残り時間 ttl を持ち、Enemy を継承しない。",
+        "Spark は通常の更新リストで使える。Pygame のグループには Sprite の仕組みが必要。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip",
+        "https://docs.python.org/3.12/library/typing.html#typing.Protocol",
+        "https://www.pygame.org/docs/ref/sprite.html#pygame.sprite.Group.update"
+      ],
+      "code": "class Spark:\n    def __init__(self) -> None:\n        self.ttl = 1.0\n\n    def update(self, dt: float) -> None:\n        self.ttl = max(0.0, self.ttl - dt)",
+      "file": "contracts.py / Spark"
+    },
+    {
+      "number": 12,
+      "type": "code",
+      "title": "呼び出しには互換性が必要",
+      "sub": "メソッド名と引数が呼び出しを左右する",
+      "notes": [
+        "update がなければ AttributeError。",
+        "update があっても dt を受け取れなければ呼び出せない。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip",
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance"
+      ],
+      "code": "class BadClock:\n    def update(self):\n        pass\n\nbad = BadClock()\nbad.update(0.5)  # TypeError",
+      "file": "contracts.py / BadClock"
+    },
+    {
+      "number": 13,
+      "type": "table",
+      "title": "更新インターフェースの契約",
+      "sub": "共通の操作には振る舞いと単位の約束もある",
+      "notes": [
+        "抽象化では必要な操作を公開し、実装の詳細をオブジェクト内部に保つ。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip"
+      ],
+      "values": [
+        [
+          "項目",
+          "この例での約束"
+        ],
+        [
+          "入力",
+          "dt: float"
+        ],
+        [
+          "単位",
+          "経過秒数、dt ≥ 0"
+        ],
+        [
+          "副作用",
+          "自身の状態を更新し、必要なら rect を同期"
+        ],
+        [
+          "戻り値",
+          "None"
+        ]
+      ]
+    },
+    {
+      "number": 14,
+      "type": "code",
+      "title": "抽象基底クラス ABC",
+      "sub": "抽象メソッドでサブクラスに必要な操作を示す",
+      "notes": [
+        "これは独立した簡略モデル。元の Actor は具象クラスのまま。",
+        "ABC と abstractmethod は abc モジュールから読み込む。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip",
+        "https://docs.python.org/3.12/library/abc.html"
+      ],
+      "code": "from abc import ABC, abstractmethod\n\nclass UpdateableABC(ABC):\n    @abstractmethod\n    def update(self, dt: float) -> None:\n        pass",
+      "file": "contracts.py / UpdateableABC"
+    },
+    {
+      "number": 15,
+      "type": "code",
+      "title": "未実装の抽象メソッド",
+      "sub": "抽象メソッドが残る間は実体を生成できない",
+      "notes": [
+        "pass 自体は抽象契約を作らない。ABC とデコレーターが必要。",
+        "ABC はオーバーライドのシグネチャや振る舞いを完全には検証しない。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/library/abc.html"
+      ],
+      "code": "class Incomplete(UpdateableABC):\n    pass\n\nIncomplete()  # TypeError\n\n# Still abstract:\nUpdateableABC()  # TypeError",
+      "file": "contracts.py / abstract-class example"
+    },
+    {
+      "number": 16,
+      "type": "code",
+      "title": "抽象契約を実装したクラス",
+      "sub": "FallingTarget が update(dt) を実装",
+      "notes": [
+        "生成後の update(0.5) で y は 0.0 から 40.0 になる。",
+        "抽象クラスも共通実装や通常のメソッドを提供できる。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip",
+        "https://docs.python.org/3.12/library/abc.html"
+      ],
+      "code": "class FallingTarget(UpdateableABC):\n    def __init__(self) -> None:\n        self.y = 0.0\n\n    def update(self, dt: float) -> None:\n        self.y += 80.0 * dt",
+      "file": "contracts.py / FallingTarget"
+    },
+    {
+      "number": 17,
+      "type": "code",
+      "title": "Protocol で必要な操作を表す",
+      "sub": "明示的な継承なしで構造から互換性を判断",
+      "notes": [
+        "tick_all が必要とするのは update(dt) を呼べること。",
+        "Iterable はリストやタプルなどの反復可能な入力を受け取る。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip",
+        "https://docs.python.org/3.12/library/typing.html#typing.Protocol"
+      ],
+      "code": "from typing import Protocol\nfrom collections.abc import Iterable\n\nclass Updatable(Protocol):\n    def update(self, dt: float) -> None: ...\n\ndef tick_all(items: Iterable[Updatable], dt: float) -> None:\n    for item in items:\n        item.update(dt)",
+      "file": "contracts.py / Updatable, tick_all"
+    },
+    {
+      "number": 18,
+      "type": "code",
+      "title": "異なるクラスを同じ関数で更新",
+      "sub": "FallingTarget も Spark も Updatable を満たす",
+      "notes": [
+        "Spark は class Spark(Updatable) と宣言する必要がない。",
+        "同じ dt でも、各オブジェクトの状態変化は異なる。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip",
+        "https://docs.python.org/3.12/library/typing.html#typing.Protocol"
+      ],
+      "code": "from contracts import FallingTarget, Spark, tick_all\n\ntarget = FallingTarget()\nspark = Spark()\ntick_all([target, spark], 0.5)\n\nprint(target.y, spark.ttl)\n# 40.0 0.5",
+      "file": "contracts.py / executable example"
+    },
+    {
+      "number": 19,
+      "type": "code",
+      "title": "静的検査で不適合なメソッドを見つける",
+      "sub": "typing_error.py は意図的な型エラーの例",
+      "notes": [
+        "mypy は update(self, dt: float) を期待するが、BadClock には dt がない。",
+        "型ヒントは検査を支援する。Python が自動で mypy を実行するわけではない。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip",
+        "https://docs.python.org/3.12/library/typing.html#typing.Protocol",
+        "https://mypy.readthedocs.io/en/stable/protocols.html"
+      ],
+      "code": "from contracts import BadClock, Updatable\n\nbad: Updatable = BadClock()\n\n# mypy: incompatible types in assignment",
+      "file": "typing_error.py"
+    },
+    {
+      "number": 20,
+      "type": "code",
+      "title": "runtime_checkable の範囲",
+      "sub": "実行時はメンバーの存在を調べ、完全なシグネチャは検証しない",
+      "notes": [
+        "isinstance が True でも update(0.5) の成功は保証されない。",
+        "通常の Protocol でこの isinstance 検査を行うにはデコレーターが必要。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip",
+        "https://docs.python.org/3.12/library/typing.html#typing.Protocol"
+      ],
+      "code": "from typing import Protocol, runtime_checkable\nfrom contracts import BadClock\n\n@runtime_checkable\nclass CanUpdate(Protocol):\n    def update(self, dt: float) -> None: ...\n\nprint(isinstance(BadClock(), CanUpdate))\n# True",
+      "file": "contracts.py / CanUpdate"
+    },
+    {
+      "number": 21,
+      "type": "table",
+      "title": "インターフェースの三つの表し方",
+      "sub": "必要な契約と検査方法を選ぶ",
+      "notes": [
+        "どれも多態性に使える。ABC と Protocol は同じプロジェクトで併用できる。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/library/abc.html",
+        "https://docs.python.org/3.12/library/typing.html#typing.Protocol",
+        "https://mypy.readthedocs.io/en/stable/protocols.html"
+      ],
+      "values": [
+        [
+          "方式",
+          "適合の根拠",
+          "主な検査時点"
+        ],
+        [
+          "ダックタイピング",
+          "必要な操作を呼べる",
+          "呼び出し時"
+        ],
+        [
+          "ABC",
+          "継承と抽象メソッドの実装",
+          "実体の生成時"
+        ],
+        [
+          "Protocol",
+          "メソッドと属性の構造",
+          "主に静的検査"
+        ]
+      ]
+    },
+    {
+      "number": 22,
+      "type": "text",
+      "title": "型の互換性と正しい振る舞い",
+      "sub": "インターフェースは呼び出しを表し、テストは状態変化を確かめる",
+      "notes": [
+        "すべての update(dt) で秒を使う。あるクラスだけミリ秒にしない。",
+        "オーバーライド後も既存の呼び出しを受け取り、必須引数を増やさない。",
+        "位置・HP・rect の整合性もテストする。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip",
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/typing.html#typing.Protocol"
+      ]
+    },
+    {
+      "number": 23,
+      "type": "code",
+      "title": "コンポジションで移動を分離",
+      "sub": "Enemy が Motion を持ち、速度の計算を任せる",
+      "notes": [
+        "Motion は velocity(dt) を定義し、(vx, vy) を返す。",
+        "戻り値は速度であり、まだ dt を掛けていない。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip"
+      ],
+      "code": "from typing import Protocol\n\nclass Motion(Protocol):\n    def velocity(self, dt: float) -> tuple[float, float]: ...",
+      "file": "motion.py / Motion"
+    },
+    {
+      "number": 24,
+      "type": "code",
+      "title": "直進と揺動の二つの戦略",
+      "sub": "同じ velocity(dt) で異なる速度を得る",
+      "notes": [
+        "Straight は時刻を持たず、Weave は elapsed で進行を保持する。",
+        "各敵に別の Weave を作り、可変の時刻状態を共有しない。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip"
+      ],
+      "code": "from math import cos\n\nclass Straight:\n    def velocity(self, dt: float) -> tuple[float, float]:\n        return (0.0, 80.0)\n\nclass Weave:\n    def __init__(self) -> None:\n        self.elapsed = 0.0\n\n    def velocity(self, dt: float) -> tuple[float, float]:\n        self.elapsed += dt\n        return (100.0 * cos(3.0 * self.elapsed), 80.0)",
+      "file": "motion.py / Straight, Weave"
+    },
+    {
+      "number": 25,
+      "type": "code",
+      "title": "StrategyEnemy が速度計算を委譲",
+      "sub": "Enemy の機能を継承しつつ移動戦略を持つ",
+      "notes": [
+        "まず速度を得て、Actor.update が dt を掛ける。",
+        "参照によるオブジェクトの組み合わせ。属性があるだけでは UML の強い所有関係を意味しない。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip"
+      ],
+      "code": "class StrategyEnemy(Enemy):\n    def __init__(self, name, position, motion: Motion):\n        super().__init__(name, position)\n        self.motion = motion\n\n    def update(self, dt):\n        vx, vy = self.motion.velocity(dt)\n        self.velocity.update(vx, vy)\n        super().update(dt)",
+      "file": "extension.py / StrategyEnemy"
+    },
+    {
+      "number": 26,
+      "type": "code",
+      "title": "敵を保ったまま戦略を差し替える",
+      "sub": "Enemy を作り直さず motion の参照を変更",
+      "notes": [
+        "敵の同一性・位置・HP を保ち、次の更新から新戦略を使う。",
+        "第 8 週版で C を押すと StrategyEnemy の直進・揺動を切り替える。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip"
+      ],
+      "code": "from extension import StrategyEnemy\nfrom motion import Straight, Weave\n\nenemy = StrategyEnemy(\"E03\", (620, 175), Weave())\noriginal = enemy\nenemy.motion = Straight()\nprint(enemy is original)  # True",
+      "file": "extension.py + motion.py"
+    },
+    {
+      "number": 27,
+      "type": "table",
+      "title": "継承とコンポジションの選択",
+      "sub": "実体の種類と振る舞いの変化から関係を決める",
+      "notes": [
+        "StrategyEnemy は継承とコンポジションを併用する。両者は補完できる。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip"
+      ],
+      "values": [
+        [
+          "状況",
+          "選択",
+          "例"
+        ],
+        [
+          "Enemy の一種で被弾ルールを共有",
+          "継承",
+          "WeavingEnemy(Enemy)"
+        ],
+        [
+          "同じ敵の移動方法を変更",
+          "コンポジション",
+          "enemy.motion = Straight()"
+        ],
+        [
+          "共通の親がなくても更新可能",
+          "Protocol",
+          "tick_all([target, spark], dt)"
+        ]
+      ]
+    },
+    {
+      "number": 28,
+      "type": "image",
+      "title": "ブラウザー版を停止して観察",
+      "sub": "ブラウザーは元のゲーム。新戦略は第 8 週のダウンロード版に収録",
+      "notes": [
+        "観察用の例を読み込み、B01 を選び、N で一フレーム進める。",
+        "B01.y は約 490.0 から 479.7 へ変わり、owner は同じ Player のまま。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/pygame-oop-shooter.zip",
+        "https://minhuangyuntech.github.io/oo2026/pygame/play/"
+      ],
+      "image": "pygame-ja-browser-observe.png",
+      "links": [
+        [
+          "元のブラウザー版を開く",
+          "https://minhuangyuntech.github.io/oo2026/ja/pygame/play/"
+        ]
+      ]
+    },
+    {
+      "number": 29,
+      "type": "code",
+      "title": "第 8 週のサンプルを実行",
+      "sub": "ZIP を展開し week8_examples フォルダーで実行",
+      "notes": [
+        "Python 3.12+。元の操作に加え、C で戦略切替、P で停止、N で一歩進む。",
+        "英語は en、日本語は ja。typing_error.py では型エラーが出る。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip"
+      ],
+      "code": "python -m pip install -r requirements.txt\npython contracts.py\npython demo_game.py --lang ja\npython -m mypy --strict contracts.py motion.py\npython -m mypy --strict typing_error.py\npython -m unittest discover -s tests -v",
+      "file": "week8_examples/",
+      "codeLanguage": "bash",
+      "links": [
+        [
+          "第 8 週のサンプル ZIP",
+          "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip"
+        ]
+      ]
+    },
+    {
+      "number": 30,
+      "type": "text",
+      "title": "演習：移動を止める戦略",
+      "sub": "Freeze を追加して既存の敵をその場に止める",
+      "notes": [
+        "velocity(dt) を実装し、横・縦の速度を 0 にする。",
+        "enemy.motion を Freeze() に変え、update(0.5) を呼ぶ。",
+        "位置が変わらず、同一性と HP が保たれることを確かめる。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip"
+      ]
+    },
+    {
+      "number": 31,
+      "type": "code",
+      "title": "演習の解答と状態の確認",
+      "sub": "振る舞いのオブジェクトを替え、更新処理を再利用",
+      "notes": [
+        "Freeze は構造で Motion を満たし、明示的な継承は不要。",
+        "完全なテストでは HP・rect・グループ所属も確認する。"
+      ],
+      "sources": [
+        "https://minhuangyuntech.github.io/oo2026/materials/week-8-examples.zip"
+      ],
+      "code": "class Freeze:\n    def velocity(self, dt: float) -> tuple[float, float]:\n        return (0.0, 0.0)\n\nenemy.motion = Freeze()\nbefore = tuple(enemy.pos)\noriginal = enemy\nenemy.update(0.5)\nassert tuple(enemy.pos) == before\nassert enemy is original",
+      "file": "motion.py / Freeze; tests/test_week8.py"
+    },
+    {
+      "number": 32,
+      "type": "text",
+      "title": "今週の要点と参考資料",
+      "sub": "共通の操作でオブジェクトを協調・差し替え可能にする",
+      "notes": [
+        "多態性は実体に応じて振る舞いを選ぶ。継承でもダックタイピングでも使える。",
+        "ABC は実装責任を示し、Protocol は構造的な互換性を表す。",
+        "コンポジションで振る舞いを差し替え、テストで契約を確かめる。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/library/abc.html",
+        "https://docs.python.org/3.12/library/typing.html#typing.Protocol",
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://www.pygame.org/docs/ref/sprite.html#pygame.sprite.Group.update",
+        "https://mypy.readthedocs.io/en/stable/protocols.html"
+      ],
+      "links": [
+        [
+          "Python の抽象クラス",
+          "https://docs.python.org/3.12/library/abc.html"
+        ],
+        [
+          "Python Protocol",
+          "https://docs.python.org/3.12/library/typing.html#typing.Protocol"
+        ]
+      ]
+    }
+  ]
+}
