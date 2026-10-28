@@ -1,0 +1,1406 @@
+{
+  "zh": [
+    {
+      "number": 1,
+      "type": "cover",
+      "title": "繼承與類別階層",
+      "sub": "第 7 週",
+      "notes": [
+        "從射擊遊戲理解共用行為與子類別擴充"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ]
+    },
+    {
+      "number": 2,
+      "type": "text",
+      "title": "本週的學習路線",
+      "sub": "第 6 週 UML 的實作延伸",
+      "notes": [
+        "辨識父類別、子類別與每個物件自己的狀態。",
+        "追蹤初始化、方法覆寫與 super() 的執行順序。",
+        "判斷 is-a 與 has-a，閱讀多重繼承的 MRO。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ]
+    },
+    {
+      "number": 3,
+      "type": "code",
+      "title": "射擊遊戲的類別階層",
+      "sub": "縮排表示直接繼承關係",
+      "notes": [
+        "Player、Enemy、Bullet 都是 Actor 的子類別。",
+        "UML 泛化使用實線與空心三角形，指向父類別。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "code": "object\n  pygame.sprite.Sprite\n    Actor\n      Player\n      Enemy\n      Bullet",
+      "file": "actors.py / week7_demo.py",
+      "codeLanguage": "text"
+    },
+    {
+      "number": 4,
+      "type": "table",
+      "title": "共用責任與專屬責任",
+      "sub": "依現有 actors.py 分工",
+      "notes": [],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "values": [
+        [
+          "類別",
+          "狀態與行為"
+        ],
+        [
+          "Actor",
+          "name、image、pos、rect、velocity；update(dt)"
+        ],
+        [
+          "Player",
+          "hp、cooldown；輸入方向、發射、受傷"
+        ],
+        [
+          "Enemy",
+          "hp、max_hp；沿用移動、處理命中"
+        ],
+        [
+          "Bullet",
+          "owner、damage；移動後檢查是否離開畫面"
+        ]
+      ]
+    },
+    {
+      "number": 5,
+      "type": "code",
+      "title": "Actor 提供共同移動",
+      "sub": "原程式節錄；dt 的單位為秒",
+      "notes": [
+        "velocity 是每秒位移；乘上 dt 得到這一步的位移。",
+        "pos 保存浮點位置，rect 供顯示與碰撞使用。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "code": "class Actor(pygame.sprite.Sprite):\n    def update(self, dt):\n        self.pos += self.velocity * dt\n        self.rect.center = (\n            round(self.pos.x), round(self.pos.y)\n        )",
+      "file": "actors.py / week7_demo.py"
+    },
+    {
+      "number": 6,
+      "type": "code",
+      "title": "Enemy 沿用父類別方法",
+      "sub": "未定義 update 時，沿 MRO 尋找",
+      "notes": [
+        "Enemy 沒有覆寫 update，這次呼叫執行 Actor.update。",
+        "y 從 100 變為 120；self 就是 enemy。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "code": "enemy = Enemy(\"E01\", (200, 100), speed=80)\nenemy.update(0.25)\nprint(enemy.pos.y)  # 120.0\nprint(Enemy.update is Actor.update)  # True",
+      "file": "actors.py / week7_demo.py"
+    },
+    {
+      "number": 7,
+      "type": "code",
+      "title": "初始化共同屬性",
+      "sub": "Actor.__init__ 的原程式節錄",
+      "notes": [
+        "super().__init__() 完成 Sprite 的初始化。",
+        "這些 self 屬性建立在目前的同一個物件上。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "code": "def __init__(self, name, position, size):\n    super().__init__()\n    self.name = name\n    self.image = pygame.Surface(size, pygame.SRCALPHA)\n    self.pos = pygame.Vector2(position)\n    self.rect = self.image.get_rect(center=position)\n    self.velocity = pygame.Vector2()",
+      "file": "actors.py / week7_demo.py"
+    },
+    {
+      "number": 8,
+      "type": "code",
+      "title": "子類別擴充初始化",
+      "sub": "Enemy.__init__ 節錄，省略繪圖",
+      "notes": [
+        "先建立共同狀態，再設定敵人的速度與生命。",
+        "覆寫 __init__ 後，父類別初始化不會自動另行呼叫。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "code": "class Enemy(Actor):\n    def __init__(self, name, position, speed=80, hp=1):\n        super().__init__(name, position, (44, 40))\n        self.velocity.y = speed\n        self.hp = hp\n        self.max_hp = hp",
+      "file": "actors.py / week7_demo.py"
+    },
+    {
+      "number": 9,
+      "type": "text",
+      "title": "初始化的執行順序",
+      "sub": "Enemy(\"E01\", (200, 100))",
+      "notes": [
+        "進入 Enemy.__init__，self 是新建立的 Enemy 物件。",
+        "super() 呼叫 Actor.__init__，其中再初始化 Sprite。",
+        "回到 Enemy 設定 hp。過程中使用同一個 self。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ]
+    },
+    {
+      "number": 10,
+      "type": "code",
+      "title": "共用方法，狀態各自獨立",
+      "sub": "兩個 Enemy 實體",
+      "notes": [
+        "每次初始化都建立新的 Vector2，不會共用速度物件。",
+        "繼承不表示兩個實體共用 hp。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "code": "a = Enemy(\"E01\", (100, 100), hp=1)\nb = Enemy(\"E02\", (200, 100), hp=3)\na.hp = 0\nprint(b.hp)  # 3\nprint(a.velocity is b.velocity)  # False",
+      "file": "actors.py / week7_demo.py"
+    },
+    {
+      "number": 11,
+      "type": "code",
+      "title": "類別判斷與繼承關係",
+      "sub": "isinstance 與 issubclass",
+      "notes": [
+        "isinstance 接受子類別實體；type(...) is ... 比較精確類別。",
+        "這些檢查描述關係，不保證方法的行為正確。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "code": "enemy = Enemy(\"E01\", (200, 100))\nprint(isinstance(enemy, Enemy))  # True\nprint(isinstance(enemy, Actor))  # True\nprint(issubclass(Enemy, Actor))  # True\nprint(type(enemy) is Actor)     # False",
+      "file": "actors.py / week7_demo.py"
+    },
+    {
+      "number": 12,
+      "type": "text",
+      "title": "屬性應該放在哪裡",
+      "sub": "依角色共同責任決定",
+      "notes": [
+        "所有 Actor 都需要位置與速度，因此放在 Actor 初始化。",
+        "只有 Bullet 需要 owner，因此保留在 Bullet。",
+        "可變清單若要每個實體獨立，應在 __init__ 中建立。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ]
+    },
+    {
+      "number": 13,
+      "type": "code",
+      "title": "覆寫方法並延伸行為",
+      "sub": "Bullet.update 原程式節錄",
+      "notes": [
+        "Bullet 定義同名方法，因此先執行 Bullet.update。",
+        "super() 完成移動，再檢查離開畫面。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "code": "class Bullet(Actor):\n    def update(self, dt):\n        super().update(dt)\n        if self.rect.bottom < PLAY_AREA.top:\n            self.kill()",
+      "file": "actors.py / week7_demo.py"
+    },
+    {
+      "number": 14,
+      "type": "text",
+      "title": "super() 的意義",
+      "sub": "依方法解析順序繼續查找",
+      "notes": [
+        "super() 產生代理，從目前類別之後沿 MRO 尋找方法。",
+        "Bullet 的單一繼承例子會找到 Actor.update。",
+        "self 仍是原本的 Bullet，沒有產生另一個 Actor 實體。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ]
+    },
+    {
+      "number": 15,
+      "type": "code",
+      "title": "新增快速敵人",
+      "sub": "可直接搭配原 actors.py；只改預設參數",
+      "notes": [
+        "FastEnemy 沿用 Enemy 的受傷處理與 Actor 的移動。",
+        "如果只是速度不同，直接傳 speed=160 也足夠。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "code": "class FastEnemy(Enemy):\n    def __init__(self, name, position):\n        super().__init__(name, position, speed=160)\n\nfast = FastEnemy(\"F01\", (200, 100))\nfast.update(0.25)\nprint(fast.pos.y)  # 140.0",
+      "file": "actors.py / week7_demo.py"
+    },
+    {
+      "number": 16,
+      "type": "code",
+      "title": "新增斜向敵人",
+      "sub": "覆寫 update，保留父類別的移動計算",
+      "notes": [
+        "先設定水平速度，再以 super() 移動一次。",
+        "呼叫鏈：DiagonalEnemy.update、Actor.update。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "code": "class DiagonalEnemy(Enemy):\n    def update(self, dt):\n        self.velocity.x = 60\n        super().update(dt)\n\ndiagonal = DiagonalEnemy(\"D01\", (200, 100))\ndiagonal.update(0.25)\nprint(tuple(diagonal.pos))  # (215.0, 120.0)",
+      "file": "actors.py / week7_demo.py"
+    },
+    {
+      "number": 17,
+      "type": "table",
+      "title": "單步移動的結果",
+      "sub": "起點 (200, 100)，dt = 0.25 秒",
+      "notes": [
+        "同樣呼叫 update(dt)，各物件依自己的速度移動。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "values": [
+        [
+          "Class",
+          "velocity (x, y)",
+          "pos (x, y)"
+        ],
+        [
+          "Enemy",
+          "(0, 80)",
+          "(200, 120)"
+        ],
+        [
+          "FastEnemy",
+          "(0, 160)",
+          "(200, 140)"
+        ],
+        [
+          "DiagonalEnemy",
+          "(60, 80)",
+          "(215, 120)"
+        ]
+      ]
+    },
+    {
+      "number": 18,
+      "type": "text",
+      "title": "常見錯誤",
+      "sub": "檢查呼叫順序與方法契約",
+      "notes": [
+        "漏掉必要的 super().__init__，可能使 pos 或 rect 尚未建立。",
+        "自己移動後又呼叫 super().update，可能使物件移動兩次。",
+        "把 update(self, dt) 改成 update(self)，既有呼叫會出現 TypeError。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ]
+    },
+    {
+      "number": 19,
+      "type": "text",
+      "title": "Is-a 與 Has-a",
+      "sub": "繼承與參照關係各有用途",
+      "notes": [
+        "Enemy is an Actor：需要遵守 Actor 的共同介面與行為。",
+        "Bullet has an owner：owner 參照 Player，Bullet 不繼承 Player。",
+        "只為取得另一類別的便利方法而繼承，容易建立不合理關係。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ]
+    },
+    {
+      "number": 20,
+      "type": "code",
+      "title": "子類別的可替換性",
+      "sub": "呼叫端依賴共同的 update(dt) 約定",
+      "notes": [
+        "各子類別保留秒數參數、位置更新與 rect 同步。",
+        "相同方法名稱還不夠，行為也需要符合呼叫端的期待。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "code": "enemies = [\n    Enemy(\"E01\", (200, 100)),\n    FastEnemy(\"F01\", (200, 100)),\n    DiagonalEnemy(\"D01\", (200, 100)),\n]\nfor enemy in enemies:\n    enemy.update(0.25)",
+      "file": "actors.py / week7_demo.py"
+    },
+    {
+      "number": 21,
+      "type": "code",
+      "title": "多重繼承與 MRO",
+      "sub": "獨立小範例；不修改遊戲階層",
+      "notes": [
+        "MRO 是方法解析順序；Python 使用 C3 線性化。",
+        "D 的順序是 D、B、C、A、object。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "code": "class A: pass\nclass B(A): pass\nclass C(A): pass\nclass D(B, C): pass\n\nprint([cls.__name__ for cls in D.__mro__])\n# [\"D\", \"B\", \"C\", \"A\", \"object\"]",
+      "file": "actors.py / week7_demo.py"
+    },
+    {
+      "number": 22,
+      "type": "code",
+      "title": "合作式 super() 呼叫",
+      "sub": "沿用上一頁的 D(B, C)，重新定義 A、B、C 後重建 D",
+      "notes": [
+        "D().act() 輸出 B、C、A；B 的下一站是 C。",
+        "合作方法需要相容參數，並一致使用 super()。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "code": "class A:\n    def act(self): print(\"A\")\nclass B(A):\n    def act(self):\n        print(\"B\")\n        super().act()\nclass C(A):\n    def act(self):\n        print(\"C\")\n        super().act()\nclass D(B, C): pass\nD().act()",
+      "file": "actors.py / week7_demo.py"
+    },
+    {
+      "number": 23,
+      "type": "code",
+      "title": "範例下載與執行",
+      "sub": "Python 3.12；解壓縮後在資料夾開啟終端機",
+      "notes": [
+        "week7_demo.py 印出位置、繼承判斷與 MRO，並驗證結果。",
+        "原版遊戲與物件標籤仍可從課程的射擊遊戲頁開啟。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "code": "python -m pip install pygame==2.6.1\npython week7_demo.py",
+      "file": "actors.py / week7_demo.py",
+      "links": [
+        [
+          "下載範例",
+          "https://minhuangyuntech.github.io/oo2026/materials/week-7-examples.zip"
+        ]
+      ],
+      "codeLanguage": "shell"
+    },
+    {
+      "number": 24,
+      "type": "text",
+      "title": "練習與第 8 週銜接",
+      "sub": "先預測，再執行觀察",
+      "notes": [
+        "把 FastEnemy 速度改為 200，計算 0.25 秒後的位置。",
+        "答案：(200, 150)。說明哪個類別的方法負責更新位置。",
+        "第 8 週進一步使用多型、ABC 與 Protocol 描述共同介面。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ]
+    }
+  ],
+  "en": [
+    {
+      "number": 1,
+      "type": "cover",
+      "title": "Inheritance &\nclass hierarchies",
+      "sub": "Week 7",
+      "notes": [
+        "Shared behavior and subclass extensions in the shooter"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ]
+    },
+    {
+      "number": 2,
+      "type": "text",
+      "title": "Learning path",
+      "sub": "From UML to executable classes",
+      "notes": [
+        "Identify base classes, subclasses, and per-object state.",
+        "Trace initialization, overriding, and super() calls.",
+        "Distinguish is-a from has-a and read the MRO."
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ]
+    },
+    {
+      "number": 3,
+      "type": "code",
+      "title": "The shooter hierarchy",
+      "sub": "Indentation shows direct inheritance",
+      "notes": [
+        "Player, Enemy, and Bullet all derive from Actor.",
+        "In UML, a solid line with a hollow triangle points to the base class."
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "code": "object\n  pygame.sprite.Sprite\n    Actor\n      Player\n      Enemy\n      Bullet",
+      "file": "actors.py / week7_demo.py",
+      "codeLanguage": "text"
+    },
+    {
+      "number": 4,
+      "type": "table",
+      "title": "Shared and specific responsibilities",
+      "sub": "Responsibilities in the existing actors.py",
+      "notes": [],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "values": [
+        [
+          "Class",
+          "State and behavior"
+        ],
+        [
+          "Actor",
+          "name, image, pos, rect, velocity; update(dt)"
+        ],
+        [
+          "Player",
+          "hp, cooldown; direction, shooting, damage"
+        ],
+        [
+          "Enemy",
+          "hp, max_hp; inherited movement, hit handling"
+        ],
+        [
+          "Bullet",
+          "owner, damage; move and check screen exit"
+        ]
+      ]
+    },
+    {
+      "number": 5,
+      "type": "code",
+      "title": "Actor supplies movement",
+      "sub": "Original excerpt; dt is measured in seconds",
+      "notes": [
+        "Velocity times dt gives displacement for this step.",
+        "pos keeps float coordinates; rect supports drawing and collisions."
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "code": "class Actor(pygame.sprite.Sprite):\n    def update(self, dt):\n        self.pos += self.velocity * dt\n        self.rect.center = (\n            round(self.pos.x), round(self.pos.y)\n        )",
+      "file": "actors.py / week7_demo.py"
+    },
+    {
+      "number": 6,
+      "type": "code",
+      "title": "Enemy inherits update",
+      "sub": "Lookup follows the MRO when update is absent",
+      "notes": [
+        "Enemy does not override update, so this calls Actor.update.",
+        "y changes from 100 to 120; self is enemy."
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "code": "enemy = Enemy(\"E01\", (200, 100), speed=80)\nenemy.update(0.25)\nprint(enemy.pos.y)  # 120.0\nprint(Enemy.update is Actor.update)  # True",
+      "file": "actors.py / week7_demo.py"
+    },
+    {
+      "number": 7,
+      "type": "code",
+      "title": "Initializing shared attributes",
+      "sub": "Excerpt from Actor.__init__",
+      "notes": [
+        "super().__init__() initializes Sprite state.",
+        "These self attributes belong to this same instance."
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "code": "def __init__(self, name, position, size):\n    super().__init__()\n    self.name = name\n    self.image = pygame.Surface(size, pygame.SRCALPHA)\n    self.pos = pygame.Vector2(position)\n    self.rect = self.image.get_rect(center=position)\n    self.velocity = pygame.Vector2()",
+      "file": "actors.py / week7_demo.py"
+    },
+    {
+      "number": 8,
+      "type": "code",
+      "title": "Extending initialization",
+      "sub": "Enemy.__init__ excerpt; drawing omitted",
+      "notes": [
+        "Initialize common state, then enemy speed and health.",
+        "An overridden __init__ must explicitly call the base initializer when needed."
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "code": "class Enemy(Actor):\n    def __init__(self, name, position, speed=80, hp=1):\n        super().__init__(name, position, (44, 40))\n        self.velocity.y = speed\n        self.hp = hp\n        self.max_hp = hp",
+      "file": "actors.py / week7_demo.py"
+    },
+    {
+      "number": 9,
+      "type": "text",
+      "title": "Initialization order",
+      "sub": "Enemy(\"E01\", (200, 100))",
+      "notes": [
+        "Enter Enemy.__init__; self is the newly created Enemy.",
+        "super() calls Actor.__init__, which initializes Sprite.",
+        "Return to Enemy to set hp. Every step uses the same self."
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ]
+    },
+    {
+      "number": 10,
+      "type": "code",
+      "title": "Shared methods, independent state",
+      "sub": "Two Enemy instances",
+      "notes": [
+        "Each initializer creates its own velocity Vector2.",
+        "Inheritance does not make the two instances share hp."
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "code": "a = Enemy(\"E01\", (100, 100), hp=1)\nb = Enemy(\"E02\", (200, 100), hp=3)\na.hp = 0\nprint(b.hp)  # 3\nprint(a.velocity is b.velocity)  # False",
+      "file": "actors.py / week7_demo.py"
+    },
+    {
+      "number": 11,
+      "type": "code",
+      "title": "Checking class relationships",
+      "sub": "isinstance and issubclass",
+      "notes": [
+        "isinstance includes subclass instances; type identity is exact.",
+        "These checks describe relationships, not behavioral correctness."
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "code": "enemy = Enemy(\"E01\", (200, 100))\nprint(isinstance(enemy, Enemy))  # True\nprint(isinstance(enemy, Actor))  # True\nprint(issubclass(Enemy, Actor))  # True\nprint(type(enemy) is Actor)     # False",
+      "file": "actors.py / week7_demo.py"
+    },
+    {
+      "number": 12,
+      "type": "text",
+      "title": "Where attributes belong",
+      "sub": "Use shared responsibilities to decide",
+      "notes": [
+        "All actors need position and velocity, so Actor initializes them.",
+        "Only Bullet needs owner, so Bullet defines it.",
+        "Create mutable lists in __init__ when each instance needs its own."
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ]
+    },
+    {
+      "number": 13,
+      "type": "code",
+      "title": "Overriding and extending behavior",
+      "sub": "Original Bullet.update excerpt",
+      "notes": [
+        "Bullet defines update, so Bullet.update runs first.",
+        "super() moves the bullet before the exit check."
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "code": "class Bullet(Actor):\n    def update(self, dt):\n        super().update(dt)\n        if self.rect.bottom < PLAY_AREA.top:\n            self.kill()",
+      "file": "actors.py / week7_demo.py"
+    },
+    {
+      "number": 14,
+      "type": "text",
+      "title": "What super() means",
+      "sub": "Continue lookup along the method resolution order",
+      "notes": [
+        "super() returns a proxy that searches after the current class in the MRO.",
+        "In this single-inheritance example, it finds Actor.update.",
+        "self remains the original Bullet; no separate Actor is created."
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ]
+    },
+    {
+      "number": 15,
+      "type": "code",
+      "title": "Adding a fast enemy",
+      "sub": "Works with the original actors.py; changes defaults",
+      "notes": [
+        "FastEnemy inherits hit handling and movement.",
+        "For a speed-only difference, passing speed=160 also works."
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "code": "class FastEnemy(Enemy):\n    def __init__(self, name, position):\n        super().__init__(name, position, speed=160)\n\nfast = FastEnemy(\"F01\", (200, 100))\nfast.update(0.25)\nprint(fast.pos.y)  # 140.0",
+      "file": "actors.py / week7_demo.py"
+    },
+    {
+      "number": 16,
+      "type": "code",
+      "title": "Adding a diagonal enemy",
+      "sub": "Override update and reuse the movement calculation",
+      "notes": [
+        "Set horizontal velocity, then call super() to move once.",
+        "Call chain: DiagonalEnemy.update, then Actor.update."
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "code": "class DiagonalEnemy(Enemy):\n    def update(self, dt):\n        self.velocity.x = 60\n        super().update(dt)\n\ndiagonal = DiagonalEnemy(\"D01\", (200, 100))\ndiagonal.update(0.25)\nprint(tuple(diagonal.pos))  # (215.0, 120.0)",
+      "file": "actors.py / week7_demo.py"
+    },
+    {
+      "number": 17,
+      "type": "table",
+      "title": "One update step",
+      "sub": "Start (200, 100), dt = 0.25 seconds",
+      "notes": [
+        "Each object uses its own velocity for update(dt)."
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "values": [
+        [
+          "Class",
+          "velocity (x, y)",
+          "pos (x, y)"
+        ],
+        [
+          "Enemy",
+          "(0, 80)",
+          "(200, 120)"
+        ],
+        [
+          "FastEnemy",
+          "(0, 160)",
+          "(200, 140)"
+        ],
+        [
+          "DiagonalEnemy",
+          "(60, 80)",
+          "(215, 120)"
+        ]
+      ]
+    },
+    {
+      "number": 18,
+      "type": "text",
+      "title": "Common mistakes",
+      "sub": "Check call order and method contracts",
+      "notes": [
+        "Missing required base initialization can leave pos or rect undefined.",
+        "Moving manually and calling super().update can move twice.",
+        "Changing update(self, dt) to update(self) breaks existing calls."
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ]
+    },
+    {
+      "number": 19,
+      "type": "text",
+      "title": "Is-a and has-a",
+      "sub": "Inheritance and references serve different purposes",
+      "notes": [
+        "Enemy is an Actor and should honor its interface and behavior.",
+        "Bullet has an owner reference to Player; it does not inherit Player.",
+        "Inheriting only to borrow a convenient method can create a poor model."
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ]
+    },
+    {
+      "number": 20,
+      "type": "code",
+      "title": "Substitutability",
+      "sub": "The caller relies on the shared update(dt) contract",
+      "notes": [
+        "Subclasses preserve seconds as input and synchronize pos and rect.",
+        "Matching names alone is insufficient; behavior must meet caller expectations."
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "code": "enemies = [\n    Enemy(\"E01\", (200, 100)),\n    FastEnemy(\"F01\", (200, 100)),\n    DiagonalEnemy(\"D01\", (200, 100)),\n]\nfor enemy in enemies:\n    enemy.update(0.25)",
+      "file": "actors.py / week7_demo.py"
+    },
+    {
+      "number": 21,
+      "type": "code",
+      "title": "Multiple inheritance and MRO",
+      "sub": "Standalone example; the game hierarchy is unchanged",
+      "notes": [
+        "MRO is the method resolution order, computed with C3 linearization.",
+        "The order for D is D, B, C, A, object."
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "code": "class A: pass\nclass B(A): pass\nclass C(A): pass\nclass D(B, C): pass\n\nprint([cls.__name__ for cls in D.__mro__])\n# [\"D\", \"B\", \"C\", \"A\", \"object\"]",
+      "file": "actors.py / week7_demo.py"
+    },
+    {
+      "number": 22,
+      "type": "code",
+      "title": "Cooperative super() calls",
+      "sub": "Recreate D(B, C) after defining these classes",
+      "notes": [
+        "D().act() prints B, C, A; B continues to C.",
+        "Cooperative methods need compatible parameters and consistent super() calls."
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "code": "class A:\n    def act(self): print(\"A\")\nclass B(A):\n    def act(self):\n        print(\"B\")\n        super().act()\nclass C(A):\n    def act(self):\n        print(\"C\")\n        super().act()\nclass D(B, C): pass\nD().act()",
+      "file": "actors.py / week7_demo.py"
+    },
+    {
+      "number": 23,
+      "type": "code",
+      "title": "Download and run",
+      "sub": "Python 3.12; open a terminal in the extracted folder",
+      "notes": [
+        "week7_demo.py prints and checks positions, inheritance, and MRO.",
+        "The original game and object labels are available on the shooter page."
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "code": "python -m pip install pygame==2.6.1\npython week7_demo.py",
+      "file": "actors.py / week7_demo.py",
+      "links": [
+        [
+          "Download examples",
+          "https://minhuangyuntech.github.io/oo2026/materials/week-7-examples.zip"
+        ]
+      ],
+      "codeLanguage": "shell"
+    },
+    {
+      "number": 24,
+      "type": "text",
+      "title": "Practice and the next step",
+      "sub": "Predict, then run and observe",
+      "notes": [
+        "Change FastEnemy speed to 200 and calculate its position after 0.25 s.",
+        "Answer: (200, 150). Explain which class implements movement.",
+        "Week 8 develops polymorphism, ABCs, and Protocols for shared interfaces."
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ]
+    }
+  ],
+  "ja": [
+    {
+      "number": 1,
+      "type": "cover",
+      "title": "継承とクラス階層",
+      "sub": "第7週",
+      "notes": [
+        "シューティングゲームで共通の動作と派生クラスを学ぶ"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ]
+    },
+    {
+      "number": 2,
+      "type": "text",
+      "title": "今週の学習内容",
+      "sub": "第6週の UML から実装へ",
+      "notes": [
+        "基底クラス・派生クラスと各オブジェクトの状態を区別する。",
+        "初期化・オーバーライド・super() の実行順序を追う。",
+        "is-a と has-a を区別し、多重継承の MRO を読む。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ]
+    },
+    {
+      "number": 3,
+      "type": "code",
+      "title": "ゲームのクラス階層",
+      "sub": "字下げは直接の継承関係を表す",
+      "notes": [
+        "Player・Enemy・Bullet は Actor を継承する。",
+        "UML の汎化は実線と白抜き三角で基底クラスを指す。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "code": "object\n  pygame.sprite.Sprite\n    Actor\n      Player\n      Enemy\n      Bullet",
+      "file": "actors.py / week7_demo.py",
+      "codeLanguage": "text"
+    },
+    {
+      "number": 4,
+      "type": "table",
+      "title": "共通の役割と固有の役割",
+      "sub": "既存の actors.py の役割分担",
+      "notes": [],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "values": [
+        [
+          "クラス",
+          "状態と動作"
+        ],
+        [
+          "Actor",
+          "name・image・pos・rect・velocity、update(dt)"
+        ],
+        [
+          "Player",
+          "hp・cooldown、移動方向・発射・被弾"
+        ],
+        [
+          "Enemy",
+          "hp・max_hp、移動の継承・命中処理"
+        ],
+        [
+          "Bullet",
+          "owner・damage、移動後に画面外を判定"
+        ]
+      ]
+    },
+    {
+      "number": 5,
+      "type": "code",
+      "title": "Actor が共通の移動を提供する",
+      "sub": "元コードの抜粋。dt の単位は秒",
+      "notes": [
+        "速度に dt を掛けると、このステップの移動量になる。",
+        "pos は浮動小数点座標、rect は描画と衝突判定に使う。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "code": "class Actor(pygame.sprite.Sprite):\n    def update(self, dt):\n        self.pos += self.velocity * dt\n        self.rect.center = (\n            round(self.pos.x), round(self.pos.y)\n        )",
+      "file": "actors.py / week7_demo.py"
+    },
+    {
+      "number": 6,
+      "type": "code",
+      "title": "Enemy は update を継承する",
+      "sub": "update がなければ MRO に沿って探す",
+      "notes": [
+        "Enemy は update を定義せず、Actor.update が動く。",
+        "y は 100 から 120 に変わる。self は enemy。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "code": "enemy = Enemy(\"E01\", (200, 100), speed=80)\nenemy.update(0.25)\nprint(enemy.pos.y)  # 120.0\nprint(Enemy.update is Actor.update)  # True",
+      "file": "actors.py / week7_demo.py"
+    },
+    {
+      "number": 7,
+      "type": "code",
+      "title": "共通属性の初期化",
+      "sub": "Actor.__init__ の抜粋",
+      "notes": [
+        "super().__init__() が Sprite の状態を初期化する。",
+        "これらの self 属性は同じインスタンスに作られる。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "code": "def __init__(self, name, position, size):\n    super().__init__()\n    self.name = name\n    self.image = pygame.Surface(size, pygame.SRCALPHA)\n    self.pos = pygame.Vector2(position)\n    self.rect = self.image.get_rect(center=position)\n    self.velocity = pygame.Vector2()",
+      "file": "actors.py / week7_demo.py"
+    },
+    {
+      "number": 8,
+      "type": "code",
+      "title": "派生クラスによる初期化の拡張",
+      "sub": "Enemy.__init__ の抜粋。描画は省略",
+      "notes": [
+        "共通状態を作り、敵の速度と HP を設定する。",
+        "__init__ を上書きしたら、必要な基底初期化を明示的に呼ぶ。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "code": "class Enemy(Actor):\n    def __init__(self, name, position, speed=80, hp=1):\n        super().__init__(name, position, (44, 40))\n        self.velocity.y = speed\n        self.hp = hp\n        self.max_hp = hp",
+      "file": "actors.py / week7_demo.py"
+    },
+    {
+      "number": 9,
+      "type": "text",
+      "title": "初期化の実行順序",
+      "sub": "Enemy(\"E01\", (200, 100))",
+      "notes": [
+        "Enemy.__init__ に入り、self は新しい Enemy を指す。",
+        "super() で Actor.__init__ を呼び、その中で Sprite を初期化する。",
+        "Enemy に戻って hp を設定する。全過程で同じ self を使う。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ]
+    },
+    {
+      "number": 10,
+      "type": "code",
+      "title": "メソッドの共有と独立した状態",
+      "sub": "2個の Enemy インスタンス",
+      "notes": [
+        "初期化ごとに独自の速度 Vector2 を作る。",
+        "継承しても2つのインスタンスが hp を共有するわけではない。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "code": "a = Enemy(\"E01\", (100, 100), hp=1)\nb = Enemy(\"E02\", (200, 100), hp=3)\na.hp = 0\nprint(b.hp)  # 3\nprint(a.velocity is b.velocity)  # False",
+      "file": "actors.py / week7_demo.py"
+    },
+    {
+      "number": 11,
+      "type": "code",
+      "title": "クラス関係の確認",
+      "sub": "isinstance と issubclass",
+      "notes": [
+        "isinstance は派生クラスも含み、type の同一性は厳密に比較する。",
+        "これらは関係を調べるが、動作の正しさは保証しない。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "code": "enemy = Enemy(\"E01\", (200, 100))\nprint(isinstance(enemy, Enemy))  # True\nprint(isinstance(enemy, Actor))  # True\nprint(issubclass(Enemy, Actor))  # True\nprint(type(enemy) is Actor)     # False",
+      "file": "actors.py / week7_demo.py"
+    },
+    {
+      "number": 12,
+      "type": "text",
+      "title": "属性を置く場所",
+      "sub": "共通の役割に基づいて決める",
+      "notes": [
+        "すべての Actor が位置と速度を必要とするため、Actor で初期化する。",
+        "owner は Bullet に必要なので Bullet に置く。",
+        "可変リストを各インスタンスで独立させるなら __init__ 内で作る。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ]
+    },
+    {
+      "number": 13,
+      "type": "code",
+      "title": "オーバーライドによる動作の拡張",
+      "sub": "元の Bullet.update の抜粋",
+      "notes": [
+        "Bullet が update を定義するため、最初に Bullet.update が動く。",
+        "super() で移動した後に画面外を判定する。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "code": "class Bullet(Actor):\n    def update(self, dt):\n        super().update(dt)\n        if self.rect.bottom < PLAY_AREA.top:\n            self.kill()",
+      "file": "actors.py / week7_demo.py"
+    },
+    {
+      "number": 14,
+      "type": "text",
+      "title": "super() の意味",
+      "sub": "メソッド解決順序に沿って探索を続ける",
+      "notes": [
+        "super() は現在のクラスの次から MRO をたどるプロキシを返す。",
+        "この単一継承の例では Actor.update が見つかる。",
+        "self は元の Bullet のままで、別の Actor は作られない。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ]
+    },
+    {
+      "number": 15,
+      "type": "code",
+      "title": "速い敵の追加",
+      "sub": "元の actors.py と組み合わせ、既定値だけを変更する",
+      "notes": [
+        "FastEnemy は命中処理と移動を継承する。",
+        "速度だけの違いなら speed=160 を渡す方法でもよい。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "code": "class FastEnemy(Enemy):\n    def __init__(self, name, position):\n        super().__init__(name, position, speed=160)\n\nfast = FastEnemy(\"F01\", (200, 100))\nfast.update(0.25)\nprint(fast.pos.y)  # 140.0",
+      "file": "actors.py / week7_demo.py"
+    },
+    {
+      "number": 16,
+      "type": "code",
+      "title": "斜めに動く敵の追加",
+      "sub": "update を上書きし、移動計算を再利用する",
+      "notes": [
+        "横方向の速度を設定し、super() で1回移動する。",
+        "呼び出し順は DiagonalEnemy.update、Actor.update。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "code": "class DiagonalEnemy(Enemy):\n    def update(self, dt):\n        self.velocity.x = 60\n        super().update(dt)\n\ndiagonal = DiagonalEnemy(\"D01\", (200, 100))\ndiagonal.update(0.25)\nprint(tuple(diagonal.pos))  # (215.0, 120.0)",
+      "file": "actors.py / week7_demo.py"
+    },
+    {
+      "number": 17,
+      "type": "table",
+      "title": "1ステップの更新結果",
+      "sub": "開始位置 (200, 100)、dt = 0.25 秒",
+      "notes": [
+        "同じ update(dt) を呼んでも各オブジェクトの速度で動く。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "values": [
+        [
+          "Class",
+          "velocity (x, y)",
+          "pos (x, y)"
+        ],
+        [
+          "Enemy",
+          "(0, 80)",
+          "(200, 120)"
+        ],
+        [
+          "FastEnemy",
+          "(0, 160)",
+          "(200, 140)"
+        ],
+        [
+          "DiagonalEnemy",
+          "(60, 80)",
+          "(215, 120)"
+        ]
+      ]
+    },
+    {
+      "number": 18,
+      "type": "text",
+      "title": "よくある誤り",
+      "sub": "呼び出し順とメソッドの契約を確認する",
+      "notes": [
+        "必要な基底初期化を忘れると pos や rect が存在しない場合がある。",
+        "自分で移動した後に super().update を呼ぶと二重移動になる場合がある。",
+        "update(self, dt) を update(self) に変えると既存の呼び出しが失敗する。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ]
+    },
+    {
+      "number": 19,
+      "type": "text",
+      "title": "Is-a と Has-a",
+      "sub": "継承と参照にはそれぞれの用途がある",
+      "notes": [
+        "Enemy は Actor の一種であり、そのインターフェースと動作を守る。",
+        "Bullet は Player を指す owner を持つ。Player は継承しない。",
+        "便利なメソッドを借りるためだけの継承は不自然なモデルになりやすい。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ]
+    },
+    {
+      "number": 20,
+      "type": "code",
+      "title": "派生クラスの置き換え可能性",
+      "sub": "呼び出し側は共通の update(dt) の契約に依存する",
+      "notes": [
+        "派生クラスも秒数を受け取り、pos と rect を同期する。",
+        "同名メソッドだけでは不十分で、動作も呼び出し側の期待を満たす必要がある。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "code": "enemies = [\n    Enemy(\"E01\", (200, 100)),\n    FastEnemy(\"F01\", (200, 100)),\n    DiagonalEnemy(\"D01\", (200, 100)),\n]\nfor enemy in enemies:\n    enemy.update(0.25)",
+      "file": "actors.py / week7_demo.py"
+    },
+    {
+      "number": 21,
+      "type": "code",
+      "title": "多重継承と MRO",
+      "sub": "独立した例。ゲームの階層は変更しない",
+      "notes": [
+        "MRO はメソッド解決順序で、C3 線形化によって決まる。",
+        "D の順序は D・B・C・A・object。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "code": "class A: pass\nclass B(A): pass\nclass C(A): pass\nclass D(B, C): pass\n\nprint([cls.__name__ for cls in D.__mro__])\n# [\"D\", \"B\", \"C\", \"A\", \"object\"]",
+      "file": "actors.py / week7_demo.py"
+    },
+    {
+      "number": 22,
+      "type": "code",
+      "title": "協調的な super() の呼び出し",
+      "sub": "以下のクラス定義後に D(B, C) を再定義する",
+      "notes": [
+        "D().act() は B・C・A を出力し、B の次は C になる。",
+        "協調するメソッドは引数を揃え、一貫して super() を使う。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "code": "class A:\n    def act(self): print(\"A\")\nclass B(A):\n    def act(self):\n        print(\"B\")\n        super().act()\nclass C(A):\n    def act(self):\n        print(\"C\")\n        super().act()\nclass D(B, C): pass\nD().act()",
+      "file": "actors.py / week7_demo.py"
+    },
+    {
+      "number": 23,
+      "type": "code",
+      "title": "ダウンロードと実行",
+      "sub": "Python 3.12。展開したフォルダーで端末を開く",
+      "notes": [
+        "week7_demo.py は位置・継承関係・MRO を表示して検証する。",
+        "元のゲームとオブジェクトラベルはゲームのページから利用できる。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ],
+      "code": "python -m pip install pygame==2.6.1\npython week7_demo.py",
+      "file": "actors.py / week7_demo.py",
+      "links": [
+        [
+          "例をダウンロード",
+          "https://minhuangyuntech.github.io/oo2026/materials/week-7-examples.zip"
+        ]
+      ],
+      "codeLanguage": "shell"
+    },
+    {
+      "number": 24,
+      "type": "text",
+      "title": "演習と第8週への接続",
+      "sub": "予想してから実行し、観察する",
+      "notes": [
+        "FastEnemy の速度を 200 に変え、0.25 秒後の位置を求める。",
+        "答えは (200, 150)。どのクラスのメソッドが位置を更新するか説明する。",
+        "第8週では多態性・ABC・Protocol による共通インターフェースを学ぶ。"
+      ],
+      "sources": [
+        "https://docs.python.org/3.12/tutorial/classes.html#inheritance",
+        "https://docs.python.org/3.12/library/functions.html#super",
+        "https://www.pygame.org/docs/ref/sprite.html",
+        "Course shooter: actors.py"
+      ]
+    }
+  ]
+}

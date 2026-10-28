@@ -33,6 +33,7 @@ jobs:
       - run: python -m pip install pygame==2.6.1 mypy==2.4.0
       - run: python scripts/check_memory_package.py
       - run: python scripts/check_week8_package.py
+      - run: python scripts/check_week7_package.py
       - run: python scripts/check_export.py
       - uses: actions/upload-pages-artifact@v3
         with:

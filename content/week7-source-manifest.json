@@ -1,0 +1,26 @@
+[
+  {
+    "week": 7,
+    "language": "zh",
+    "source": "Week7_繼承與類別階層_繁體中文.pptx",
+    "download": "week-7-zh.pptx",
+    "slides": 24,
+    "sha256": "2e65da80f228cedaa28c421346d929791ec0c83aa85a23a18eb48ea03a1ffc2b"
+  },
+  {
+    "week": 7,
+    "language": "en",
+    "source": "Week7_Inheritance_Class_Hierarchies_English.pptx",
+    "download": "week-7-en.pptx",
+    "slides": 24,
+    "sha256": "6156dcdd56df98442bfe6de207ccb51d913e92dcbbac02a723ff1119fe84bf20"
+  },
+  {
+    "week": 7,
+    "language": "ja",
+    "source": "Week7_継承とクラス階層_日本語.pptx",
+    "download": "week-7-ja.pptx",
+    "slides": 24,
+    "sha256": "bdafec7a88c02e35dfc3840f39525a1a28dd412345ab5889f365e551ea620830"
+  }
+]

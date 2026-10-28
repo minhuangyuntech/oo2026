@@ -7,11 +7,11 @@ export const dynamicParams=false;
 export function generateStaticParams(){return Array.from({length:18},(_,i)=>({week:String(i+1)}));}
 export async function generateMetadata({params}:{params:Promise<{week:string}>}){
   const week=Number((await params).week);
-  return ((week>=1&&week<=6)||week===8)?courseMetadata("zh",week):legacyMetadata({params});
+  return (week>=1&&week<=8)?courseMetadata("zh",week):legacyMetadata({params});
 }
 export default async function Page({params}:{params:Promise<{week:string}>}){
   const week=Number((await params).week);
   if(!Number.isInteger(week)||week<1||week>18)notFound();
-  if(week<=6||week===8)return <WeekLesson lang="zh" week={week} lesson={getLesson("zh",week)}/>;
+  if(week<=8)return <WeekLesson lang="zh" week={week} lesson={getLesson("zh",week)}/>;
   return <div className="legacy-shell"><LegacyWeek params={params}/></div>;
 }

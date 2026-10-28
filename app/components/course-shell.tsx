@@ -20,7 +20,7 @@ export default function CourseShell({lang,week,children}:{lang:Language;week?:Un
       <p className="sidebar-course">{t.course}</p>
       <nav aria-label={t.menu} className="course-nav">
         <Link className={!week?"nav-home active":"nav-home"} href={coursePath(lang)} aria-current={!week?"page":undefined}><span aria-hidden="true">⌂</span>{t.home}</Link>
-        <p className="nav-caption">{t.materials}<span>01–06 / 08</span></p>
+        <p className="nav-caption">{t.materials}<span>01–08</span></p>
         {modernWeeks.map(unit=>{const item=unitInfo(lang,unit);return <Link className={`nav-week ${week===unit?"active":""}`} key={item.title} href={coursePath(lang,unit)} aria-current={week===unit?"page":undefined}><span className="nav-number">{String(unit).padStart(2,"0")}</span><span><small>{item.tag}</small><b>{item.title}</b></span>{week===unit&&<i aria-hidden="true"/>}</Link>;})}
         <Link className={`nav-week ${week==="gui"?"active":""}`} href={coursePath(lang,"gui")} aria-current={week==="gui"?"page":undefined}><span className="nav-number">GUI</span><span><small>{guiInfo[lang].tag}</small><b>{guiInfo[lang].title}</b></span></Link>
         <Link className={`nav-week ${week==="django"?"active":""}`} href={coursePath(lang,"django")} aria-current={week==="django"?"page":undefined}><span className="nav-number">WEB</span><span><small>{djangoInfo[lang].tag}</small><b>{djangoInfo[lang].title}</b></span></Link>
