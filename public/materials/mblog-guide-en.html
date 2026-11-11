@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>mblog installation and running guide</title>
+<style>body{font:17px/1.75 system-ui,sans-serif;color:#17333a;background:#f7f9f5;margin:0}main{max-width:900px;margin:auto;padding:2rem 1.25rem}h1,h2{line-height:1.4}h2{margin-top:2.4rem}a{color:#176c68}nav{display:flex;flex-wrap:wrap;gap:1rem}pre{background:#132f39;color:#e5f7f1;padding:1.2rem;overflow:auto;border-radius:8px}pre code{font-size:14px}table{display:block;overflow:auto;border-collapse:collapse}td,th{border:1px solid #ccd6d1;padding:.5rem;text-align:left}code{overflow-wrap:anywhere}.download{display:inline-block;margin-top:1rem;padding:.6rem 1rem;background:#176c68;color:white;border-radius:6px}</style></head>
+<body><main><nav><a href="../en/django-case/#mblog-download">← Back to course</a><span><a href="mblog-guide-zh.html" lang="zh">繁體中文</a> · <a href="mblog-guide-en.html" lang="en">English</a> · <a href="mblog-guide-ja.html" lang="ja">日本語</a></span></nav><a class="download" download href="mblog-complete.zip">Download complete project ZIP</a><h1>mblog: installation and running guide</h1>
+<p>This complete project accompanies slides 1–88 of Django Website Case Studies. It includes a post list, detail pages, admin, shared templates, Bootstrap, static assets, and Markdown sanitized with nh3. The blog interface and sample posts are in Traditional Chinese, matching the original example. All three guides describe this same project.</p>
+<h2>1. Requirements</h2>
+<p>Install Python 3.13 or 3.14 (3.12 also works). Extract the ZIP and open the <code>mblog</code> folder containing <code>manage.py</code>. Internet access is needed to install dependencies initially. SQLite is included with Python; no separate database or AI key is needed.</p>
+<p>The course pins Django 5.2.18, Markdown 3.11.2, and nh3 0.3.7. Bootstrap 5.3.8 and its MIT license are included in <code>static/vendor/bootstrap/</code>. Page styling does not need a CDN connection.</p>
+<h2>2. Windows PowerShell</h2>
+<p>Open PowerShell in the extracted <code>mblog</code> folder and run:</p>
+<pre><code class="language-powershell">python --version
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe manage.py migrate
+.\.venv\Scripts\python.exe manage.py seed_demo
+.\.venv\Scripts\python.exe manage.py check
+.\.venv\Scripts\python.exe manage.py runserver 127.0.0.1:8000
+</code></pre>
+<p>These commands use the virtual environment's Python directly. You do not need Activate.ps1 or a PowerShell execution-policy change. If <code>python</code> does not start your installed Python, use <code>py -3.14</code> (or your installed version) for the first two commands.</p>
+<h2>3. macOS / Linux</h2>
+<p>Open a terminal in that same <code>mblog</code> folder:</p>
+<pre><code class="language-sh">python3 --version
+python3 -m venv .venv
+./.venv/bin/python -m pip install -r requirements.txt
+./.venv/bin/python manage.py migrate
+./.venv/bin/python manage.py seed_demo
+./.venv/bin/python manage.py check
+./.venv/bin/python manage.py runserver 127.0.0.1:8000
+</code></pre>
+<p>Use only the command set for your operating system. On Ubuntu / Debian, if venv is unavailable, install the venv package matching your Python version and create the environment again.</p>
+<h2>4. Browse and manage posts</h2>
+<p>Keep the terminal running and open:</p>
+<ul>
+<li>Home: <a href="http://127.0.0.1:8000/">http://127.0.0.1:8000/</a></li>
+<li>First post: <a href="http://127.0.0.1:8000/post/hello-django/">http://127.0.0.1:8000/post/hello-django/</a></li>
+<li>Markdown example: <a href="http://127.0.0.1:8000/post/markdown-demo/">http://127.0.0.1:8000/post/markdown-demo/</a></li>
+<li>Administration: <a href="http://127.0.0.1:8000/admin/">http://127.0.0.1:8000/admin/</a></li>
+</ul>
+<p>Press <code>Ctrl+C</code> to stop the server, create your own administrator, and restart it.</p>
+<p>Windows:</p>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe manage.py createsuperuser
+.\.venv\Scripts\python.exe manage.py runserver 127.0.0.1:8000
+</code></pre>
+<p>macOS / Linux:</p>
+<pre><code class="language-sh">./.venv/bin/python manage.py createsuperuser
+./.venv/bin/python manage.py runserver 127.0.0.1:8000
+</code></pre>
+<p>Choose your own username and password. Password characters are not displayed while you type. No preset credentials are included. Use Posts in the admin to add or edit entries. <code>title</code> is the heading, <code>slug</code> is the unique URL identifier (such as <code>my-first-post</code>), <code>body</code> accepts Markdown, and <code>pub_date</code> is generated automatically. If a Chinese title does not produce a slug, type an ASCII slug using letters, digits, and hyphens.</p>
+<p><code>seed_demo</code> creates five missing sample posts. Running it again preserves existing posts and your edits; it never creates users. The ZIP contains no database. <code>migrate</code> creates your local <code>db.sqlite3</code>. On later visits, run <code>runserver</code> again; installation and initialization do not need to be repeated.</p>
+<h2>5. Files and slides</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+<th>Slides</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mblog/settings.py</code></td>
+<td>Apps, templates, database, static files</td>
+<td>12–13, 39, 67</td>
+</tr>
+<tr>
+<td><code>mysite/models.py</code>, <code>migrations/0001_initial.py</code></td>
+<td>Post model and database schema</td>
+<td>22–25</td>
+</tr>
+<tr>
+<td><code>mysite/admin.py</code></td>
+<td>Admin list, search, slug prepopulation</td>
+<td>30</td>
+</tr>
+<tr>
+<td><code>mblog/urls.py</code>, <code>mysite/urls.py</code>, <code>mysite/views.py</code></td>
+<td>Routing, home query, detail, 404</td>
+<td>38, 40, 47</td>
+</tr>
+<tr>
+<td><code>templates/</code>, <code>static/</code></td>
+<td>Shared layout, post pages, CSS, logo</td>
+<td>54–71, 82</td>
+</tr>
+<tr>
+<td><code>mysite/templatetags/markdown_extras.py</code></td>
+<td>Markdown parsing and HTML allowlist sanitization</td>
+<td>79–80</td>
+</tr>
+<tr>
+<td><code>mysite/management/commands/seed_demo.py</code></td>
+<td>Repeatable sample-data command</td>
+<td>Download companion utility</td>
+</tr>
+<tr>
+<td><code>mysite/tests.py</code></td>
+<td>Pages, data constraints, admin, Markdown tests</td>
+<td>84</td>
+</tr>
+</tbody>
+</table>
+<h2>6. Tests</h2>
+<p>Stop the development server first. Windows:</p>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe manage.py test
+.\.venv\Scripts\python.exe manage.py makemigrations --check --dry-run
+</code></pre>
+<p>macOS / Linux:</p>
+<pre><code class="language-sh">./.venv/bin/python manage.py test
+./.venv/bin/python manage.py makemigrations --check --dry-run
+</code></pre>
+<p>Tests use a separate test database and do not modify your posts. They cover empty lists, links, 404s, unique slugs, ordering, repeatable sample loading, admin create/edit/delete, CSRF, and dangerous HTML removal. No external service is called.</p>
+<h2>7. Troubleshooting</h2>
+<ul>
+<li><code>No module named django</code>: use the <code>.venv</code> Python for both installation and execution.</li>
+<li><code>no such table</code>: run <code>migrate</code> from the folder containing <code>manage.py</code>.</li>
+<li>Empty home page: run <code>seed_demo</code> or add posts in the admin.</li>
+<li>Port already in use: use <code>runserver 127.0.0.1:8001</code> and open port 8001 in your browser too.</li>
+<li><code>manage.py</code> not found: enter the extracted <code>mblog</code> directory. Do not run directly inside the ZIP or from its parent folder.</li>
+<li>Unknown post URL returns 404: this is expected; the slug must match an existing post.</li>
+</ul>
+<h2>8. Scope and references</h2>
+<p>This is a local learning project with <code>DEBUG=True</code> and a public classroom SECRET_KEY. Before public deployment, configure a separate secret from the environment, disable DEBUG, set production ALLOWED_HOSTS, HTTPS, static-file hosting, backups, and a production WSGI/ASGI server. <code>runserver</code> is not a production server. Do not commit your database, virtual environment, or secrets. GitHub Pages hosts the lesson and downloads; it does not execute Django.</p>
+<ul>
+<li><a href="https://minhuangyuntech.github.io/oo2026/en/django-case/">English course material</a></li>
+<li><a href="https://docs.djangoproject.com/en/5.2/intro/tutorial02/">Django 5.2 tutorial</a></li>
+<li><a href="https://nh3.readthedocs.io/en/latest/">nh3 documentation</a></li>
+<li><a href="https://getbootstrap.com/docs/5.3/getting-started/download/">Bootstrap downloads and license</a></li>
+</ul></main></body></html>

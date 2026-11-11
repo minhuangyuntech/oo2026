@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>mblog 安裝與執行</title>
+<style>body{font:17px/1.75 system-ui,sans-serif;color:#17333a;background:#f7f9f5;margin:0}main{max-width:900px;margin:auto;padding:2rem 1.25rem}h1,h2{line-height:1.4}h2{margin-top:2.4rem}a{color:#176c68}nav{display:flex;flex-wrap:wrap;gap:1rem}pre{background:#132f39;color:#e5f7f1;padding:1.2rem;overflow:auto;border-radius:8px}pre code{font-size:14px}table{display:block;overflow:auto;border-collapse:collapse}td,th{border:1px solid #ccd6d1;padding:.5rem;text-align:left}code{overflow-wrap:anywhere}.download{display:inline-block;margin-top:1rem;padding:.6rem 1rem;background:#176c68;color:white;border-radius:6px}</style></head>
+<body><main><nav><a href="../django-case/#mblog-download">← 回到課程教材</a><span><a href="mblog-guide-zh.html" lang="zh">繁體中文</a> · <a href="mblog-guide-en.html" lang="en">English</a> · <a href="mblog-guide-ja.html" lang="ja">日本語</a></span></nav><a class="download" download href="mblog-complete.zip">下載完整專案 ZIP</a><h1>mblog 部落格：安裝與執行</h1>
+<p>這是「Django 網站實作案例」第 1–88 頁的完整專案。包含文章列表、文章詳情、管理後台、共用模板、Bootstrap、靜態資源與經 nh3 清理的 Markdown。介面與示範文章採繁體中文；三語說明對應同一份程式。</p>
+<h2>1. 準備環境</h2>
+<p>安裝 Python 3.13 或 3.14（也支援 3.12），解壓縮 ZIP，進入包含 <code>manage.py</code> 的 <code>mblog</code> 資料夾。第一次安裝套件需要網路。使用 SQLite，不必安裝其他資料庫；不需要 AI 金鑰。</p>
+<p>套件固定為 Django 5.2.18、Markdown 3.11.2、nh3 0.3.7，與教材一致。Bootstrap 5.3.8 已附在 <code>static/vendor/bootstrap/</code>，包含 MIT 授權；網站樣式不依賴 CDN。</p>
+<h2>2. Windows PowerShell</h2>
+<p>在解壓縮後的 <code>mblog</code> 資料夾開啟 PowerShell，依序執行：</p>
+<pre><code class="language-powershell">python --version
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe manage.py migrate
+.\.venv\Scripts\python.exe manage.py seed_demo
+.\.venv\Scripts\python.exe manage.py check
+.\.venv\Scripts\python.exe manage.py runserver 127.0.0.1:8000
+</code></pre>
+<p>這裡直接使用虛擬環境中的 Python，不需要執行 Activate.ps1 或更改 PowerShell 執行原則。若 <code>python</code> 無法啟動已安裝的 Python，可將前兩行的 <code>python</code> 改為 <code>py -3.14</code>（或已安裝的版本）。</p>
+<h2>3. macOS / Linux</h2>
+<p>在同一個 <code>mblog</code> 資料夾開啟終端機：</p>
+<pre><code class="language-sh">python3 --version
+python3 -m venv .venv
+./.venv/bin/python -m pip install -r requirements.txt
+./.venv/bin/python manage.py migrate
+./.venv/bin/python manage.py seed_demo
+./.venv/bin/python manage.py check
+./.venv/bin/python manage.py runserver 127.0.0.1:8000
+</code></pre>
+<p>只需選擇適合自己作業系統的一組指令。Ubuntu / Debian 若提示缺少 venv，請安裝對應 Python 版本的 venv 套件，再重新建立環境。</p>
+<h2>4. 瀏覽網站與管理文章</h2>
+<p>保持終端機開啟，瀏覽：</p>
+<ul>
+<li>首頁：<a href="http://127.0.0.1:8000/">http://127.0.0.1:8000/</a></li>
+<li>第一篇文章：<a href="http://127.0.0.1:8000/post/hello-django/">http://127.0.0.1:8000/post/hello-django/</a></li>
+<li>Markdown 範例：<a href="http://127.0.0.1:8000/post/markdown-demo/">http://127.0.0.1:8000/post/markdown-demo/</a></li>
+<li>管理後台：<a href="http://127.0.0.1:8000/admin/">http://127.0.0.1:8000/admin/</a></li>
+</ul>
+<p>按 <code>Ctrl+C</code> 停止伺服器，建立自己的管理員，再重新啟動：</p>
+<p>Windows：</p>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe manage.py createsuperuser
+.\.venv\Scripts\python.exe manage.py runserver 127.0.0.1:8000
+</code></pre>
+<p>macOS / Linux：</p>
+<pre><code class="language-sh">./.venv/bin/python manage.py createsuperuser
+./.venv/bin/python manage.py runserver 127.0.0.1:8000
+</code></pre>
+<p>自行設定帳號與密碼；輸入密碼時終端機不顯示字元是正常現象。專案沒有預設帳密。在後台的 Posts 新增或修改文章：<code>title</code> 是標題、<code>slug</code> 是唯一網址名稱（如 <code>my-first-post</code>）、<code>body</code> 支援 Markdown，<code>pub_date</code> 自動產生。中文標題若未自動產生 slug，請手動輸入英數字及連字號。</p>
+<p><code>seed_demo</code> 建立五篇缺少的示範文章，重複執行不會覆寫你修改過的內容，也不會建立使用者。首次下載不含資料庫；執行 <code>migrate</code> 後才會建立本機 <code>db.sqlite3</code>。下次只需執行 <code>runserver</code>，不必重新安裝或初始化。</p>
+<h2>5. 程式位置與教材對照</h2>
+<table>
+<thead>
+<tr>
+<th>檔案</th>
+<th>用途</th>
+<th>投影片</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mblog/settings.py</code></td>
+<td>App、模板、資料庫與靜態檔案設定</td>
+<td>12–13、39、67</td>
+</tr>
+<tr>
+<td><code>mysite/models.py</code>、<code>migrations/0001_initial.py</code></td>
+<td>Post 模型與資料表建立</td>
+<td>22–25</td>
+</tr>
+<tr>
+<td><code>mysite/admin.py</code></td>
+<td>後台列表、搜尋、slug 預填</td>
+<td>30</td>
+</tr>
+<tr>
+<td><code>mblog/urls.py</code>、<code>mysite/urls.py</code>、<code>mysite/views.py</code></td>
+<td>網址、首頁查詢、文章詳情與 404</td>
+<td>38、40、47</td>
+</tr>
+<tr>
+<td><code>templates/</code>、<code>static/</code></td>
+<td>共用模板、文章畫面、CSS、Logo</td>
+<td>54–71、82</td>
+</tr>
+<tr>
+<td><code>mysite/templatetags/markdown_extras.py</code></td>
+<td>Markdown 解析、HTML 允許清單與清理</td>
+<td>79–80</td>
+</tr>
+<tr>
+<td><code>mysite/management/commands/seed_demo.py</code></td>
+<td>可重複執行的示範資料建立指令</td>
+<td>下載專案附加工具</td>
+</tr>
+<tr>
+<td><code>mysite/tests.py</code></td>
+<td>網頁、資料約束、後台與 Markdown 測試</td>
+<td>84</td>
+</tr>
+</tbody>
+</table>
+<h2>6. 執行測試</h2>
+<p>先停止開發伺服器。Windows：</p>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe manage.py test
+.\.venv\Scripts\python.exe manage.py makemigrations --check --dry-run
+</code></pre>
+<p>macOS / Linux：</p>
+<pre><code class="language-sh">./.venv/bin/python manage.py test
+./.venv/bin/python manage.py makemigrations --check --dry-run
+</code></pre>
+<p>測試使用獨立的測試資料庫，不會修改你的文章。確認空列表、文章連結、404、slug 唯一性、排序、重複匯入、後台新增修改刪除、CSRF 與危險 HTML 清理。測試不呼叫外部服務。</p>
+<h2>7. 常見問題</h2>
+<ul>
+<li><code>No module named django</code>：請用上面的 <code>.venv</code> Python 安裝套件及執行，不要混用系統 Python。</li>
+<li><code>no such table</code>：在 <code>manage.py</code> 同層執行 <code>migrate</code>。</li>
+<li>首頁沒有文章：執行 <code>seed_demo</code>，或登入後台新增文章。</li>
+<li>埠號被占用：將 <code>runserver</code> 改成 <code>127.0.0.1:8001</code>，瀏覽器網址也改為 8001。</li>
+<li><code>manage.py</code> 找不到：終端機所在目錄應是解壓縮後的 <code>mblog</code>，不要停在外層資料夾，也不要直接從 ZIP 執行。</li>
+<li>未知的文章網址顯示 404：這是正常行為。slug 與文章資料必須相符。</li>
+</ul>
+<h2>8. 執行範圍與參考</h2>
+<p>此專案供本機學習，使用 <code>DEBUG=True</code> 與公開的本機練習 SECRET_KEY。公開部署前須更換獨立的環境變數金鑰、關閉 DEBUG、設定正式 ALLOWED_HOSTS、HTTPS、靜態檔案服務、資料備份及正式 WSGI/ASGI server；<code>runserver</code> 不是正式服務。不要提交自己的 <code>db.sqlite3</code>、虛擬環境或秘密資料。GitHub Pages 僅提供教材與下載，不執行 Django。</p>
+<ul>
+<li><a href="https://minhuangyuntech.github.io/oo2026/django-case/">三語課程教材</a></li>
+<li><a href="https://docs.djangoproject.com/en/5.2/intro/tutorial02/">Django 5.2 教學</a></li>
+<li><a href="https://nh3.readthedocs.io/en/latest/">nh3 文件</a></li>
+<li><a href="https://getbootstrap.com/docs/5.3/getting-started/download/">Bootstrap 下載與授權</a></li>
+</ul></main></body></html>

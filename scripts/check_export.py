@@ -244,6 +244,13 @@ for lang,deck in week7_raw.items():
     with zipfile.ZipFile(ROOT/'public/materials'/lesson['download']) as pptx:
         assert len([n for n in pptx.namelist() if re.fullmatch(r'ppt/slides/slide\d+\.xml',n)])==24
 topics=sum(len(lesson['slides']) for lesson in lessons.values())
+
+for lang,prefix in [('zh',''),('en','/en'),('ja','/ja')]:
+    page=pages[prefix+'/django-case/']
+    assert 'mblog-download' in page.ids
+    assert BASE+'/materials/mblog-complete.zip' in page.links
+    for code in ['zh','en','ja']:
+        assert BASE+f'/materials/mblog-guide-{code}.html' in page.links
 guides=json.loads((ROOT/'content/game-variables.json').read_text(encoding='utf-8'))
 for unit,guide in guides.items():
     assert len({s['id'] for s in guide['sections']})==len(guide['sections'])

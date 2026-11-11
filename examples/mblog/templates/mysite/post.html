@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% load markdown_extras %}
+{% block title %}{{ post.title }} · 我的部落格{% endblock %}
+{% block headmessage %}
+  <h2>{{ post.title }}</h2>
+  <time>{{ post.pub_date|date:"Y-m-d H:i:s" }}</time>
+{% endblock %}
+{% block content %}
+  <article class="post-body">
+    {{ post.body|render_markdown }}
+  </article>
+  <p><a href="{% url 'mysite:home' %}">回首頁</a></p>
+{% endblock %}

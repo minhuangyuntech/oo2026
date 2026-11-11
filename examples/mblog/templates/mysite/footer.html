@@ -1,0 +1,7 @@
+<footer>
+  {% if now %}
+    <p>現在時刻：{{ now|date:"Y-m-d H:i:s" }}</p>
+  {% else %}
+    <p>課堂示範內容，圖片請使用自有或授權素材。</p>
+  {% endif %}
+</footer>

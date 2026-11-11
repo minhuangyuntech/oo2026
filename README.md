@@ -127,3 +127,9 @@ python -m unittest discover -s tests -v
 PygameApp 持有原有 Game，處理事件、縮放座標與繪圖。物件標籤用 L 切換，N 執行單步，M 切換模式，F1 / F2 開啟成功／失敗範例，1 / 2 / 3 切換語言並保留物件狀態。右鍵與方向鍵只切換檢視對象，Enter 選牌，Space 確認回合，Esc 結束。沒有計時器自動推進配對。隨附 Noto Sans CJK TC 字型及 SIL OFL 授權，可離線顯示中日文字。
 
 `python scripts/check_memory_package.py` 從實際下載 ZIP 解壓縮，執行 6 項模型測試與 10 項 Pygame 介面測試；需先安裝 pygame==2.6.1。介面測試使用 SDL dummy driver，驗證事件、語言、縮放、單步與繪圖。GitHub Actions 發布前也會執行。
+
+## mblog 完整專案
+
+三語 Django 實作頁的 `#mblog-download` 提供 `materials/mblog-complete.zip` 與三語 HTML 安裝指南。專案原始碼位於 `examples/mblog/`，ZIP 不包含資料庫、使用者帳密或虛擬環境。
+
+修改專案或 README 後，先安裝 `examples/mblog/requirements.txt`，執行 `python scripts/build_mblog_package.py` 重新產生 ZIP、三語指南與 manifest，再執行 `python scripts/check_mblog_package.py`。檢查會從下載 ZIP 解壓縮、套用 migration、重複匯入示範資料、執行 11 項測試、收集靜態資源並核對 Bootstrap 與三語指南。網站建置後另執行 `python scripts/check_export.py` 驗證三語下載入口。

@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>mblog のインストールと実行</title>
+<style>body{font:17px/1.75 system-ui,sans-serif;color:#17333a;background:#f7f9f5;margin:0}main{max-width:900px;margin:auto;padding:2rem 1.25rem}h1,h2{line-height:1.4}h2{margin-top:2.4rem}a{color:#176c68}nav{display:flex;flex-wrap:wrap;gap:1rem}pre{background:#132f39;color:#e5f7f1;padding:1.2rem;overflow:auto;border-radius:8px}pre code{font-size:14px}table{display:block;overflow:auto;border-collapse:collapse}td,th{border:1px solid #ccd6d1;padding:.5rem;text-align:left}code{overflow-wrap:anywhere}.download{display:inline-block;margin-top:1rem;padding:.6rem 1rem;background:#176c68;color:white;border-radius:6px}</style></head>
+<body><main><nav><a href="../ja/django-case/#mblog-download">← 教材に戻る</a><span><a href="mblog-guide-zh.html" lang="zh">繁體中文</a> · <a href="mblog-guide-en.html" lang="en">English</a> · <a href="mblog-guide-ja.html" lang="ja">日本語</a></span></nav><a class="download" download href="mblog-complete.zip">完全なプロジェクト ZIP</a><h1>mblog：インストールと実行</h1>
+<p>「Django Web サイト実装例」の 1〜88 枚目に対応する完全なプロジェクトです。記事一覧、詳細ページ、管理画面、共通テンプレート、Bootstrap、静的ファイル、nh3 で安全に処理する Markdown を含みます。ブログの画面とサンプル記事は元の例に合わせて繁体字中国語です。三言語の説明は同じプロジェクトに対応しています。</p>
+<h2>1. 準備</h2>
+<p>Python 3.13 または 3.14 をインストールします（3.12 も利用可能）。ZIP を展開し、<code>manage.py</code> がある <code>mblog</code> フォルダーを開いてください。最初のパッケージ導入にはインターネット接続が必要です。SQLite は Python に含まれるため、別のデータベースや AI キーは不要です。</p>
+<p>教材に合わせて Django 5.2.18、Markdown 3.11.2、nh3 0.3.7 を指定しています。Bootstrap 5.3.8 と MIT ライセンスは <code>static/vendor/bootstrap/</code> に同梱しており、ページの表示に CDN 接続は不要です。</p>
+<h2>2. Windows PowerShell</h2>
+<p>展開後の <code>mblog</code> フォルダーで PowerShell を開き、順に実行します。</p>
+<pre><code class="language-powershell">python --version
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe manage.py migrate
+.\.venv\Scripts\python.exe manage.py seed_demo
+.\.venv\Scripts\python.exe manage.py check
+.\.venv\Scripts\python.exe manage.py runserver 127.0.0.1:8000
+</code></pre>
+<p>仮想環境の Python を直接使うため、Activate.ps1 の実行や PowerShell の実行ポリシー変更は不要です。<code>python</code> で導入済みの Python が起動しない場合は、最初の二つのコマンドを <code>py -3.14</code>（または導入済みバージョン）で実行してください。</p>
+<h2>3. macOS / Linux</h2>
+<p>同じ <code>mblog</code> フォルダーでターミナルを開きます。</p>
+<pre><code class="language-sh">python3 --version
+python3 -m venv .venv
+./.venv/bin/python -m pip install -r requirements.txt
+./.venv/bin/python manage.py migrate
+./.venv/bin/python manage.py seed_demo
+./.venv/bin/python manage.py check
+./.venv/bin/python manage.py runserver 127.0.0.1:8000
+</code></pre>
+<p>自分の OS に対応するコマンドだけを実行します。Ubuntu / Debian で venv が使えない場合は、Python のバージョンに対応する venv パッケージを導入してから仮想環境を作成してください。</p>
+<h2>4. ページと管理画面</h2>
+<p>ターミナルを開いたまま、次の URL にアクセスします。</p>
+<ul>
+<li>トップページ：<a href="http://127.0.0.1:8000/">http://127.0.0.1:8000/</a></li>
+<li>最初の記事：<a href="http://127.0.0.1:8000/post/hello-django/">http://127.0.0.1:8000/post/hello-django/</a></li>
+<li>Markdown の例：<a href="http://127.0.0.1:8000/post/markdown-demo/">http://127.0.0.1:8000/post/markdown-demo/</a></li>
+<li>管理画面：<a href="http://127.0.0.1:8000/admin/">http://127.0.0.1:8000/admin/</a></li>
+</ul>
+<p><code>Ctrl+C</code> でサーバーを停止し、自分の管理者を作成して再起動します。</p>
+<p>Windows：</p>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe manage.py createsuperuser
+.\.venv\Scripts\python.exe manage.py runserver 127.0.0.1:8000
+</code></pre>
+<p>macOS / Linux：</p>
+<pre><code class="language-sh">./.venv/bin/python manage.py createsuperuser
+./.venv/bin/python manage.py runserver 127.0.0.1:8000
+</code></pre>
+<p>ユーザー名とパスワードは自分で設定します。入力中のパスワードが表示されないのは正常です。既定の管理者やパスワードはありません。管理画面の Posts から記事を追加・編集できます。<code>title</code> は見出し、<code>slug</code> は一意の URL 名（例：<code>my-first-post</code>）、<code>body</code> は Markdown 本文、<code>pub_date</code> は自動生成される日時です。中国語のタイトルから slug が作られない場合は、英数字とハイフンで手入力してください。</p>
+<p><code>seed_demo</code> は不足している五つのサンプル記事を作成します。再実行しても既存の記事や編集内容を上書きせず、ユーザーも作成しません。ZIP にデータベースは含まれません。<code>migrate</code> がローカルの <code>db.sqlite3</code> を作成します。次回からは <code>runserver</code> だけで起動でき、導入と初期化を繰り返す必要はありません。</p>
+<h2>5. ファイルと教材の対応</h2>
+<table>
+<thead>
+<tr>
+<th>ファイル</th>
+<th>役割</th>
+<th>スライド</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mblog/settings.py</code></td>
+<td>App、テンプレート、データベース、静的ファイルの設定</td>
+<td>12–13、39、67</td>
+</tr>
+<tr>
+<td><code>mysite/models.py</code>、<code>migrations/0001_initial.py</code></td>
+<td>Post モデルとテーブル作成</td>
+<td>22–25</td>
+</tr>
+<tr>
+<td><code>mysite/admin.py</code></td>
+<td>管理一覧、検索、slug の事前入力</td>
+<td>30</td>
+</tr>
+<tr>
+<td><code>mblog/urls.py</code>、<code>mysite/urls.py</code>、<code>mysite/views.py</code></td>
+<td>URL、一覧の取得、詳細、404</td>
+<td>38、40、47</td>
+</tr>
+<tr>
+<td><code>templates/</code>、<code>static/</code></td>
+<td>共通構造、記事画面、CSS、ロゴ</td>
+<td>54–71、82</td>
+</tr>
+<tr>
+<td><code>mysite/templatetags/markdown_extras.py</code></td>
+<td>Markdown 解析と許可リストによる HTML の無害化</td>
+<td>79–80</td>
+</tr>
+<tr>
+<td><code>mysite/management/commands/seed_demo.py</code></td>
+<td>再実行できるサンプルデータ作成コマンド</td>
+<td>ダウンロード版の補助機能</td>
+</tr>
+<tr>
+<td><code>mysite/tests.py</code></td>
+<td>ページ、データ制約、管理画面、Markdown のテスト</td>
+<td>84</td>
+</tr>
+</tbody>
+</table>
+<h2>6. テスト</h2>
+<p>開発サーバーを停止してから実行します。Windows：</p>
+<pre><code class="language-powershell">.\.venv\Scripts\python.exe manage.py test
+.\.venv\Scripts\python.exe manage.py makemigrations --check --dry-run
+</code></pre>
+<p>macOS / Linux：</p>
+<pre><code class="language-sh">./.venv/bin/python manage.py test
+./.venv/bin/python manage.py makemigrations --check --dry-run
+</code></pre>
+<p>独立したテスト用データベースを使うため、自分の記事は変更されません。空の一覧、リンク、404、slug の一意性、並び順、サンプルの再作成、管理画面での追加・編集・削除、CSRF、危険な HTML の除去を確認します。外部サービスは呼び出しません。</p>
+<h2>7. よくある問題</h2>
+<ul>
+<li><code>No module named django</code>：インストールと実行の両方で <code>.venv</code> の Python を使います。</li>
+<li><code>no such table</code>：<code>manage.py</code> があるフォルダーで <code>migrate</code> を実行します。</li>
+<li>記事が表示されない：<code>seed_demo</code> を実行するか、管理画面で記事を追加します。</li>
+<li>ポートが使用中：<code>runserver 127.0.0.1:8001</code> を使い、ブラウザーの URL も 8001 に変更します。</li>
+<li><code>manage.py</code> が見つからない：展開後の <code>mblog</code> に移動します。ZIP 内や親フォルダーから直接実行しないでください。</li>
+<li>存在しない記事が 404 になる：正常です。slug は登録済みの記事と一致する必要があります。</li>
+</ul>
+<h2>8. 利用範囲と参考資料</h2>
+<p>本プロジェクトはローカル学習用で、<code>DEBUG=True</code> と公開の練習用 SECRET_KEY を使います。公開時には環境変数から独立した秘密鍵を読み込み、DEBUG を無効にし、正式な ALLOWED_HOSTS、HTTPS、静的ファイル配信、バックアップ、WSGI/ASGI サーバーを設定してください。<code>runserver</code> は本番用ではありません。データベース、仮想環境、秘密情報は Git に登録しません。GitHub Pages は教材とファイルを提供し、Django 自体は実行しません。</p>
+<ul>
+<li><a href="https://minhuangyuntech.github.io/oo2026/ja/django-case/">日本語の教材</a></li>
+<li><a href="https://docs.djangoproject.com/ja/5.2/intro/tutorial02/">Django 5.2 チュートリアル</a></li>
+<li><a href="https://nh3.readthedocs.io/en/latest/">nh3 ドキュメント</a></li>
+<li><a href="https://getbootstrap.com/docs/5.3/getting-started/download/">Bootstrap のダウンロードとライセンス</a></li>
+</ul></main></body></html>

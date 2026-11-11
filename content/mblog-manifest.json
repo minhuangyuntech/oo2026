@@ -1,0 +1,60 @@
+{
+  "archive": "mblog-complete.zip",
+  "sha256": "0b27a1918f19ca3c38e486f01bd338604f47ad24cc0cb0915d68148ac1328a53",
+  "files": {
+    ".gitignore": "6b39658d32dd668abff1491ee24e378480f2884dcedce9b9bb5109309cb4408d",
+    "manage.py": "4afd18e58a9be89b4ec3b1599efa6b7240a9d1b1d0ff187635a8053d7efc5657",
+    "mblog/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "mblog/asgi.py": "34d203dd783ad66ab25e1b0513b44c755d64a666615d96b96abd14e61531e22b",
+    "mblog/settings.py": "95ca6a90367c6393c095a5951727c43268987d21fed81591c9afc4a36ed6bcfd",
+    "mblog/urls.py": "86f4c946638418b0579cada7846297e3decbd3428a1d66e25a207dc665d14bac",
+    "mblog/wsgi.py": "13e4060b1f731871ed46cc2480e0d0824a8de68fc71120306f81189828e59296",
+    "mysite/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "mysite/admin.py": "8448bad0d31150fb482cc719be458dd70acffdbb47c426889dc6f39fe4130c67",
+    "mysite/apps.py": "1e7a1d1758767f14694e2c849620a44da87443ddf61b5fdc6e36e7e0e9cc1a10",
+    "mysite/management/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "mysite/management/commands/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "mysite/management/commands/seed_demo.py": "5b6935293d098581f6697538ab79fd195e42ffa34b4db5d53af1c8fcdc22acc9",
+    "mysite/migrations/0001_initial.py": "61b786572b62f1ceabca6f48ce0b3596fa36f263ea9b05f0c4d02a2a7bd5a3a1",
+    "mysite/migrations/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "mysite/models.py": "4647df082ef5ad9ac833926cba93c3d79db9e7276d1a38fad340a13c0c7f37ea",
+    "mysite/templatetags/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "mysite/templatetags/markdown_extras.py": "7c526213a1e5d882f3644ee3221d06e9df5521ae67de50494a2a5b5d236cb424",
+    "mysite/tests.py": "b5107b4fbeaaf87481024b4b2600f45e096181190192f7cb60c1ed8c12341db7",
+    "mysite/urls.py": "df780dbb34a9635d5bd1605f778be8c774a684256c6832af90005832fa8c3ae2",
+    "mysite/views.py": "bd97473155b8ad92bc926bdb0f2622eda77fe8ee5bdc07be0cf7bbdcc9d05271",
+    "README.en.md": "c87bf2d4132794e6127bc824206f7b046fc0f024484696d21ec8716fb9040e2c",
+    "README.ja.md": "77f976584bc5ec9a0cf9c4b7f08851cb81c24109ecaf8e23ab16468eed55abb6",
+    "README.md": "f363913174c7830b495782da451dfe7fa8da533d2d4a6a6dd39818ef777e54ce",
+    "README.zh-TW.md": "a1a344f4fdbebe41c582d83cb3c9a7c1af2be2f3246257398b79b2825d54253f",
+    "requirements.txt": "8a74d1eb17ebfbaeadb265bbd9d1455e9607312071fd0bbf65424d876142a453",
+    "static/mysite/css/site.css": "91d768511e927d7f32061399cd817d52a74459b0b6a9115430d1a63f87fefd53",
+    "static/mysite/images/logo.svg": "fb290ce512fd0851b3029be3d375703b3c7ca83eed50600b2e5489dec70ba2d5",
+    "static/vendor/bootstrap/bootstrap.min.css": "d85327d99c7a3ee1f9b5d0500d1370acea3ad2db39c163c2f51f232baedbdede",
+    "static/vendor/bootstrap/bootstrap.min.css.map": "48144faf6aa0fb3cd2ce748d9730238f888f4ab715f05dabd1c9af2c5671988a",
+    "static/vendor/bootstrap/LICENSE": "4620c84ad5ce8602ff65640ed6b7c8b78ebb9e036584f0ebc1ccc88206a4bb51",
+    "templates/base.html": "d88cf1ec1906db79bc19c55da50721fbc459b1f3409edc259aef3e6107b58e61",
+    "templates/mysite/footer.html": "d36a63206a76b0a27871ed1feca494ebe3524c76340ebfda41fe65a49cd70ea5",
+    "templates/mysite/header.html": "7e02469d7b8d8cacaee95172869509c3c1b3956615bd10b8ed516fe58b45cab6",
+    "templates/mysite/index.html": "f44267c026e8f1592b9a1b272342812b352c7a5b313a6c48901dfc7d1af9a80b",
+    "templates/mysite/post.html": "405e8bf38add946f792ee941ed3c879eed6c57a75d146df036cf7faad0840f45",
+    "THIRD_PARTY.md": "f878034f054a09551f0801d67bc1e332657042e663b94bfae1cc4cfa53f05a79"
+  },
+  "guides": [
+    {
+      "language": "zh",
+      "file": "mblog-guide-zh.html",
+      "sha256": "4b2843e80b888e4473376a9d101b4c66859097355c53d265ca1f07208f2d108b"
+    },
+    {
+      "language": "en",
+      "file": "mblog-guide-en.html",
+      "sha256": "8674457fb31f9e78e8475374ce91c2c49430b6b96c6a075f4e068d27f5cfac17"
+    },
+    {
+      "language": "ja",
+      "file": "mblog-guide-ja.html",
+      "sha256": "5ab6d925c74e84db23561628855c30972513f77bd4f96dde77ce98c45b0b0021"
+    }
+  ]
+}

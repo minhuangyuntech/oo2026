@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}文章列表 · 我的部落格{% endblock %}
+{% block headmessage %}<h2>文章列表</h2>{% endblock %}
+{% block content %}
+{% for post in posts %}
+  <article class="card mb-3">
+    <div class="card-body">
+      <h3 class="h4">
+        <a href="{% url 'mysite:post-detail' slug=post.slug %}">
+          {{ post.title }}
+        </a>
+      </h3>
+      <p>{{ post.body|truncatechars:80 }}</p>
+      <time>{{ post.pub_date|date:"Y-m-d H:i:s" }}</time>
+    </div>
+  </article>
+{% empty %}<p>目前還沒有文章。</p>
+{% endfor %}
+{% endblock %}

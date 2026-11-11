@@ -10,7 +10,7 @@ export const djangoCaseChapters={
  ja:["実装例の概要と基準","プロジェクト環境と Git","モデルと管理画面","URL・View・Template","共通テンプレートと構造","Bootstrap と静的ファイル","Markdown・安全性・確認","AI の構成と環境準備","Ollama と共通検証","OpenAI・NVIDIA・エラー処理","Provider・フォーム・ページ","オフラインテストと公開準備"]
 };
 export const djangoCaseResourceNote={
- zh:"三語版本各 127 頁，程式碼可整段複製。範例 ZIP 提供依本教材整理的獨立 Django AI 專案與離線 mock 測試；部落格部分依第 1–88 頁逐步建立。GitHub Pages 提供教材閱讀與下載，Django 範例需下載至自己的 Python 環境執行。",
- en:"Each language has 127 slides with copyable code. The ZIP contains a standalone Django AI project and offline mock tests assembled from these examples. Build the blog using slides 1–88. GitHub Pages hosts the lessons and downloads; run Django locally in your Python environment.",
- ja:"各言語 127 枚で、コードは一括コピーできます。ZIP には教材から整理した独立 Django AI プロジェクトとオフライン mock テストを収録しています。ブログは 1〜88 枚目で作成します。GitHub Pages は教材とダウンロードを提供し、Django は手元の Python 環境で実行します。"
+ zh:"三語版本各 127 頁，程式碼可整段複製。上方提供第 1–88 頁的 mblog 完整專案；下方 AI 範例 ZIP 對應第 89–127 頁，包含獨立 Django AI 專案與離線 mock 測試。GitHub Pages 提供教材閱讀與下載，Django 範例需下載至自己的 Python 環境執行。",
+ en:"Each language has 127 slides with copyable code. The complete mblog download above covers slides 1–88. The AI ZIP below covers slides 89–127 with a standalone Django AI project and offline mock tests. GitHub Pages hosts lessons and downloads; run Django locally in your Python environment.",
+ ja:"各言語 127 枚で、コードは一括コピーできます。上の mblog 完全版は 1〜88 枚目に対応します。下の AI サンプル ZIP は 89〜127 枚目の独立 Django AI プロジェクトとオフライン mock テストです。GitHub Pages は教材とダウンロードを提供し、Django は手元の Python 環境で実行します。"
 };
