@@ -10,7 +10,9 @@ import {pygameInfo,pygameRanges,pygameChapters} from "./pygame-data";
 export {pygameInfo,pygameRanges,pygameChapters};
 import {memoryInfo,memoryRanges,memoryChapters} from "./memory-data";
 export {memoryInfo,memoryRanges,memoryChapters};
-export type UnitId = number | "gui" | "django" | "pygame" | "memory";
+import {pypiInfo,pypiRanges,pypiChapters} from "./pypi-data";
+export {pypiInfo,pypiRanges,pypiChapters};
+export type UnitId = number | "gui" | "django" | "pygame" | "memory" | "pypi";
 export type Language = "zh" | "en" | "ja";
 export type BodyBlock = { type: string; text?: string; rows?: string[][] };
 export type Snippet = {code:string;language:string;label?:string|null};
@@ -90,6 +92,7 @@ export const laterWeeks = {
   ja:["ライフサイクルとメモリモデル","クラス間の関係と UML クラス図","継承とクラス階層","多態性・抽象化・インターフェース","中間試験（筆記）","Python の高度なオブジェクト指向機構","データクラス・ジェネリクス・型設計","オブジェクト指向分析と設計","SOLID と設計原則","デザインパターンとリファクタリング","Python のウェブ・データベース応用（補足）","LLM 統合と Linux 配備（補足）","システム統合とプロジェクトレビュー","総復習と最終プロジェクトの要件"]
 };
 export function weekLabel(lang: Language, week: UnitId) {
+  if(week==="pypi")return "PyPI";
   if(week==="gui")return "GUI";
   if(week==="django")return "Django";
   if(week==="pygame")return "Pygame";
@@ -99,6 +102,6 @@ export function weekLabel(lang: Language, week: UnitId) {
 
 for(const lang of locales){weekInfo[lang].push(...extraInfo[lang]);chapterNames[lang].push(...extraChapters[lang]);}
 chapterRanges.push(...extraRanges);
-export function unitInfo(lang:Language,unit:UnitId){return unit===7?week7Info[lang]:unit===8?week8Info[lang]:unit==="memory"?memoryInfo[lang]:unit==="pygame"?pygameInfo[lang]:unit==="django"?djangoInfo[lang]:unit==="gui"?guiInfo[lang]:weekInfo[lang][unit-1];}
-export function unitRanges(unit:UnitId){return unit===7?week7Ranges:unit===8?week8Ranges:unit==="memory"?memoryRanges:unit==="pygame"?pygameRanges:unit==="django"?djangoRanges:unit==="gui"?guiRanges:chapterRanges[unit-1];}
-export function unitChapters(lang:Language,unit:UnitId){return unit===7?week7Chapters[lang]:unit===8?week8Chapters[lang]:unit==="memory"?memoryChapters[lang]:unit==="pygame"?pygameChapters[lang]:unit==="django"?djangoChapters[lang]:unit==="gui"?guiChapters[lang]:chapterNames[lang][unit-1];}
+export function unitInfo(lang:Language,unit:UnitId){return unit==="pypi"?pypiInfo[lang]:unit===7?week7Info[lang]:unit===8?week8Info[lang]:unit==="memory"?memoryInfo[lang]:unit==="pygame"?pygameInfo[lang]:unit==="django"?djangoInfo[lang]:unit==="gui"?guiInfo[lang]:weekInfo[lang][unit-1];}
+export function unitRanges(unit:UnitId){return unit==="pypi"?pypiRanges:unit===7?week7Ranges:unit===8?week8Ranges:unit==="memory"?memoryRanges:unit==="pygame"?pygameRanges:unit==="django"?djangoRanges:unit==="gui"?guiRanges:chapterRanges[unit-1];}
+export function unitChapters(lang:Language,unit:UnitId){return unit==="pypi"?pypiChapters[lang]:unit===7?week7Chapters[lang]:unit===8?week8Chapters[lang]:unit==="memory"?memoryChapters[lang]:unit==="pygame"?pygameChapters[lang]:unit==="django"?djangoChapters[lang]:unit==="gui"?guiChapters[lang]:chapterNames[lang][unit-1];}

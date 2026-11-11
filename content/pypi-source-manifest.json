@@ -1,0 +1,26 @@
+[
+  {
+    "week": "pypi",
+    "language": "zh",
+    "source": "pypi-zh.pptx",
+    "download": "pypi-zh.pptx",
+    "slides": 49,
+    "sha256": "a50808cb714b03715a3700ab4058759c970b8e4153a6ca600c4e206e44f46f79"
+  },
+  {
+    "week": "pypi",
+    "language": "en",
+    "source": "pypi-en.pptx",
+    "download": "pypi-en.pptx",
+    "slides": 49,
+    "sha256": "64610cce113628fe10315ffc5ed3432a2e4da81eb319a2f7c8343ba74cc78230"
+  },
+  {
+    "week": "pypi",
+    "language": "ja",
+    "source": "pypi-ja.pptx",
+    "download": "pypi-ja.pptx",
+    "slides": 49,
+    "sha256": "5e15dfc1dfc0d53514599812276d8a49a665fc09a114c05a9b33cdda88a30512"
+  }
+]

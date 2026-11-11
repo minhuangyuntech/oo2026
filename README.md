@@ -2,7 +2,7 @@
 
 以 Python 為主要實作語言的 18 週物件導向程式設計教材網站。
 
-第 1–8 週、GUI 入門、Django 網站入門、Pygame 射擊遊戲與翻牌配對已依最新版投影片同步，提供繁體中文、英文與日文完整網頁教材，共 417 個原始投影片主題、1251 個語言版本主題。第 9–18 週保留原有中文教材與網址。
+第 1–8 週、GUI 入門、Django 網站入門、Pygame 射擊遊戲、翻牌配對與 Python 模組／PyPI 發布已依最新版投影片同步，提供繁體中文、英文與日文完整網頁教材，共 466 個原始投影片主題、1398 個語言版本主題。第 9–18 週保留原有中文教材與網址。
 
 兩種遊戲另有獨立的三語「變數與物件屬性」網頁補充教材，位於各語言 `/pygame/#variables` 與 `/memory/#variables`。內容涵蓋設定值、物件屬性、參數、區域變數、參照關係與單步狀態，附變數搜尋及檔案／類別索引；教材上方、閱讀目錄、遊戲頁皆有入口。
 
@@ -34,13 +34,23 @@
 
 `content/slide-sources.json` 是原始投影片可見文字、表格與程式碼的結構化擷取；`scripts/sync_materials.py` 將其轉為 `content/lessons.json`。第 4 週四張機制示意圖重製為有文字內容、可縮放的網頁流程圖。
 
-`public/materials/` 提供 27 份 PPTX，以及第 3、4、5–6、8 週、GUI、Django、Pygame 和翻牌配對的十一個範例 ZIP。第 4 週 ZIP 另加入 `django_product_demo.py` 和三語操作說明，對應最新投影片 47–50 頁；原本的 `slide_XX.py` 檔名保留舊版頁碼，下載包已說明差異。
+`public/materials/` 提供 30 份 PPTX，以及第 3、4、5–6、8 週、GUI、Django、Pygame 和翻牌配對等範例 ZIP（另含 house_price_demo.zip）。第 4 週 ZIP 另加入 `django_product_demo.py` 和三語操作說明，對應最新投影片 47–50 頁；原本的 `slide_XX.py` 檔名保留舊版頁碼，下載包已說明差異。
 
 新增單元的原始擷取、完整英日文翻譯與來源雜湊位於 `content/additional-slide-sources.json`、`content/additional-translations.json`、`content/additional-source-manifest.json`。`scripts/sync_additional.py` 由主同步腳本呼叫，保留 Python 縮排並區分 PowerShell 命令。8 張參考／UML 圖以可縮放 SVG 重製，5 張 GUI 操作畫面直接取自最新版投影片。第 5、6 週沿用原投影片頁碼，因此第 6 週從第 12 頁開始。
 
 第 5–6 週及 GUI 的 ZIP 保留所有原始 Python 程式，README 改成學生用三語執行說明，並校正最新版頁碼。第 4–6 週與 GUI 的網頁完整三語；下載的原始投影片為中文。
 
 Django 單元使用 `content/django-slide-sources.json`，由 `scripts/sync_django.py` 保留三語投影片內容與 12 張原始圖像。命令、目錄、Python、模板 HTML 與 CSS 分開顯示及複製。`content/django-example-sources.json` 保存三語完整範例，含補齊的本機 `config/settings.py`；打包時使用固定 ZIP 時間戳。每個語言專案有 24 個檔案，皆不含資料庫、虛擬環境或使用者資料。`content/django-source-manifest.json` 記錄三份原始投影片雜湊。
+
+## Python 模組與 PyPI 發布
+
+三語路徑為 `/pypi/`、`/en/pypi/`、`/ja/pypi/`，每種語言 49 頁、7 章。涵蓋 PyPI、六種套件管理工具（各兩頁）、五種臺灣實用套件、模組準備、Decimal 房價換算、線上匯率、TestPyPI 與 PyPI 發布。
+
+`content/pypi-slides.json` 是三語投影片與網頁的共同文字來源。`python scripts/sync_pypi.py` 更新網頁資料；主同步腳本也會保留本單元。三份 PPTX 位於 `public/materials/pypi-{zh,en,ja}.pptx`，SHA-256 記錄於 `content/pypi-source-manifest.json`。投影片每個程式片段都是單一可編輯文字方塊，保留縮排與空行。
+
+`house_price_demo.zip` 包含完整 Python 模組與三語 README。CLI 保留中文標籤；英日文說明提供對照與可直接使用的程式。房價套件使用標準函式庫，透過 RateWise／HaoRate 取得臺銀資料快照，保留銀行掛牌時間。範例尚未發布到套件索引，學生須自行替換發布名稱與準備授權。
+
+`python scripts/check_pypi.py` 驗證 147 頁、93 段程式碼在 PPTX 與網頁間完全一致，並確認每段程式碼只在一個文字方塊、下載包可匯入、換算與錯誤輸入處理正確。
 
 ## 本機預覽
 

@@ -34,6 +34,7 @@ jobs:
       - run: python scripts/check_memory_package.py
       - run: python scripts/check_week8_package.py
       - run: python scripts/check_week7_package.py
+      - run: python scripts/check_pypi.py
       - run: python scripts/check_export.py
       - uses: actions/upload-pages-artifact@v3
         with:

@@ -1,0 +1,2669 @@
+{
+  "zh": [
+    {
+      "type": "cover",
+      "title": "Python 模組與\nPyPI 發布",
+      "lead": "房價換算與套件工具",
+      "items": [
+        "Python 模組、套件與發布實務"
+      ],
+      "src": [],
+      "number": 1
+    },
+    {
+      "type": "prose",
+      "title": "PyPI：Python 套件的公開索引",
+      "lead": "Python Package Index 收錄專案資訊與可下載的發布檔。",
+      "items": [
+        "使用者：搜尋套件、閱讀說明，使用 pip 安裝。",
+        "作者：提供原始碼、版本、相依套件與使用方法。",
+        "專案頁可查看 README、Python 版本需求與發布歷史。",
+        "安裝前核對專案名稱、官方文件、授權與維護狀態。"
+      ],
+      "src": [
+        "https://packaging.python.org/en/latest/tutorials/packaging-projects/",
+        "https://pypi.org/"
+      ],
+      "original": 3,
+      "number": 2
+    },
+    {
+      "type": "code",
+      "title": "pip 安裝套件，import 使用程式",
+      "lead": "終端機指令與 Python 程式碼，執行的位置不同。",
+      "code": "# 終端機：安裝到目前 Python 環境\npython -m pip install holidays\npython -m pip show holidays\n\n# Python：載入套件後使用\nimport holidays\ntw = holidays.country_holidays(\"TW\", years=2026)\nprint(\"2026-01-01\" in tw)",
+      "notes": [
+        "python -m pip 會使用這個 python 所屬的 pip。",
+        "安裝名稱與 import 名稱有時不同，例如 python-stdnum 與 stdnum。"
+      ],
+      "src": [
+        "https://pip.pypa.io/en/stable/user_guide/",
+        "https://holidays.readthedocs.io/en/latest/auto_gen_docs/taiwan/"
+      ],
+      "original": 4,
+      "number": 3
+    },
+    {
+      "type": "table",
+      "title": "發布流程：每個工具各有任務",
+      "lead": "從可重複使用的程式，建立可安裝與分享的發布版本。",
+      "values": [
+        [
+          "階段",
+          "工具／檔案",
+          "產生的結果"
+        ],
+        [
+          "撰寫",
+          "Python、README",
+          "可重複使用的函式與使用說明"
+        ],
+        [
+          "描述",
+          "pyproject.toml",
+          "名稱、版本、建置方式與需求"
+        ],
+        [
+          "建置",
+          "python -m build",
+          "wheel 與原始碼壓縮檔"
+        ],
+        [
+          "檢查、上傳",
+          "python -m twine",
+          "先送 TestPyPI，再送 PyPI"
+        ],
+        [
+          "使用",
+          "python -m pip install",
+          "其他環境也能 import"
+        ]
+      ],
+      "widths": [
+        190,
+        400,
+        546
+      ],
+      "foot": "GitHub 放原始碼；PyPI 放可安裝的發布版本。",
+      "src": [
+        "https://packaging.python.org/en/latest/tutorials/packaging-projects/",
+        "https://packaging.python.org/en/latest/guides/using-testpypi/"
+      ],
+      "original": 5,
+      "number": 4
+    },
+    {
+      "type": "table",
+      "title": "套件管理有兩個常見層次",
+      "lead": "先看「要安裝什麼」，再選工具。",
+      "values": [
+        [
+          "管理範圍",
+          "工具",
+          "常見用途"
+        ],
+        [
+          "Python 專案",
+          "pip／PyPI",
+          "安裝 holidays 等 Python 套件"
+        ],
+        [
+          "JavaScript 專案",
+          "npm／npm registry",
+          "安裝 JavaScript 函式庫與開發工具"
+        ],
+        [
+          "Ruby 專案",
+          "gem／RubyGems",
+          "安裝 Ruby 函式庫與工具"
+        ],
+        [
+          "Windows 軟體",
+          "Chocolatey、WinGet",
+          "安裝 Git、編輯器等應用程式"
+        ],
+        [
+          "macOS／Linux 工具",
+          "Homebrew",
+          "安裝命令列工具；macOS 也有 GUI 應用"
+        ],
+        [
+          "Debian／Ubuntu 系統",
+          "APT",
+          "安裝發行版提供的系統套件"
+        ]
+      ],
+      "widths": [
+        290,
+        360,
+        486
+      ],
+      "foot": "例如先用作業系統工具安裝 Python，再用 pip 安裝專案套件。",
+      "src": [],
+      "original": 6,
+      "number": 5
+    },
+    {
+      "type": "prose",
+      "title": "npm ①：JavaScript 的套件工具",
+      "lead": "npm 包含命令列工具，也有公開的套件 registry。",
+      "items": [
+        "常見於 Node.js 與網頁前端專案，也可管理開發用工具。",
+        "先安裝 Node.js 與 npm；官方提供版本管理器與安裝程式的說明。",
+        "package.json 記錄專案資訊與相依套件。",
+        "package-lock.json 記錄解析後的版本；npm ci 可依鎖定檔安裝。"
+      ],
+      "src": [
+        "https://docs.npmjs.com/cli/v11/commands/npm-install/",
+        "https://docs.npmjs.com/downloading-and-installing-node-js-and-npm/"
+      ],
+      "original": 7,
+      "number": 6
+    },
+    {
+      "type": "code",
+      "title": "npm ②：以日期套件為例",
+      "lead": "在新的 Node.js 專案資料夾執行。",
+      "code": "node --version\nnpm --version\nnpm init -y\nnpm install dayjs\nnpm ls\n\n# 存成 demo.cjs，再執行 node demo.cjs\nconst dayjs = require(\"dayjs\");\nconsole.log(dayjs(\"2026-01-01\").format(\"YYYY/MM/DD\"));",
+      "notes": [
+        "npm install 下載相依套件到 node_modules，並更新專案設定。",
+        "這裡的 JavaScript 程式與 Python 的 import、函式呼叫扮演相似角色。"
+      ],
+      "src": [
+        "https://docs.npmjs.com/cli/v11/commands/npm-install/",
+        "https://day.js.org/docs/en/installation/node-js"
+      ],
+      "original": 8,
+      "number": 7
+    },
+    {
+      "type": "prose",
+      "title": "RubyGems ①：Ruby 的套件生態",
+      "lead": "gem 是 Ruby 套件的名稱，也是管理套件的命令。",
+      "items": [
+        "RubyGems.org 提供套件搜尋、版本資訊與下載。",
+        "安裝 Ruby 後，使用 gem --version 確認 RubyGems 可用。",
+        "gem install 安裝函式庫與工具；Ruby 使用 require 載入。",
+        "專案常搭配 Bundler：Gemfile 宣告相依套件，Gemfile.lock 記錄版本。"
+      ],
+      "src": [
+        "https://guides.rubygems.org/rubygems-basics/",
+        "https://guides.rubygems.org/installation/"
+      ],
+      "original": 9,
+      "number": 8
+    },
+    {
+      "type": "code",
+      "title": "RubyGems ②：安裝與載入 gem",
+      "lead": "範例以 JSON 處理套件說明 gem 與 require。",
+      "code": "# 終端機\ngem --version\ngem install json\ngem list json\n\n# 存成 demo.rb，再執行 ruby demo.rb\nrequire \"json\"\ndata = JSON.parse('{\"price\": 30000}')\nputs data[\"price\"]",
+      "notes": [
+        "JSON.parse 把 JSON 字串轉成 Ruby 的資料物件。",
+        "gem 主要處理 Ruby 套件；Bundler 管理一個專案的相依版本。"
+      ],
+      "src": [
+        "https://guides.rubygems.org/rubygems-basics/",
+        "https://ruby-doc.org/stdlib-3.1.0/libdoc/json/rdoc/JSON.html"
+      ],
+      "original": 10,
+      "number": 9
+    },
+    {
+      "type": "prose",
+      "title": "Chocolatey ①：Windows 軟體管理",
+      "lead": "正式名稱是 Chocolatey，命令名稱是 choco。",
+      "items": [
+        "用套件描述軟體安裝步驟，常用於 Windows 環境建置。",
+        "可安裝 Git、工具程式等；部分套件會執行安裝腳本。",
+        "依官方安裝頁設定 Chocolatey，完成後執行 choco --version。",
+        "一般系統安裝常需要管理員權限；先確認套件來源與安裝內容。"
+      ],
+      "src": [
+        "https://docs.chocolatey.org/en-us/choco/commands/install/",
+        "https://docs.chocolatey.org/en-us/choco/setup/"
+      ],
+      "original": 11,
+      "number": 10
+    },
+    {
+      "type": "code",
+      "title": "Chocolatey ②：搜尋、安裝與更新",
+      "lead": "以下是 Windows PowerShell 指令。",
+      "code": "choco --version\nchoco search git --exact\nchoco info git\nchoco install git\nchoco list\nchoco upgrade git\nchoco uninstall git",
+      "notes": [
+        "安裝過程會顯示套件與腳本相關確認，閱讀內容後再決定。",
+        "choco install git 安裝 Git 軟體；Python 套件仍由 pip 管理。"
+      ],
+      "src": [
+        "https://docs.chocolatey.org/en-us/choco/commands/install/"
+      ],
+      "original": 12,
+      "number": 11
+    },
+    {
+      "type": "prose",
+      "title": "WinGet ①：Windows Package Manager",
+      "lead": "Microsoft 提供的 Windows 應用程式管理工具。",
+      "items": [
+        "由「應用程式安裝程式」App Installer 提供 WinGet 用戶端。",
+        "可搜尋、查看、安裝、升級與移除應用程式。",
+        "套件資訊包含識別碼、來源、版本與安裝程式。",
+        "先搜尋，再以 --id 與 --exact 明確指定要安裝的套件。"
+      ],
+      "src": [
+        "https://learn.microsoft.com/windows/package-manager/winget/"
+      ],
+      "original": 13,
+      "number": 12
+    },
+    {
+      "type": "code",
+      "title": "WinGet ②：用識別碼安裝 Git",
+      "lead": "在已具備 WinGet 的 Windows 終端機執行。",
+      "code": "winget --version\nwinget search git\nwinget show --id Git.Git --exact\nwinget install --id Git.Git --exact\nwinget list --id Git.Git --exact\nwinget upgrade --id Git.Git --exact\nwinget uninstall --id Git.Git --exact",
+      "notes": [
+        "同名軟體可能有不同來源，識別碼可降低選錯項目的機會。",
+        "安裝程式依軟體需求，可能要求授權同意或管理員權限。"
+      ],
+      "src": [
+        "https://learn.microsoft.com/windows/package-manager/winget/",
+        "https://learn.microsoft.com/windows/package-manager/winget/install"
+      ],
+      "original": 14,
+      "number": 13
+    },
+    {
+      "type": "prose",
+      "title": "Homebrew ①：macOS 與 Linux 工具管理",
+      "lead": "命令名稱是 brew。",
+      "items": [
+        "常用來安裝 Git、Python、資料處理等命令列工具。",
+        "formula 描述工具的安裝方式，常可使用預先建置的 bottle。",
+        "macOS 的 cask 可安裝預先封裝的應用程式，例如編輯器。",
+        "依 brew.sh 安裝並完成 PATH 設定，再以 brew --version 驗證。"
+      ],
+      "src": [
+        "https://docs.brew.sh/Manpage",
+        "https://brew.sh/"
+      ],
+      "original": 15,
+      "number": 14
+    },
+    {
+      "type": "code",
+      "title": "Homebrew ②：工具與桌面程式",
+      "lead": "一般 brew 指令以一般使用者身分執行。",
+      "code": "brew --version\nbrew search git\nbrew info git\nbrew install git\nbrew update\nbrew upgrade git\n\n# 以下 cask 範例用於 macOS\nbrew install --cask visual-studio-code",
+      "notes": [
+        "brew update 更新 Homebrew 與套件資訊。",
+        "brew upgrade git 才會升級已安裝的 Git。"
+      ],
+      "src": [
+        "https://docs.brew.sh/Manpage"
+      ],
+      "original": 16,
+      "number": 15
+    },
+    {
+      "type": "prose",
+      "title": "APT ①：Debian／Ubuntu 的系統套件",
+      "lead": "apt 讀取軟體來源，下載套件並處理相依關係。",
+      "items": [
+        "套件常以 .deb 格式提供，由發行版的套件來源管理。",
+        "系統通常已附帶 apt，可在 Debian、Ubuntu 或相應 WSL 發行版使用。",
+        "apt update 更新可用套件清單；apt upgrade 升級已安裝套件。",
+        "系統 Python 由發行版管理；專案的 pip 套件放在虛擬環境中。"
+      ],
+      "src": [
+        "https://documentation.ubuntu.com/server/how-to/software/package-management/"
+      ],
+      "original": 17,
+      "number": 16
+    },
+    {
+      "type": "code",
+      "title": "APT ②：準備 Python 開發環境",
+      "lead": "下列指令適用 Ubuntu／Debian 終端機。",
+      "code": "apt --version\nsudo apt update\napt search python3-venv\nsudo apt install python3 python3-venv python3-pip\n\npython3 -m venv .venv\nsource .venv/bin/activate\npython -m pip install holidays",
+      "notes": [
+        "sudo 讓系統安裝指令取得所需權限。",
+        "進入 .venv 後再安裝 Python 套件，避免修改系統 Python 的套件。"
+      ],
+      "src": [
+        "https://documentation.ubuntu.com/server/how-to/software/package-management/",
+        "https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/"
+      ],
+      "original": 18,
+      "number": 17
+    },
+    {
+      "type": "code",
+      "title": "twstock：臺股歷史資料",
+      "lead": "安裝：python -m pip install twstock",
+      "code": "import twstock\n\nstock = twstock.Stock(\"2330\")\nif stock.date and stock.price:\n    print(stock.date[-1])\n    print(stock.price[-1])",
+      "notes": [
+        "stock 是物件；date 與 price 保存取得的日期與收盤價資料。",
+        "需要連線，結果依來源變動。避免短時間大量查詢，並處理空資料與連線失敗。"
+      ],
+      "src": [
+        "https://pypi.org/project/twstock/"
+      ],
+      "original": 19,
+      "number": 18
+    },
+    {
+      "type": "code",
+      "title": "FinMind：用資料集查詢臺灣金融資料",
+      "lead": "安裝：python -m pip install FinMind",
+      "code": "from FinMind.data import DataLoader\n\napi = DataLoader()\ndf = api.taiwan_stock_daily(\n    stock_id=\"2330\",\n    start_date=\"2026-01-05\",\n    end_date=\"2026-01-09\"\n)\nprint(df.head())",
+      "notes": [
+        "傳入股票代號與日期範圍，回傳表格型態的 DataFrame。",
+        "資料集權限、額度及登入要求依服務方案而定；需要 token 時依官方文件設定。"
+      ],
+      "src": [
+        "https://finmind.github.io/"
+      ],
+      "original": 20,
+      "number": 19
+    },
+    {
+      "type": "code",
+      "title": "OpenCC：簡體轉成臺灣繁體用語",
+      "lead": "安裝：python -m pip install opencc-python-reimplemented",
+      "code": "from opencc import OpenCC\n\nconverter = OpenCC(\"s2twp\")\ntext = \"软件与数据库\"\nresult = converter.convert(text)\nprint(result)",
+      "notes": [
+        "s2twp 表示簡體轉臺灣繁體，並使用臺灣詞彙轉換。",
+        "安裝名稱與 import 名稱不同；套件安裝完成後，這個轉換可離線執行。"
+      ],
+      "src": [
+        "https://pypi.org/project/opencc-python-reimplemented/"
+      ],
+      "original": 21,
+      "number": 20
+    },
+    {
+      "type": "code",
+      "title": "holidays：查詢臺灣假日",
+      "lead": "安裝：python -m pip install holidays",
+      "code": "import holidays\n\ntw = holidays.country_holidays(\"TW\", years=2026)\nday = \"2026-01-01\"\nprint(day in tw)\nprint(tw.get(day))",
+      "notes": [
+        "in 判斷日期是否在假日集合，get 取得對應名稱。",
+        "適合行事曆與日期處理；實際出勤仍須核對當年度公告與組織規定。"
+      ],
+      "src": [
+        "https://holidays.readthedocs.io/en/latest/auto_gen_docs/taiwan/"
+      ],
+      "original": 22,
+      "number": 21
+    },
+    {
+      "type": "code",
+      "title": "python-stdnum：檢查統一編號格式",
+      "lead": "安裝：python -m pip install python-stdnum",
+      "code": "from stdnum.tw import ubn\n\nprint(ubn.is_valid(\"00501503\"))\nprint(ubn.is_valid(\"12345\"))\n\n# 對應結果\n# True\n# False",
+      "notes": [
+        "使用字串保存編號，才能保留開頭的 0。",
+        "檢查長度、格式與檢查碼；通過檢查仍不代表公司實際存在或正在營業。"
+      ],
+      "src": [
+        "https://arthurdejong.org/python-stdnum/doc/2.0/stdnum.tw.ubn"
+      ],
+      "original": 23,
+      "number": 22
+    },
+    {
+      "type": "table",
+      "title": "模組、套件與發布套件",
+      "lead": "同一份程式，在不同階段有不同名稱。",
+      "values": [
+        [
+          "名詞",
+          "本課例子",
+          "用途"
+        ],
+        [
+          "模組 module",
+          "rates.py",
+          "把相關函式集中在一個 .py 檔案"
+        ],
+        [
+          "匯入套件 package",
+          "house_price/",
+          "本例以 __init__.py 組織多個模組"
+        ],
+        [
+          "發布套件\ndistribution",
+          "oo2026-house-price-yourid",
+          "提供 pip 安裝的專案名稱"
+        ],
+        [
+          "虛擬環境",
+          " .venv/",
+          "為專案保留獨立的套件環境"
+        ]
+      ],
+      "widths": [
+        260,
+        430,
+        446
+      ],
+      "foot": "yourid 換成個人英文或數字代號；import 仍使用 house_price。",
+      "src": [
+        "https://packaging.python.org/en/latest/tutorials/packaging-projects/"
+      ],
+      "original": 24,
+      "number": 23
+    },
+    {
+      "type": "code",
+      "title": "專案結構：運算、查價、使用介面分開",
+      "lead": "解壓縮 house_price_demo.zip 後，在此專案根目錄操作。",
+      "code": "house_price_demo/\n    pyproject.toml\n    README.md\n    demo.py\n    house_price/\n        __init__.py\n        rates.py",
+      "notes": [
+        "__init__.py 提供換算函式與套件入口；rates.py 負責線上查價。",
+        "demo.py 處理輸入與顯示。發布時還需確認授權，並加入對應 LICENSE。"
+      ],
+      "src": [],
+      "original": 25,
+      "number": 24
+    },
+    {
+      "type": "code",
+      "title": "虛擬環境：隔離專案的套件",
+      "lead": "以下採 Windows PowerShell；macOS／Linux 使用下方替代指令。",
+      "code": "python --version\npython -m venv .venv\n.\\.venv\\Scripts\\Activate.ps1\npython -m pip install --upgrade pip\npython -m pip install build twine\npython -m pip --version",
+      "notes": [
+        "macOS／Linux：python3 -m venv .venv，再執行 source .venv/bin/activate。",
+        "若無法啟用，Windows 可直接用 .\\.venv\\Scripts\\python.exe 執行後續命令。"
+      ],
+      "src": [
+        "https://packaging.python.org/en/latest/tutorials/packaging-projects/"
+      ],
+      "original": 26,
+      "number": 25
+    },
+    {
+      "type": "code",
+      "title": "套件入口：把需要的功能提供給使用者",
+      "lead": "house_price/__init__.py 的公開介面。",
+      "code": "from decimal import Decimal\nfrom .rates import QuoteError, fetch_cny_sell_quote\n\nPING_PER_SQM = Decimal(\"0.3025\")\n\ndef twd_per_ping(cny_per_sqm, twd_per_cny):\n    return cny_per_sqm * twd_per_cny / PING_PER_SQM",
+      "notes": [
+        ".rates 表示同一個套件內的 rates 模組。",
+        "使用者只需 from house_price import twd_per_ping，即可呼叫換算功能。"
+      ],
+      "src": [],
+      "original": 27,
+      "number": 26
+    },
+    {
+      "type": "code",
+      "title": "pyproject.toml：讓工具認識你的套件",
+      "lead": "下列內容接續下一頁；名稱要換成未被使用的個人專案名稱。",
+      "code": "[build-system]\nrequires = [\"setuptools>=64\"]\nbuild-backend = \"setuptools.build_meta\"\n\n[project]\nname = \"oo2026-house-price-yourid\"\nversion = \"0.1.0\"\ndescription = \"Convert CNY per sqm to TWD per ping\"\nrequires-python = \">=3.9\"\nreadme = \"README.md\"",
+      "notes": [
+        "[build-system] 決定由哪個建置工具產生發布檔。",
+        "[project] 記錄發布名稱、版本與相容條件；yourid 是需要替換的範例字串。"
+      ],
+      "src": [
+        "https://packaging.python.org/en/latest/tutorials/packaging-projects/"
+      ],
+      "original": 28,
+      "number": 27
+    },
+    {
+      "type": "code",
+      "title": "套件內容與相依需求",
+      "lead": "接續上一頁的 pyproject.toml。",
+      "code": "[tool.setuptools]\npackages = [\"house_price\"]\n\n# 本課房價套件只使用 Python 標準函式庫。\n# 若未來在程式中使用 requests，應在 [project] 加入：\n# dependencies = [\"requests>=2.32\"]",
+      "notes": [
+        "build、twine 是開發發布工具，不必列為使用者執行時的相依套件。",
+        "README 應包含安裝、匯入範例、單位、資料來源與錯誤處理方式。"
+      ],
+      "src": [
+        "https://packaging.python.org/en/latest/tutorials/packaging-projects/"
+      ],
+      "original": 29,
+      "number": 28
+    },
+    {
+      "type": "prose",
+      "title": "房價範例：讓單位與幣別一致",
+      "lead": "輸入「人民幣元／平方公尺」，輸出「新臺幣元／坪」。",
+      "items": [
+        "輸入房屋單價，例如每平方公尺人民幣 30,000 元。",
+        "連線取得 1 人民幣相當於多少新臺幣，並記錄來源時間。",
+        "同時換算幣別與面積單位，再顯示每坪金額。",
+        "比較物件時還要確認面積計算方式，例如建物面積與使用面積。"
+      ],
+      "src": [
+        "https://w3.land.gov.taipei/calareacnvr/",
+        "https://rate.bot.com.tw/xrt"
+      ],
+      "original": 30,
+      "number": 29
+    },
+    {
+      "type": "prose",
+      "title": "換算公式：每坪有約 3.3058 平方公尺",
+      "lead": "1 平方公尺 = 0.3025 坪，因此每平方公尺單價要除以 0.3025。",
+      "items": [
+        "新臺幣元／坪 = 人民幣元／㎡ × 新臺幣元／人民幣 ÷ 0.3025",
+        "計算範例：30,250 × 4.5 ÷ 0.3025 = 450,000 元／坪。",
+        "換成萬元／坪：450,000 ÷ 10,000 = 45 萬元／坪。",
+        "此處的 4.5 是範例匯率；實際程式會連線查詢最新可用報價。"
+      ],
+      "src": [
+        "https://w3.land.gov.taipei/calareacnvr/"
+      ],
+      "original": 31,
+      "number": 30
+    },
+    {
+      "type": "code",
+      "title": "Decimal：用十進位數值保存金額",
+      "lead": "用字串建立 Decimal，保留我們輸入的十進位值。",
+      "code": "from decimal import Decimal\nfrom house_price import twd_per_ping\n\nprice = Decimal(\"30250\")\nrate = Decimal(\"4.5\")\nresult = twd_per_ping(price, rate)\nprint(f\"{result:,.0f} 元／坪\")\nprint(f\"{result / 10000:.2f} 萬元／坪\")",
+      "notes": [
+        "輸出為 450,000 元／坪，以及 45.00 萬元／坪。",
+        "此步驟先驗證運算，尚未連線查詢匯率。"
+      ],
+      "src": [
+        "https://docs.python.org/3/library/decimal.html"
+      ],
+      "original": 32,
+      "number": 31
+    },
+    {
+      "type": "prose",
+      "title": "線上匯率：來源與時間都要保留",
+      "lead": "本例使用 RateWise／HaoRate 同步的臺灣銀行牌告資料。",
+      "items": [
+        "以新臺幣購買人民幣的情境，採用臺銀「人民幣即期賣出價」。",
+        "程式讀取公開 JSON，再取得臺銀的資料快照。",
+        "程式顯示銀行掛牌時間；本次下載時間與銀行掛牌時間可能不同。",
+        "資料經第三方同步，可能有延遲。線上查詢不表示逐筆即時成交價。"
+      ],
+      "src": [
+        "https://app.haotool.org/ratewise/open-data/",
+        "https://rate.bot.com.tw/xrt"
+      ],
+      "original": 33,
+      "number": 32
+    },
+    {
+      "type": "code",
+      "title": "讀取 JSON：從網路取得 Python 資料",
+      "lead": "rates.py 中的下載函式，保留完整的雜湊驗證。",
+      "code": "def _download(path, expected_hash=None):\n    with urlopen(DATA_ROOT + path, timeout=10) as response:\n        content = response.read()\n    if expected_hash:\n        actual = hashlib.sha256(content).hexdigest()\n        if actual != expected_hash:\n            raise QuoteError(\"匯率資料的檢查碼不符\")\n    return json.loads(content)",
+      "notes": [
+        "urlopen 取得內容，json.loads 將 JSON 轉為 dict／list 等資料。",
+        "需要匯入 json、hashlib 與 urllib.request.urlopen；DATA_ROOT 定義見下一頁。"
+      ],
+      "src": [
+        "https://app.haotool.org/ratewise/open-data/"
+      ],
+      "original": 34,
+      "number": 33
+    },
+    {
+      "type": "code",
+      "title": "依照索引取得臺銀資料快照",
+      "lead": "API v3 使用 current、manifest 與 provider snapshot。",
+      "code": "DATA_ROOT = (\n    \"https://raw.githubusercontent.com/haotool/app/\"\n    \"data/public/rates/v3/\"\n)\npointer = _download(\"current.json\")\nref = pointer[\"manifest\"]\nmanifest = _download(ref[\"path\"], ref[\"sha256\"])\nbank = next(p for p in manifest[\"providers\"]\n            if p[\"providerId\"] == \"bot\")\nref = bank[\"snapshot\"]\nsnapshot = _download(ref[\"path\"], ref[\"sha256\"])",
+      "notes": [
+        "此頁聚焦取得資料的路徑，完整程式還會確認 bank[\"checkStatus\"]。",
+        "SHA-256 比對可檢查內容是否符合索引，無法保證牌告仍然新鮮。"
+      ],
+      "src": [
+        "https://app.haotool.org/ratewise/open-data/"
+      ],
+      "original": 35,
+      "number": 34
+    },
+    {
+      "type": "code",
+      "title": "選取人民幣報價：欄位方向要讀清楚",
+      "lead": "以下是已選出可用 TWD → CNY 資料列後的核心片段。",
+      "code": "original = row[\"sourceQuote\"]\n# 完整程式會確認 originalSellField == \"spot.sell\"\n# 以及 subjectCurrency == \"CNY\"、priceCurrency == \"TWD\"\nprice = Decimal(original[\"providerSellPrice\"])\nunits = Decimal(original[\"unitAmount\"])\ntwd_per_cny = price / units\nstamp = datetime.fromisoformat(\n    original[\"sourcePublishedAt\"].replace(\"Z\", \"+00:00\")\n)",
+      "notes": [
+        "providerSellPrice／unitAmount 表示每 1 元人民幣的臺幣價格。",
+        "row、snapshot、original 都是從 JSON 取得的資料；完整版本另檢查狀態、正值與時區。"
+      ],
+      "src": [
+        "https://app.haotool.org/ratewise/open-data/"
+      ],
+      "original": 36,
+      "number": 35
+    },
+    {
+      "type": "code",
+      "title": "Quote 物件：把匯率與掛牌時間放在一起",
+      "lead": "取得一份報價後，可透過屬性讀取資料。",
+      "code": "@dataclass(frozen=True)\nclass Quote:\n    twd_per_cny: Decimal\n    published_at: datetime\n\nquote = fetch_cny_sell_quote()\nprint(quote.twd_per_cny)\nprint(quote.published_at)",
+      "notes": [
+        "dataclass 自動產生常用方法；frozen=True 避免建立後直接改寫屬性。",
+        "型別註記說明預期資料型態；外部資料仍需程式自行檢查。"
+      ],
+      "src": [
+        "https://docs.python.org/3/library/dataclasses.html"
+      ],
+      "original": 37,
+      "number": 36
+    },
+    {
+      "type": "code",
+      "title": "主程式：組合查價與換算功能",
+      "lead": "以下程式可存成 quick_demo.py，在專案根目錄執行。",
+      "code": "from decimal import Decimal\nfrom house_price import fetch_cny_sell_quote, twd_per_ping\n\nprice = Decimal(\"30000\")\nquote = fetch_cny_sell_quote()\nresult = twd_per_ping(price, quote.twd_per_cny)\nprint(f\"匯率：{quote.twd_per_cny}\")\nprint(f\"掛牌時間：{quote.published_at}\")\nprint(f\"每坪新臺幣 {result:,.0f} 元\")",
+      "notes": [
+        "主程式無需知道 JSON 的內部結構，只使用套件提供的函式。",
+        "完整 demo.py 另提供參數輸入、錯誤訊息與資料來源標示。"
+      ],
+      "src": [],
+      "original": 38,
+      "number": 37
+    },
+    {
+      "type": "code",
+      "title": "錯誤處理：失敗時不把匯率當成 0",
+      "lead": "連線失敗、欄位變動或資料不完整，都應明確回報。",
+      "code": "from house_price import QuoteError, fetch_cny_sell_quote\n\ntry:\n    quote = fetch_cny_sell_quote()\nexcept QuoteError as error:\n    print(\"無法取得匯率：\", error)\nelse:\n    print(\"本次報價：\", quote.twd_per_cny)",
+      "notes": [
+        "demo.py 也會拒絕小於等於零、非數字或非有限值的房屋單價。",
+        "執行完整範例：python demo.py 30000。輸出數值與來源時間會隨查價結果變動。"
+      ],
+      "src": [],
+      "original": 39,
+      "number": 38
+    },
+    {
+      "type": "code",
+      "title": "本機驗證：運算與網路分別確認",
+      "lead": "在專案根目錄進行 editable install，便於持續修改。",
+      "code": "# 終端機\npython -m pip install -e .\npython demo.py 30000\n\n# Python：使用固定輸入檢查換算\nfrom decimal import Decimal\nfrom house_price import twd_per_ping\nassert twd_per_ping(Decimal(\"30250\"),\n                    Decimal(\"4.5\")) == Decimal(\"450000\")",
+      "notes": [
+        "固定匯率驗證計算；線上查價則確認連線、幣別、正值與來源時間。",
+        "editable install 的程式修改會反映在環境中；發布前仍需測試真正的 wheel。"
+      ],
+      "src": [],
+      "original": 40,
+      "number": 39
+    },
+    {
+      "type": "code",
+      "title": "建置：產生可以發布的檔案",
+      "lead": "在含有 pyproject.toml 的專案根目錄執行。",
+      "code": "python -m pip install --upgrade build twine\npython -m build --outdir dist-0.1.0\npython -m twine check dist-0.1.0/*",
+      "notes": [
+        "build 依 pyproject.toml 呼叫建置後端，輸出到新的版本資料夾。",
+        "twine check 檢查發布中繼資料與 README 等項目；不能取代程式功能測試。"
+      ],
+      "src": [
+        "https://packaging.python.org/en/latest/tutorials/packaging-projects/"
+      ],
+      "original": 41,
+      "number": 40
+    },
+    {
+      "type": "table",
+      "title": "發布檔：wheel 與原始碼壓縮檔",
+      "lead": "以 yourid 為名稱示例，實作時換成自己的專案名稱。",
+      "values": [
+        [
+          "檔案",
+          "內容",
+          "用途"
+        ],
+        [
+          "…-0.1.0-py3-none-any.whl",
+          "可安裝的套件與中繼資料",
+          "pip 通常可直接安裝"
+        ],
+        [
+          "…-0.1.0.tar.gz",
+          "原始碼與建置所需資料",
+          "在安裝時可重新建置"
+        ],
+        [
+          "README.md",
+          "功能、安裝與使用方式",
+          "呈現在套件專案頁"
+        ],
+        [
+          "LICENSE",
+          "作者選定的授權條款",
+          "讓使用者知道可如何使用"
+        ]
+      ],
+      "widths": [
+        470,
+        330,
+        336
+      ],
+      "foot": "上傳前檢查壓縮檔內容，確認沒有 token、.venv 或私人資料。",
+      "src": [
+        "https://packaging.python.org/en/latest/tutorials/packaging-projects/"
+      ],
+      "original": 42,
+      "number": 41
+    },
+    {
+      "type": "prose",
+      "title": "帳號與權杖：測試站、正式站分別準備",
+      "lead": "TestPyPI 與 PyPI 使用獨立的帳號、專案與 API token。",
+      "items": [
+        "分別註冊並驗證電子郵件，保存並驗證復原碼，再設定雙因素驗證。",
+        "在帳號設定建立 API token。首次建立專案可能需帳號範圍的 token。",
+        "專案建立後，改用限該專案的 token，並撤銷不再需要的廣泛權限 token。",
+        "token 只在上傳工具要求時輸入，不放進程式、README、投影片或 Git。"
+      ],
+      "src": [
+        "https://packaging.python.org/en/latest/guides/using-testpypi/",
+        "https://docs.pypi.org/your-account/two-factor-authentication/",
+        "https://docs.pypi.org/publishing/publishing-to-pypi/"
+      ],
+      "original": 43,
+      "number": 42
+    },
+    {
+      "type": "code",
+      "title": "TestPyPI：先上傳測試版本",
+      "lead": "此步驟會公開發布到測試站。請使用自己的名稱與測試站 token。",
+      "code": "python -m twine upload --repository testpypi dist-0.1.0/*\n\n# 若工具要求帳號與密碼：\n# Username: __token__\n# Password: 在隱藏輸入提示貼上 TestPyPI API token",
+      "notes": [
+        "上傳成功後，依工具顯示的專案連結，檢查 README、版本與發布檔。",
+        "TestPyPI 是測試服務，不保證永久保留資料；正式作品使用 PyPI。"
+      ],
+      "src": [
+        "https://packaging.python.org/en/latest/guides/using-testpypi/"
+      ],
+      "original": 44,
+      "number": 43
+    },
+    {
+      "type": "code",
+      "title": "重新安裝：避開原始碼資料夾驗證",
+      "lead": "以下採 Windows PowerShell，在專案的上一層建立乾淨環境。",
+      "code": "cd ..\npython -m venv verify-env\n.\\verify-env\\Scripts\\Activate.ps1\npython -m pip install --no-deps `\n    --index-url https://test.pypi.org/simple/ `\n    oo2026-house-price-yourid==0.1.0\npython -c \"import house_price; print(house_price.__file__)\"",
+      "notes": [
+        "反引號是 PowerShell 的續行符號；本例沒有外部相依，才使用 --no-deps。",
+        "換成自己的發布名稱。輸出路徑應指向 verify-env 的 site-packages。"
+      ],
+      "src": [
+        "https://packaging.python.org/en/latest/guides/using-testpypi/"
+      ],
+      "original": 45,
+      "number": 44
+    },
+    {
+      "type": "code",
+      "title": "正式 PyPI：發布同一份已驗證的檔案",
+      "lead": "回到專案根目錄，使用原本已安裝 twine 的開發環境。",
+      "code": "python -m twine upload dist-0.1.0/*\n\n# 使用 PyPI 的 token，不是 TestPyPI 的 token。\n# 發布後，使用者可在自己的虛擬環境安裝：\npython -m pip install oo2026-house-price-yourid==0.1.0",
+      "notes": [
+        "上傳前確認正式站名稱可用，並確認專案說明與授權完整。",
+        "若正式站需更改名稱，必須更新設定、重新建置，並重新驗證新發布檔。"
+      ],
+      "src": [
+        "https://packaging.python.org/en/latest/tutorials/packaging-projects/",
+        "https://packaging.python.org/en/latest/guides/using-testpypi/"
+      ],
+      "original": 46,
+      "number": 45
+    },
+    {
+      "type": "code",
+      "title": "更新版本：每次發布保留清楚的版本",
+      "lead": "修改功能後，將 pyproject.toml 的 version 改為 0.1.1。",
+      "code": "python -m build --outdir dist-0.1.1\npython -m twine check dist-0.1.1/*\npython -m twine upload --repository testpypi dist-0.1.1/*\n\n# 在乾淨環境驗證通過後，再發布到正式站\npython -m twine upload dist-0.1.1/*\npython -m pip install --upgrade oo2026-house-price-yourid",
+      "notes": [
+        "PyPI 不允許用相同檔名覆寫已發布檔案，刪除後也不能重用該檔名。",
+        "新版本使用新的輸出資料夾，避免不小心把舊版本一起上傳。"
+      ],
+      "src": [
+        "https://packaging.python.org/en/latest/tutorials/packaging-projects/"
+      ],
+      "original": 47,
+      "number": 46
+    },
+    {
+      "type": "code",
+      "title": "多筆房價換算：串列生成式",
+      "lead": "以相同匯率換算多筆房價，再比較每坪單價。",
+      "code": "from decimal import Decimal\nfrom house_price import twd_per_ping\n\nprices = [Decimal(\"30250\"), Decimal(\"60500\")]\nrate = Decimal(\"4.5\")\nresults = [twd_per_ping(p, rate) for p in prices]\nprint(results[0] / 10000)\nprint(results[1] / results[0])",
+      "notes": [
+        "第一行輸出 45，代表第一筆房價為每坪 45 萬元；第二行輸出 2。",
+        "匯率固定時，原始房價單價加倍，換算後的每坪單價也加倍。"
+      ],
+      "src": [],
+      "original": 50,
+      "number": 47
+    },
+    {
+      "type": "prose",
+      "title": "參考資料：Python 發布與房價範例",
+      "lead": "連結可點選開啟；介面與服務條件以官方最新文件為準。",
+      "items": [
+        "Python Packaging User Guide：專案結構、建置與發布。",
+        "Using TestPyPI：測試站上傳與安裝。",
+        "臺北地政面積換算、臺灣銀行牌告匯率。",
+        "RateWise／HaoRate：API v3、資料來源與時間欄位。"
+      ],
+      "src": [
+        "https://packaging.python.org/en/latest/tutorials/packaging-projects/",
+        "https://packaging.python.org/en/latest/guides/using-testpypi/",
+        "https://w3.land.gov.taipei/calareacnvr/",
+        "https://rate.bot.com.tw/xrt",
+        "https://app.haotool.org/ratewise/open-data/"
+      ],
+      "original": 52,
+      "number": 48
+    },
+    {
+      "type": "prose",
+      "title": "參考資料：套件與管理工具",
+      "lead": "各主題頁的「來源文件」也可直接開啟。",
+      "items": [
+        "npm、RubyGems、Chocolatey、WinGet、Homebrew、Ubuntu APT 官方文件。",
+        "twstock 與 FinMind：臺灣金融資料套件。",
+        "OpenCC、holidays、python-stdnum：文字、日期與編號處理。",
+        "匯率資料來源：臺灣銀行；資料整理：匯率好工具 RateWise／HaoRate。"
+      ],
+      "src": [
+        "https://docs.npmjs.com/cli/v11/commands/npm-install/",
+        "https://guides.rubygems.org/rubygems-basics/",
+        "https://docs.chocolatey.org/en-us/choco/commands/install/",
+        "https://learn.microsoft.com/windows/package-manager/winget/",
+        "https://docs.brew.sh/Manpage",
+        "https://documentation.ubuntu.com/server/how-to/software/package-management/",
+        "https://pypi.org/project/twstock/",
+        "https://finmind.github.io/",
+        "https://pypi.org/project/opencc-python-reimplemented/",
+        "https://holidays.readthedocs.io/en/latest/auto_gen_docs/taiwan/",
+        "https://arthurdejong.org/python-stdnum/doc/2.0/stdnum.tw.ubn",
+        "https://app.haotool.org/ratewise/open-data/"
+      ],
+      "original": 53,
+      "number": 49
+    }
+  ],
+  "en": [
+    {
+      "type": "cover",
+      "title": "Python modules &\nPyPI publishing",
+      "lead": "House prices and package tools",
+      "items": [
+        "Build, package, and share Python code"
+      ],
+      "src": [],
+      "number": 1
+    },
+    {
+      "type": "prose",
+      "title": "PyPI: the Python Package Index",
+      "lead": "A public index of project information and downloadable releases.",
+      "items": [
+        "Users search for packages, read documentation, and install with pip.",
+        "Authors provide code, versions, dependencies, and usage instructions.",
+        "Project pages show the README, Python requirements, and release history.",
+        "Before installation, check the name, official docs, license, and maintenance."
+      ],
+      "src": [
+        "https://packaging.python.org/en/latest/tutorials/packaging-projects/",
+        "https://pypi.org/"
+      ],
+      "original": 3,
+      "number": 2
+    },
+    {
+      "type": "code",
+      "title": "Install with pip; use code with import",
+      "lead": "Terminal commands and Python code run in different places.",
+      "code": "# Terminal: install into this Python environment\npython -m pip install holidays\npython -m pip show holidays\n\n# Python: import and use the package\nimport holidays\ntw = holidays.country_holidays(\"TW\", years=2026)\nprint(\"2026-01-01\" in tw)",
+      "notes": [
+        "python -m pip uses the pip associated with that Python interpreter.",
+        "Installation and import names can differ: python-stdnum is imported as stdnum."
+      ],
+      "src": [
+        "https://pip.pypa.io/en/stable/user_guide/",
+        "https://holidays.readthedocs.io/en/latest/auto_gen_docs/taiwan/"
+      ],
+      "original": 4,
+      "number": 3
+    },
+    {
+      "type": "table",
+      "title": "Publishing: each tool has a role",
+      "lead": "Turn reusable code into an installable, shareable release.",
+      "values": [
+        [
+          "Stage",
+          "Tool / file",
+          "Result"
+        ],
+        [
+          "Write",
+          "Python, README",
+          "Reusable functions and usage docs"
+        ],
+        [
+          "Describe",
+          "pyproject.toml",
+          "Name, version, build and requirements"
+        ],
+        [
+          "Build",
+          "python -m build",
+          "Wheel and source archive"
+        ],
+        [
+          "Check / upload",
+          "python -m twine",
+          "TestPyPI first, then PyPI"
+        ],
+        [
+          "Use",
+          "python -m pip install",
+          "Import from another environment"
+        ]
+      ],
+      "widths": [
+        190,
+        400,
+        546
+      ],
+      "foot": "GitHub hosts source code; PyPI hosts installable releases.",
+      "src": [
+        "https://packaging.python.org/en/latest/tutorials/packaging-projects/",
+        "https://packaging.python.org/en/latest/guides/using-testpypi/"
+      ],
+      "original": 5,
+      "number": 4
+    },
+    {
+      "type": "table",
+      "title": "Two common levels of package management",
+      "lead": "Choose a tool according to what you want to install.",
+      "values": [
+        [
+          "Scope",
+          "Tool",
+          "Typical use"
+        ],
+        [
+          "Python project",
+          "pip / PyPI",
+          "Python packages such as holidays"
+        ],
+        [
+          "JavaScript project",
+          "npm / npm registry",
+          "Libraries and development tools"
+        ],
+        [
+          "Ruby project",
+          "gem / RubyGems",
+          "Ruby libraries and tools"
+        ],
+        [
+          "Windows software",
+          "Chocolatey, WinGet",
+          "Git, editors, and applications"
+        ],
+        [
+          "macOS / Linux tools",
+          "Homebrew",
+          "CLI tools; GUI apps on macOS too"
+        ],
+        [
+          "Debian / Ubuntu",
+          "APT",
+          "System packages from the distribution"
+        ]
+      ],
+      "widths": [
+        290,
+        360,
+        486
+      ],
+      "foot": "For example: install Python with an OS tool, then install project packages with pip.",
+      "src": [],
+      "original": 6,
+      "number": 5
+    },
+    {
+      "type": "prose",
+      "title": "npm ①: JavaScript packages",
+      "lead": "npm provides a command-line tool and a public package registry.",
+      "items": [
+        "Used in Node.js and frontend projects, including development tools.",
+        "Install Node.js and npm using the official setup or version-manager guide.",
+        "package.json records project metadata and dependencies.",
+        "package-lock.json records resolved versions; npm ci installs from that lockfile."
+      ],
+      "src": [
+        "https://docs.npmjs.com/cli/v11/commands/npm-install/",
+        "https://docs.npmjs.com/downloading-and-installing-node-js-and-npm/"
+      ],
+      "original": 7,
+      "number": 6
+    },
+    {
+      "type": "code",
+      "title": "npm ②: a date-library example",
+      "lead": "Run these commands in a new Node.js project folder.",
+      "code": "node --version\nnpm --version\nnpm init -y\nnpm install dayjs\nnpm ls\n\n# Save the code below as demo.cjs; run node demo.cjs\nconst dayjs = require(\"dayjs\");\nconsole.log(dayjs(\"2026-01-01\").format(\"YYYY/MM/DD\"));",
+      "notes": [
+        "npm install downloads dependencies into node_modules and updates project files.",
+        "The JavaScript code plays a role similar to Python imports and function calls."
+      ],
+      "src": [
+        "https://docs.npmjs.com/cli/v11/commands/npm-install/",
+        "https://day.js.org/docs/en/installation/node-js"
+      ],
+      "original": 8,
+      "number": 7
+    },
+    {
+      "type": "prose",
+      "title": "RubyGems ①: the Ruby ecosystem",
+      "lead": "A gem is a Ruby package; gem is also the package-management command.",
+      "items": [
+        "RubyGems.org provides package search, version details, and downloads.",
+        "After installing Ruby, run gem --version to check that RubyGems is available.",
+        "gem install installs libraries and tools; Ruby loads code with require.",
+        "Bundler uses Gemfile for dependencies and Gemfile.lock for resolved versions."
+      ],
+      "src": [
+        "https://guides.rubygems.org/rubygems-basics/",
+        "https://guides.rubygems.org/installation/"
+      ],
+      "original": 9,
+      "number": 8
+    },
+    {
+      "type": "code",
+      "title": "RubyGems ②: install and load a gem",
+      "lead": "Use a JSON library to see the roles of gem and require.",
+      "code": "# Terminal\ngem --version\ngem install json\ngem list json\n\n# Save as demo.rb; run ruby demo.rb\nrequire \"json\"\ndata = JSON.parse('{\"price\": 30000}')\nputs data[\"price\"]",
+      "notes": [
+        "JSON.parse converts a JSON string into a Ruby data object.",
+        "gem manages Ruby packages; Bundler manages dependency versions for a project."
+      ],
+      "src": [
+        "https://guides.rubygems.org/rubygems-basics/",
+        "https://ruby-doc.org/stdlib-3.1.0/libdoc/json/rdoc/JSON.html"
+      ],
+      "original": 10,
+      "number": 9
+    },
+    {
+      "type": "prose",
+      "title": "Chocolatey ①: Windows software",
+      "lead": "The product is Chocolatey; its command is choco.",
+      "items": [
+        "Packages describe installation steps, often for setting up Windows machines.",
+        "It installs Git and other software; some packages execute installation scripts.",
+        "Follow the official setup guide, then check with choco --version.",
+        "System installations often need administrator rights. Check sources and contents."
+      ],
+      "src": [
+        "https://docs.chocolatey.org/en-us/choco/commands/install/",
+        "https://docs.chocolatey.org/en-us/choco/setup/"
+      ],
+      "original": 11,
+      "number": 10
+    },
+    {
+      "type": "code",
+      "title": "Chocolatey ②: search, install, update",
+      "lead": "These commands run in Windows PowerShell.",
+      "code": "choco --version\nchoco search git --exact\nchoco info git\nchoco install git\nchoco list\nchoco upgrade git\nchoco uninstall git",
+      "notes": [
+        "Installation may ask you to confirm packages and scripts. Read each prompt.",
+        "choco install git installs Git software; pip still manages Python packages."
+      ],
+      "src": [
+        "https://docs.chocolatey.org/en-us/choco/commands/install/"
+      ],
+      "original": 12,
+      "number": 11
+    },
+    {
+      "type": "prose",
+      "title": "WinGet ①: Windows Package Manager",
+      "lead": "Microsoft’s tool for managing Windows applications.",
+      "items": [
+        "The App Installer application provides the WinGet client.",
+        "Search, inspect, install, upgrade, and remove applications.",
+        "Package information includes an ID, source, version, and installer.",
+        "Search first, then use --id and --exact to select the intended package."
+      ],
+      "src": [
+        "https://learn.microsoft.com/windows/package-manager/winget/"
+      ],
+      "original": 13,
+      "number": 12
+    },
+    {
+      "type": "code",
+      "title": "WinGet ②: install Git by ID",
+      "lead": "Use a Windows terminal with WinGet already available.",
+      "code": "winget --version\nwinget search git\nwinget show --id Git.Git --exact\nwinget install --id Git.Git --exact\nwinget list --id Git.Git --exact\nwinget upgrade --id Git.Git --exact\nwinget uninstall --id Git.Git --exact",
+      "notes": [
+        "Similar names may come from different sources; the ID helps identify the package.",
+        "An installer may require license acceptance or administrator rights."
+      ],
+      "src": [
+        "https://learn.microsoft.com/windows/package-manager/winget/",
+        "https://learn.microsoft.com/windows/package-manager/winget/install"
+      ],
+      "original": 14,
+      "number": 13
+    },
+    {
+      "type": "prose",
+      "title": "Homebrew ①: macOS and Linux tools",
+      "lead": "The command is brew.",
+      "items": [
+        "Commonly used to install Git, Python, and command-line data tools.",
+        "A formula describes installation; a prebuilt bottle is often available.",
+        "On macOS, casks install packaged applications such as editors.",
+        "Install from brew.sh, configure PATH, and verify with brew --version."
+      ],
+      "src": [
+        "https://docs.brew.sh/Manpage",
+        "https://brew.sh/"
+      ],
+      "original": 15,
+      "number": 14
+    },
+    {
+      "type": "code",
+      "title": "Homebrew ②: CLI and desktop tools",
+      "lead": "Run ordinary brew commands as a regular user.",
+      "code": "brew --version\nbrew search git\nbrew info git\nbrew install git\nbrew update\nbrew upgrade git\n\n# The following cask example is for macOS\nbrew install --cask visual-studio-code",
+      "notes": [
+        "brew update updates Homebrew and package information.",
+        "brew upgrade git upgrades the installed Git package."
+      ],
+      "src": [
+        "https://docs.brew.sh/Manpage"
+      ],
+      "original": 16,
+      "number": 15
+    },
+    {
+      "type": "prose",
+      "title": "APT ①: Debian / Ubuntu packages",
+      "lead": "apt reads repositories, downloads packages, and resolves dependencies.",
+      "items": [
+        "Packages commonly use .deb format and distribution-managed repositories.",
+        "apt is normally included in Debian, Ubuntu, and corresponding WSL distributions.",
+        "apt update refreshes package lists; apt upgrade upgrades installed packages.",
+        "The distribution manages system Python. Put project packages in a virtual environment."
+      ],
+      "src": [
+        "https://documentation.ubuntu.com/server/how-to/software/package-management/"
+      ],
+      "original": 17,
+      "number": 16
+    },
+    {
+      "type": "code",
+      "title": "APT ②: a Python development environment",
+      "lead": "Run these commands in an Ubuntu / Debian terminal.",
+      "code": "apt --version\nsudo apt update\napt search python3-venv\nsudo apt install python3 python3-venv python3-pip\n\npython3 -m venv .venv\nsource .venv/bin/activate\npython -m pip install holidays",
+      "notes": [
+        "sudo grants the privileges required for system installation.",
+        "Activate .venv before installing Python packages to keep system Python separate."
+      ],
+      "src": [
+        "https://documentation.ubuntu.com/server/how-to/software/package-management/",
+        "https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/"
+      ],
+      "original": 18,
+      "number": 17
+    },
+    {
+      "type": "code",
+      "title": "twstock: historical Taiwan stock data",
+      "lead": "Install: python -m pip install twstock",
+      "code": "import twstock\n\nstock = twstock.Stock(\"2330\")\nif stock.date and stock.price:\n    print(stock.date[-1])\n    print(stock.price[-1])",
+      "notes": [
+        "stock is an object; date and price hold the retrieved dates and closing prices.",
+        "Requires a connection. Avoid rapid repeated requests; handle empty data and failures."
+      ],
+      "src": [
+        "https://pypi.org/project/twstock/"
+      ],
+      "original": 19,
+      "number": 18
+    },
+    {
+      "type": "code",
+      "title": "FinMind: Taiwan financial datasets",
+      "lead": "Install: python -m pip install FinMind",
+      "code": "from FinMind.data import DataLoader\n\napi = DataLoader()\ndf = api.taiwan_stock_daily(\n    stock_id=\"2330\",\n    start_date=\"2026-01-05\",\n    end_date=\"2026-01-09\"\n)\nprint(df.head())",
+      "notes": [
+        "Pass a stock ID and date range to receive a tabular DataFrame.",
+        "Access, quotas, and login depend on the service plan. Follow its token setup docs."
+      ],
+      "src": [
+        "https://finmind.github.io/"
+      ],
+      "original": 20,
+      "number": 19
+    },
+    {
+      "type": "code",
+      "title": "OpenCC: Traditional Chinese for Taiwan",
+      "lead": "Install: python -m pip install opencc-python-reimplemented",
+      "code": "from opencc import OpenCC\n\nconverter = OpenCC(\"s2twp\")\ntext = \"软件与数据库\"\nresult = converter.convert(text)\nprint(result)",
+      "notes": [
+        "s2twp converts Simplified Chinese to Traditional Chinese with Taiwan vocabulary.",
+        "Install and import names differ. Once installed, this conversion works offline."
+      ],
+      "src": [
+        "https://pypi.org/project/opencc-python-reimplemented/"
+      ],
+      "original": 21,
+      "number": 20
+    },
+    {
+      "type": "code",
+      "title": "holidays: look up Taiwan holidays",
+      "lead": "Install: python -m pip install holidays",
+      "code": "import holidays\n\ntw = holidays.country_holidays(\"TW\", years=2026)\nday = \"2026-01-01\"\nprint(day in tw)\nprint(tw.get(day))",
+      "notes": [
+        "in checks membership; get retrieves the holiday name for a date.",
+        "Useful for calendars. Actual attendance follows current official and organizational rules."
+      ],
+      "src": [
+        "https://holidays.readthedocs.io/en/latest/auto_gen_docs/taiwan/"
+      ],
+      "original": 22,
+      "number": 21
+    },
+    {
+      "type": "code",
+      "title": "python-stdnum: validate Taiwan business IDs",
+      "lead": "Install: python -m pip install python-stdnum",
+      "code": "from stdnum.tw import ubn\n\nprint(ubn.is_valid(\"00501503\"))\nprint(ubn.is_valid(\"12345\"))\n\n# Expected results\n# True\n# False",
+      "notes": [
+        "Store identifiers as strings to preserve leading zeros.",
+        "It checks format and checksum, not whether a business exists or is operating."
+      ],
+      "src": [
+        "https://arthurdejong.org/python-stdnum/doc/2.0/stdnum.tw.ubn"
+      ],
+      "original": 23,
+      "number": 22
+    },
+    {
+      "type": "table",
+      "title": "Module, package, and distribution",
+      "lead": "The same code has different names at different stages.",
+      "values": [
+        [
+          "Term",
+          "Example",
+          "Purpose"
+        ],
+        [
+          "Module",
+          "rates.py",
+          "Related functions in one .py file"
+        ],
+        [
+          "Import package",
+          "house_price/",
+          "Organize modules with __init__.py"
+        ],
+        [
+          "Distribution",
+          "oo2026-house-price-yourid",
+          "Project name installed with pip"
+        ],
+        [
+          "Virtual environment",
+          ".venv/",
+          "An isolated package environment"
+        ]
+      ],
+      "widths": [
+        260,
+        430,
+        446
+      ],
+      "foot": "Replace yourid with your own letters or digits. The import name remains house_price.",
+      "src": [
+        "https://packaging.python.org/en/latest/tutorials/packaging-projects/"
+      ],
+      "original": 24,
+      "number": 23
+    },
+    {
+      "type": "code",
+      "title": "Project structure: separate responsibilities",
+      "lead": "Extract house_price_demo.zip and work from the project root.",
+      "code": "house_price_demo/\n    pyproject.toml\n    README.md\n    demo.py\n    house_price/\n        __init__.py\n        rates.py",
+      "notes": [
+        "__init__.py exposes conversion functions; rates.py retrieves online exchange rates.",
+        "demo.py handles input and display. Choose a license and add LICENSE before publishing."
+      ],
+      "src": [],
+      "original": 25,
+      "number": 24
+    },
+    {
+      "type": "code",
+      "title": "Virtual environments: isolate project packages",
+      "lead": "Windows PowerShell below; macOS / Linux alternatives are in the notes.",
+      "code": "python --version\npython -m venv .venv\n.\\.venv\\Scripts\\Activate.ps1\npython -m pip install --upgrade pip\npython -m pip install build twine\npython -m pip --version",
+      "notes": [
+        "macOS / Linux: python3 -m venv .venv, then source .venv/bin/activate.",
+        "Without activation on Windows, run commands with .\\.venv\\Scripts\\python.exe."
+      ],
+      "src": [
+        "https://packaging.python.org/en/latest/tutorials/packaging-projects/"
+      ],
+      "original": 26,
+      "number": 25
+    },
+    {
+      "type": "code",
+      "title": "The package entry point: a public API",
+      "lead": "The public interface in house_price/__init__.py.",
+      "code": "from decimal import Decimal\nfrom .rates import QuoteError, fetch_cny_sell_quote\n\nPING_PER_SQM = Decimal(\"0.3025\")\n\ndef twd_per_ping(cny_per_sqm, twd_per_cny):\n    return cny_per_sqm * twd_per_cny / PING_PER_SQM",
+      "notes": [
+        ".rates refers to the rates module inside the same package.",
+        "Users can call the converter with from house_price import twd_per_ping."
+      ],
+      "src": [],
+      "original": 27,
+      "number": 26
+    },
+    {
+      "type": "code",
+      "title": "pyproject.toml: describe your package",
+      "lead": "Continued on the next page. Choose an available, personal project name.",
+      "code": "[build-system]\nrequires = [\"setuptools>=64\"]\nbuild-backend = \"setuptools.build_meta\"\n\n[project]\nname = \"oo2026-house-price-yourid\"\nversion = \"0.1.0\"\ndescription = \"Convert CNY per sqm to TWD per ping\"\nrequires-python = \">=3.9\"\nreadme = \"README.md\"",
+      "notes": [
+        "[build-system] selects the tool that builds the distribution files.",
+        "[project] records the name, version, and compatibility; replace the placeholder yourid."
+      ],
+      "src": [
+        "https://packaging.python.org/en/latest/tutorials/packaging-projects/"
+      ],
+      "original": 28,
+      "number": 27
+    },
+    {
+      "type": "code",
+      "title": "Package contents and dependencies",
+      "lead": "Continue the pyproject.toml from the previous page.",
+      "code": "[tool.setuptools]\npackages = [\"house_price\"]\n\n# This package uses only the Python standard library.\n# If using requests later, add this under [project]:\n# dependencies = [\"requests>=2.32\"]",
+      "notes": [
+        "build and twine are publishing tools, not runtime dependencies of this package.",
+        "The README should cover installation, imports, units, data sources, and errors."
+      ],
+      "src": [
+        "https://packaging.python.org/en/latest/tutorials/packaging-projects/"
+      ],
+      "original": 29,
+      "number": 28
+    },
+    {
+      "type": "prose",
+      "title": "House prices: align currency and area units",
+      "lead": "Input CNY per square metre; output TWD per ping.",
+      "items": [
+        "Enter a unit price, for example CNY 30,000 per square metre.",
+        "Fetch the TWD price of one CNY and retain the source timestamp.",
+        "Convert both currency and area units, then display the price per ping.",
+        "When comparing properties, check area definitions such as gross and usable area."
+      ],
+      "src": [
+        "https://w3.land.gov.taipei/calareacnvr/",
+        "https://rate.bot.com.tw/xrt"
+      ],
+      "original": 30,
+      "number": 29
+    },
+    {
+      "type": "prose",
+      "title": "The formula: about 3.3058 m² per ping",
+      "lead": "1 m² = 0.3025 ping, so divide the price per m² by 0.3025.",
+      "items": [
+        "TWD / ping = CNY / m² × TWD / CNY ÷ 0.3025",
+        "Example: 30,250 × 4.5 ÷ 0.3025 = TWD 450,000 per ping.",
+        "In units of TWD 10,000: 450,000 ÷ 10,000 = 45 per ping.",
+        "4.5 is an example rate. The actual program fetches the latest available quote."
+      ],
+      "src": [
+        "https://w3.land.gov.taipei/calareacnvr/"
+      ],
+      "original": 31,
+      "number": 30
+    },
+    {
+      "type": "code",
+      "title": "Decimal: represent monetary values in decimal",
+      "lead": "Create Decimal from strings to preserve the decimal values you enter.",
+      "code": "from decimal import Decimal\nfrom house_price import twd_per_ping\n\nprice = Decimal(\"30250\")\nrate = Decimal(\"4.5\")\nresult = twd_per_ping(price, rate)\nprint(f\"{result:,.0f} TWD / ping\")\nprint(f\"{result / 10000:.2f} × TWD 10,000 / ping\")",
+      "notes": [
+        "The output is TWD 450,000 per ping and 45.00 units of TWD 10,000 per ping.",
+        "This verifies the calculation without making an online rate request."
+      ],
+      "src": [
+        "https://docs.python.org/3/library/decimal.html"
+      ],
+      "original": 32,
+      "number": 31
+    },
+    {
+      "type": "prose",
+      "title": "Online rates: retain the source and timestamp",
+      "lead": "The example uses Bank of Taiwan quotes mirrored by RateWise / HaoRate.",
+      "items": [
+        "For buying CNY with TWD, use the bank’s CNY spot selling rate.",
+        "Read public JSON, then retrieve the Bank of Taiwan snapshot.",
+        "Display the bank’s quote time; it may differ from the download time.",
+        "A third-party mirror can lag. An online lookup is not a tick-by-tick trading price."
+      ],
+      "src": [
+        "https://app.haotool.org/ratewise/open-data/",
+        "https://rate.bot.com.tw/xrt"
+      ],
+      "original": 33,
+      "number": 32
+    },
+    {
+      "type": "code",
+      "title": "Read JSON: turn online content into Python data",
+      "lead": "The download helper in rates.py includes hash verification.",
+      "code": "def _download(path, expected_hash=None):\n    with urlopen(DATA_ROOT + path, timeout=10) as response:\n        content = response.read()\n    if expected_hash:\n        actual = hashlib.sha256(content).hexdigest()\n        if actual != expected_hash:\n            raise QuoteError(\"Exchange-rate data checksum mismatch\")\n    return json.loads(content)",
+      "notes": [
+        "urlopen fetches bytes; json.loads converts JSON into dicts, lists, and other values.",
+        "Import json, hashlib, and urllib.request.urlopen. DATA_ROOT is on the next page."
+      ],
+      "src": [
+        "https://app.haotool.org/ratewise/open-data/"
+      ],
+      "original": 34,
+      "number": 33
+    },
+    {
+      "type": "code",
+      "title": "Follow the index to a bank snapshot",
+      "lead": "API v3 uses current, a manifest, and provider snapshots.",
+      "code": "DATA_ROOT = (\n    \"https://raw.githubusercontent.com/haotool/app/\"\n    \"data/public/rates/v3/\"\n)\npointer = _download(\"current.json\")\nref = pointer[\"manifest\"]\nmanifest = _download(ref[\"path\"], ref[\"sha256\"])\nbank = next(p for p in manifest[\"providers\"]\n            if p[\"providerId\"] == \"bot\")\nref = bank[\"snapshot\"]\nsnapshot = _download(ref[\"path\"], ref[\"sha256\"])",
+      "notes": [
+        "This excerpt shows the retrieval path; the full program also checks bank[\"checkStatus\"].",
+        "SHA-256 checks content against the index, but does not guarantee a fresh quote."
+      ],
+      "src": [
+        "https://app.haotool.org/ratewise/open-data/"
+      ],
+      "original": 35,
+      "number": 34
+    },
+    {
+      "type": "code",
+      "title": "Select the CNY quote: read the direction",
+      "lead": "Core code after selecting an available TWD → CNY row.",
+      "code": "original = row[\"sourceQuote\"]\n# Full code checks originalSellField == \"spot.sell\"\n# and subjectCurrency == \"CNY\", priceCurrency == \"TWD\"\nprice = Decimal(original[\"providerSellPrice\"])\nunits = Decimal(original[\"unitAmount\"])\ntwd_per_cny = price / units\nstamp = datetime.fromisoformat(\n    original[\"sourcePublishedAt\"].replace(\"Z\", \"+00:00\")\n)",
+      "notes": [
+        "providerSellPrice / unitAmount is the TWD price of one CNY.",
+        "The full program also validates status, positive finite values, and the timestamp’s zone."
+      ],
+      "src": [
+        "https://app.haotool.org/ratewise/open-data/"
+      ],
+      "original": 36,
+      "number": 35
+    },
+    {
+      "type": "code",
+      "title": "A Quote object: rate and timestamp together",
+      "lead": "Read a retrieved quote through its attributes.",
+      "code": "@dataclass(frozen=True)\nclass Quote:\n    twd_per_cny: Decimal\n    published_at: datetime\n\nquote = fetch_cny_sell_quote()\nprint(quote.twd_per_cny)\nprint(quote.published_at)",
+      "notes": [
+        "dataclass generates common methods; frozen=True blocks direct attribute assignment.",
+        "Type hints describe expected types. The program must still validate external data."
+      ],
+      "src": [
+        "https://docs.python.org/3/library/dataclasses.html"
+      ],
+      "original": 37,
+      "number": 36
+    },
+    {
+      "type": "code",
+      "title": "The main program: fetch, then convert",
+      "lead": "Save as quick_demo.py and run from the project root.",
+      "code": "from decimal import Decimal\nfrom house_price import fetch_cny_sell_quote, twd_per_ping\n\nprice = Decimal(\"30000\")\nquote = fetch_cny_sell_quote()\nresult = twd_per_ping(price, quote.twd_per_cny)\nprint(f\"Rate: {quote.twd_per_cny}\")\nprint(f\"Quote time: {quote.published_at}\")\nprint(f\"TWD {result:,.0f} per ping\")",
+      "notes": [
+        "The main program uses the package functions without knowing the JSON structure.",
+        "The full demo.py also provides argument input, error messages, and attribution."
+      ],
+      "src": [],
+      "original": 38,
+      "number": 37
+    },
+    {
+      "type": "code",
+      "title": "Errors: a failed lookup is not a zero rate",
+      "lead": "Report network failures, changed fields, and incomplete data explicitly.",
+      "code": "from house_price import QuoteError, fetch_cny_sell_quote\n\ntry:\n    quote = fetch_cny_sell_quote()\nexcept QuoteError as error:\n    print(\"Unable to fetch rate: \", error)\nelse:\n    print(\"Retrieved rate: \", quote.twd_per_cny)",
+      "notes": [
+        "demo.py rejects nonnumeric, nonfinite, and nonpositive house prices.",
+        "Run python demo.py 30000. Values and quote times depend on the retrieved data."
+      ],
+      "src": [],
+      "original": 39,
+      "number": 38
+    },
+    {
+      "type": "code",
+      "title": "Local verification: calculation and connection",
+      "lead": "Use an editable install in the project root while developing.",
+      "code": "# Terminal\npython -m pip install -e .\npython demo.py 30000\n\n# Python: verify conversion with fixed inputs\nfrom decimal import Decimal\nfrom house_price import twd_per_ping\nassert twd_per_ping(Decimal(\"30250\"),\n                    Decimal(\"4.5\")) == Decimal(\"450000\")",
+      "notes": [
+        "A fixed rate verifies the formula. Online checks cover currency, validity, and source time.",
+        "Editable installs reflect code changes; test the actual wheel before publishing."
+      ],
+      "src": [],
+      "original": 40,
+      "number": 39
+    },
+    {
+      "type": "code",
+      "title": "Build: create release files",
+      "lead": "Run from the project root containing pyproject.toml.",
+      "code": "python -m pip install --upgrade build twine\npython -m build --outdir dist-0.1.0\npython -m twine check dist-0.1.0/*",
+      "notes": [
+        "build calls the configured backend and writes to a new version-specific directory.",
+        "twine check validates metadata and README rendering; it does not test program behavior."
+      ],
+      "src": [
+        "https://packaging.python.org/en/latest/tutorials/packaging-projects/"
+      ],
+      "original": 41,
+      "number": 40
+    },
+    {
+      "type": "table",
+      "title": "Release files: wheel and source archive",
+      "lead": "Replace yourid with your own project name.",
+      "values": [
+        [
+          "File",
+          "Contents",
+          "Use"
+        ],
+        [
+          "…-0.1.0-py3-none-any.whl",
+          "Package and metadata",
+          "Usually installed directly by pip"
+        ],
+        [
+          "…-0.1.0.tar.gz",
+          "Source and build inputs",
+          "Can be rebuilt during installation"
+        ],
+        [
+          "README.md",
+          "Features, setup, usage",
+          "Displayed on the project page"
+        ],
+        [
+          "LICENSE",
+          "Author-selected license",
+          "Defines permitted use"
+        ]
+      ],
+      "widths": [
+        470,
+        330,
+        336
+      ],
+      "foot": "Inspect archives before uploading. Exclude tokens, .venv, and private data.",
+      "src": [
+        "https://packaging.python.org/en/latest/tutorials/packaging-projects/"
+      ],
+      "original": 42,
+      "number": 41
+    },
+    {
+      "type": "prose",
+      "title": "Accounts and tokens: two separate indexes",
+      "lead": "TestPyPI and PyPI have separate accounts, projects, and API tokens.",
+      "items": [
+        "Register on each site, verify email, save recovery codes, and configure 2FA.",
+        "Create an API token in account settings. A first project may need an account-wide token.",
+        "After project creation, use a project-scoped token and revoke unused broad tokens.",
+        "Enter tokens only when the upload tool asks; never put them in code, slides, or Git."
+      ],
+      "src": [
+        "https://packaging.python.org/en/latest/guides/using-testpypi/",
+        "https://docs.pypi.org/your-account/two-factor-authentication/",
+        "https://docs.pypi.org/publishing/publishing-to-pypi/"
+      ],
+      "original": 43,
+      "number": 42
+    },
+    {
+      "type": "code",
+      "title": "TestPyPI: upload a test release first",
+      "lead": "This publishes publicly to the test index. Use your own name and test token.",
+      "code": "python -m twine upload --repository testpypi dist-0.1.0/*\n\n# If the tool requests credentials:\n# Username: __token__\n# Password: paste TestPyPI token at the hidden prompt",
+      "notes": [
+        "After upload, follow the project link and inspect the README, version, and files.",
+        "TestPyPI does not guarantee permanent storage. Use PyPI for official releases."
+      ],
+      "src": [
+        "https://packaging.python.org/en/latest/guides/using-testpypi/"
+      ],
+      "original": 44,
+      "number": 43
+    },
+    {
+      "type": "code",
+      "title": "Reinstall: verify away from the source folder",
+      "lead": "Windows PowerShell: create a clean environment one directory above the project.",
+      "code": "cd ..\npython -m venv verify-env\n.\\verify-env\\Scripts\\Activate.ps1\npython -m pip install --no-deps `\n    --index-url https://test.pypi.org/simple/ `\n    oo2026-house-price-yourid==0.1.0\npython -c \"import house_price; print(house_price.__file__)\"",
+      "notes": [
+        "The backtick continues a PowerShell command. --no-deps is for this dependency-free example.",
+        "Use your distribution name. The printed path should be inside verify-env/site-packages."
+      ],
+      "src": [
+        "https://packaging.python.org/en/latest/guides/using-testpypi/"
+      ],
+      "original": 45,
+      "number": 44
+    },
+    {
+      "type": "code",
+      "title": "PyPI: publish the verified files",
+      "lead": "Return to the project root and the development environment with twine installed.",
+      "code": "python -m twine upload dist-0.1.0/*\n\n# Use the PyPI token, not the TestPyPI token.\n# After publishing, users install in their own venv:\npython -m pip install oo2026-house-price-yourid==0.1.0",
+      "notes": [
+        "Before upload, check name availability, the project description, and the license.",
+        "If the name changes, update the configuration, rebuild, and verify the new files again."
+      ],
+      "src": [
+        "https://packaging.python.org/en/latest/tutorials/packaging-projects/",
+        "https://packaging.python.org/en/latest/guides/using-testpypi/"
+      ],
+      "original": 46,
+      "number": 45
+    },
+    {
+      "type": "code",
+      "title": "Version updates: make every release distinct",
+      "lead": "After changing functionality, set version to 0.1.1 in pyproject.toml.",
+      "code": "python -m build --outdir dist-0.1.1\npython -m twine check dist-0.1.1/*\npython -m twine upload --repository testpypi dist-0.1.1/*\n\n# Verify in a clean environment, then publish to PyPI\npython -m twine upload dist-0.1.1/*\npython -m pip install --upgrade oo2026-house-price-yourid",
+      "notes": [
+        "PyPI cannot overwrite a published filename or reuse it after deletion.",
+        "Use a fresh output directory for each version to avoid uploading old releases."
+      ],
+      "src": [
+        "https://packaging.python.org/en/latest/tutorials/packaging-projects/"
+      ],
+      "original": 47,
+      "number": 46
+    },
+    {
+      "type": "code",
+      "title": "Multiple house prices: a list comprehension",
+      "lead": "Convert several prices at one rate, then compare their prices per ping.",
+      "code": "from decimal import Decimal\nfrom house_price import twd_per_ping\n\nprices = [Decimal(\"30250\"), Decimal(\"60500\")]\nrate = Decimal(\"4.5\")\nresults = [twd_per_ping(p, rate) for p in prices]\nprint(results[0] / 10000)\nprint(results[1] / results[0])",
+      "notes": [
+        "The first output is 45 (TWD 450,000 per ping); the second output is 2.",
+        "At a fixed exchange rate, doubling the original unit price doubles the converted price."
+      ],
+      "src": [],
+      "original": 50,
+      "number": 47
+    },
+    {
+      "type": "prose",
+      "title": "References: publishing and the house-price example",
+      "lead": "Links open the source documentation. Refer to current official service terms.",
+      "items": [
+        "Python Packaging User Guide: structure, building, and publishing.",
+        "Using TestPyPI: upload and install from the test index.",
+        "Taipei land administration area conversion; Bank of Taiwan exchange rates.",
+        "RateWise / HaoRate: API v3, data provenance, and timestamp fields."
+      ],
+      "src": [
+        "https://packaging.python.org/en/latest/tutorials/packaging-projects/",
+        "https://packaging.python.org/en/latest/guides/using-testpypi/",
+        "https://w3.land.gov.taipei/calareacnvr/",
+        "https://rate.bot.com.tw/xrt",
+        "https://app.haotool.org/ratewise/open-data/"
+      ],
+      "original": 52,
+      "number": 48
+    },
+    {
+      "type": "prose",
+      "title": "References: packages and management tools",
+      "lead": "Each topic also links to its source documentation.",
+      "items": [
+        "Official npm, RubyGems, Chocolatey, WinGet, Homebrew, and Ubuntu APT docs.",
+        "twstock and FinMind: packages for Taiwan financial data.",
+        "OpenCC, holidays, python-stdnum: text, dates, and identifier validation.",
+        "Exchange-rate source: Bank of Taiwan. Data mirror: RateWise / HaoRate."
+      ],
+      "src": [
+        "https://docs.npmjs.com/cli/v11/commands/npm-install/",
+        "https://guides.rubygems.org/rubygems-basics/",
+        "https://docs.chocolatey.org/en-us/choco/commands/install/",
+        "https://learn.microsoft.com/windows/package-manager/winget/",
+        "https://docs.brew.sh/Manpage",
+        "https://documentation.ubuntu.com/server/how-to/software/package-management/",
+        "https://pypi.org/project/twstock/",
+        "https://finmind.github.io/",
+        "https://pypi.org/project/opencc-python-reimplemented/",
+        "https://holidays.readthedocs.io/en/latest/auto_gen_docs/taiwan/",
+        "https://arthurdejong.org/python-stdnum/doc/2.0/stdnum.tw.ubn",
+        "https://app.haotool.org/ratewise/open-data/"
+      ],
+      "original": 53,
+      "number": 49
+    }
+  ],
+  "ja": [
+    {
+      "type": "cover",
+      "title": "Python モジュールと\nPyPI への公開",
+      "lead": "住宅価格の換算とパッケージ管理ツール",
+      "items": [
+        "Python コードのモジュール化・パッケージ化・公開"
+      ],
+      "src": [],
+      "number": 1
+    },
+    {
+      "type": "prose",
+      "title": "PyPI：Python パッケージの公開インデックス",
+      "lead": "Python Package Index はプロジェクト情報と配布ファイルを公開します。",
+      "items": [
+        "利用者はパッケージを検索し、説明を読み、pip でインストールします。",
+        "作者はコード、バージョン、依存関係、使い方を提供します。",
+        "プロジェクトページには README、対応 Python、公開履歴が表示されます。",
+        "導入前に名前、公式文書、ライセンス、保守状況を確認します。"
+      ],
+      "src": [
+        "https://packaging.python.org/en/latest/tutorials/packaging-projects/",
+        "https://pypi.org/"
+      ],
+      "original": 3,
+      "number": 2
+    },
+    {
+      "type": "code",
+      "title": "pip でインストールし、import で利用する",
+      "lead": "ターミナルのコマンドと Python コードは、実行する場所が異なります。",
+      "code": "# ターミナル：現在の Python 環境に導入\npython -m pip install holidays\npython -m pip show holidays\n\n# Python：パッケージを読み込んで使用\nimport holidays\ntw = holidays.country_holidays(\"TW\", years=2026)\nprint(\"2026-01-01\" in tw)",
+      "notes": [
+        "python -m pip は、その python に対応する pip を使用します。",
+        "インストール名と import 名が異なる例：python-stdnum と stdnum。"
+      ],
+      "src": [
+        "https://pip.pypa.io/en/stable/user_guide/",
+        "https://holidays.readthedocs.io/en/latest/auto_gen_docs/taiwan/"
+      ],
+      "original": 4,
+      "number": 3
+    },
+    {
+      "type": "table",
+      "title": "公開の流れ：ツールごとの役割",
+      "lead": "再利用できるコードから、インストールして共有できる配布物を作ります。",
+      "values": [
+        [
+          "段階",
+          "ツール／ファイル",
+          "得られるもの"
+        ],
+        [
+          "作成",
+          "Python、README",
+          "再利用できる関数と使用説明"
+        ],
+        [
+          "記述",
+          "pyproject.toml",
+          "名前、版、ビルド方法、要件"
+        ],
+        [
+          "ビルド",
+          "python -m build",
+          "wheel とソースアーカイブ"
+        ],
+        [
+          "確認・送信",
+          "python -m twine",
+          "TestPyPI、次に PyPI へ"
+        ],
+        [
+          "利用",
+          "python -m pip install",
+          "別の環境でも import 可能"
+        ]
+      ],
+      "widths": [
+        190,
+        400,
+        546
+      ],
+      "foot": "GitHub にはソースコード、PyPI にはインストール可能な配布物を置きます。",
+      "src": [
+        "https://packaging.python.org/en/latest/tutorials/packaging-projects/",
+        "https://packaging.python.org/en/latest/guides/using-testpypi/"
+      ],
+      "original": 5,
+      "number": 4
+    },
+    {
+      "type": "table",
+      "title": "パッケージ管理の二つのレベル",
+      "lead": "何をインストールするのかに合わせてツールを選びます。",
+      "values": [
+        [
+          "管理対象",
+          "ツール",
+          "主な用途"
+        ],
+        [
+          "Python プロジェクト",
+          "pip／PyPI",
+          "holidays などの Python パッケージ"
+        ],
+        [
+          "JavaScript プロジェクト",
+          "npm／npm registry",
+          "ライブラリと開発ツール"
+        ],
+        [
+          "Ruby プロジェクト",
+          "gem／RubyGems",
+          "Ruby ライブラリとツール"
+        ],
+        [
+          "Windows ソフトウェア",
+          "Chocolatey、WinGet",
+          "Git、エディターなどのアプリ"
+        ],
+        [
+          "macOS／Linux ツール",
+          "Homebrew",
+          "CLI ツール、macOS の GUI アプリ"
+        ],
+        [
+          "Debian／Ubuntu",
+          "APT",
+          "配布元が提供するシステムパッケージ"
+        ]
+      ],
+      "widths": [
+        290,
+        360,
+        486
+      ],
+      "foot": "例：OS のツールで Python を入れ、pip でプロジェクト用パッケージを入れます。",
+      "src": [],
+      "original": 6,
+      "number": 5
+    },
+    {
+      "type": "prose",
+      "title": "npm ①：JavaScript のパッケージ管理",
+      "lead": "npm はコマンドラインツールと公開レジストリを提供します。",
+      "items": [
+        "Node.js やフロントエンドのプロジェクトで、開発ツールの管理にも使います。",
+        "公式案内に従い、Node.js と npm をインストールします。",
+        "package.json にプロジェクト情報と依存関係を記録します。",
+        "package-lock.json に解決済みの版を記録し、npm ci で再現して導入します。"
+      ],
+      "src": [
+        "https://docs.npmjs.com/cli/v11/commands/npm-install/",
+        "https://docs.npmjs.com/downloading-and-installing-node-js-and-npm/"
+      ],
+      "original": 7,
+      "number": 6
+    },
+    {
+      "type": "code",
+      "title": "npm ②：日付ライブラリの例",
+      "lead": "新しい Node.js プロジェクトのフォルダーで実行します。",
+      "code": "node --version\nnpm --version\nnpm init -y\nnpm install dayjs\nnpm ls\n\n# 以下を demo.cjs に保存し、node demo.cjs で実行\nconst dayjs = require(\"dayjs\");\nconsole.log(dayjs(\"2026-01-01\").format(\"YYYY/MM/DD\"));",
+      "notes": [
+        "npm install は node_modules に依存パッケージを保存し、設定を更新します。",
+        "この JavaScript コードは Python の import と関数呼び出しに相当します。"
+      ],
+      "src": [
+        "https://docs.npmjs.com/cli/v11/commands/npm-install/",
+        "https://day.js.org/docs/en/installation/node-js"
+      ],
+      "original": 8,
+      "number": 7
+    },
+    {
+      "type": "prose",
+      "title": "RubyGems ①：Ruby のパッケージ環境",
+      "lead": "gem は Ruby パッケージの呼び名であり、管理コマンドの名前でもあります。",
+      "items": [
+        "RubyGems.org でパッケージの検索、版の確認、ダウンロードができます。",
+        "Ruby を導入したら gem --version で RubyGems を確認します。",
+        "gem install で導入し、Ruby の require で読み込みます。",
+        "Bundler は Gemfile に依存関係、Gemfile.lock に解決済みの版を記録します。"
+      ],
+      "src": [
+        "https://guides.rubygems.org/rubygems-basics/",
+        "https://guides.rubygems.org/installation/"
+      ],
+      "original": 9,
+      "number": 8
+    },
+    {
+      "type": "code",
+      "title": "RubyGems ②：gem の導入と読み込み",
+      "lead": "JSON ライブラリを使い、gem と require の役割を確認します。",
+      "code": "# ターミナル\ngem --version\ngem install json\ngem list json\n\n# demo.rb に保存し、ruby demo.rb で実行\nrequire \"json\"\ndata = JSON.parse('{\"price\": 30000}')\nputs data[\"price\"]",
+      "notes": [
+        "JSON.parse は JSON 文字列を Ruby のデータオブジェクトに変換します。",
+        "gem は Ruby パッケージ、Bundler はプロジェクト単位の依存バージョンを管理します。"
+      ],
+      "src": [
+        "https://guides.rubygems.org/rubygems-basics/",
+        "https://ruby-doc.org/stdlib-3.1.0/libdoc/json/rdoc/JSON.html"
+      ],
+      "original": 10,
+      "number": 9
+    },
+    {
+      "type": "prose",
+      "title": "Chocolatey ①：Windows ソフトウェア管理",
+      "lead": "正式名称は Chocolatey、コマンド名は choco です。",
+      "items": [
+        "パッケージにインストール手順を記述し、Windows の環境構築に使います。",
+        "Git などのツールを導入できます。\n一部のパッケージは導入時にスクリプトを実行します。",
+        "公式の手順で設定し、choco --version で確認します。",
+        "システムへの導入には管理者権限が必要な場合があります。配布元と内容を確認します。"
+      ],
+      "src": [
+        "https://docs.chocolatey.org/en-us/choco/commands/install/",
+        "https://docs.chocolatey.org/en-us/choco/setup/"
+      ],
+      "original": 11,
+      "number": 10
+    },
+    {
+      "type": "code",
+      "title": "Chocolatey ②：検索・導入・更新",
+      "lead": "以下は Windows PowerShell のコマンドです。",
+      "code": "choco --version\nchoco search git --exact\nchoco info git\nchoco install git\nchoco list\nchoco upgrade git\nchoco uninstall git",
+      "notes": [
+        "導入中にパッケージやスクリプトの確認が表示されたら、内容を読んで判断します。",
+        "choco install git は Git 本体を導入します。Python パッケージには pip を使います。"
+      ],
+      "src": [
+        "https://docs.chocolatey.org/en-us/choco/commands/install/"
+      ],
+      "original": 12,
+      "number": 11
+    },
+    {
+      "type": "prose",
+      "title": "WinGet ①：Windows Package Manager",
+      "lead": "Microsoft が提供する Windows アプリケーション管理ツールです。",
+      "items": [
+        "「アプリ インストーラー」App Installer が WinGet クライアントを提供します。",
+        "アプリの検索、情報表示、導入、更新、削除ができます。",
+        "パッケージ情報には ID、配布元、バージョン、インストーラーが含まれます。",
+        "検索してから --id と --exact で対象を明確に指定します。"
+      ],
+      "src": [
+        "https://learn.microsoft.com/windows/package-manager/winget/"
+      ],
+      "original": 13,
+      "number": 12
+    },
+    {
+      "type": "code",
+      "title": "WinGet ②：ID で Git をインストールする",
+      "lead": "WinGet が利用できる Windows ターミナルで実行します。",
+      "code": "winget --version\nwinget search git\nwinget show --id Git.Git --exact\nwinget install --id Git.Git --exact\nwinget list --id Git.Git --exact\nwinget upgrade --id Git.Git --exact\nwinget uninstall --id Git.Git --exact",
+      "notes": [
+        "似た名前でも配布元が異なる場合があります。ID を使って対象を特定します。",
+        "ソフトウェアによっては、ライセンスへの同意や管理者権限が必要です。"
+      ],
+      "src": [
+        "https://learn.microsoft.com/windows/package-manager/winget/",
+        "https://learn.microsoft.com/windows/package-manager/winget/install"
+      ],
+      "original": 14,
+      "number": 13
+    },
+    {
+      "type": "prose",
+      "title": "Homebrew ①：macOS と Linux のツール管理",
+      "lead": "コマンド名は brew です。",
+      "items": [
+        "Git、Python、データ処理などのコマンドラインツールを導入します。",
+        "formula が導入方法を記述し、ビルド済みの bottle を使える場合があります。",
+        "macOS の cask では、エディターなどのアプリを導入できます。",
+        "brew.sh の手順で導入し、PATH を設定後、brew --version で確認します。"
+      ],
+      "src": [
+        "https://docs.brew.sh/Manpage",
+        "https://brew.sh/"
+      ],
+      "original": 15,
+      "number": 14
+    },
+    {
+      "type": "code",
+      "title": "Homebrew ②：CLI ツールとデスクトップアプリ",
+      "lead": "通常の brew コマンドは一般ユーザーとして実行します。",
+      "code": "brew --version\nbrew search git\nbrew info git\nbrew install git\nbrew update\nbrew upgrade git\n\n# 以下の cask の例は macOS 用\nbrew install --cask visual-studio-code",
+      "notes": [
+        "brew update は Homebrew とパッケージ情報を更新します。",
+        "導入済みの Git を更新するのは brew upgrade git です。"
+      ],
+      "src": [
+        "https://docs.brew.sh/Manpage"
+      ],
+      "original": 16,
+      "number": 15
+    },
+    {
+      "type": "prose",
+      "title": "APT ①：Debian／Ubuntu のシステムパッケージ",
+      "lead": "apt は配布元を参照し、ダウンロードと依存関係の解決を行います。",
+      "items": [
+        "通常は .deb 形式で、ディストリビューションのリポジトリが管理します。",
+        "Debian、Ubuntu、対応する WSL 環境には通常 apt が付属しています。",
+        "apt update は一覧を更新し、apt upgrade は導入済みパッケージを更新します。",
+        "システム Python は OS が管理します。プロジェクトの pip パッケージは仮想環境へ。"
+      ],
+      "src": [
+        "https://documentation.ubuntu.com/server/how-to/software/package-management/"
+      ],
+      "original": 17,
+      "number": 16
+    },
+    {
+      "type": "code",
+      "title": "APT ②：Python 開発環境を準備する",
+      "lead": "以下は Ubuntu／Debian のターミナルで実行します。",
+      "code": "apt --version\nsudo apt update\napt search python3-venv\nsudo apt install python3 python3-venv python3-pip\n\npython3 -m venv .venv\nsource .venv/bin/activate\npython -m pip install holidays",
+      "notes": [
+        "sudo はシステムへのインストールに必要な権限でコマンドを実行します。",
+        ".venv を有効にしてから導入し、システム Python のパッケージを変更しないようにします。"
+      ],
+      "src": [
+        "https://documentation.ubuntu.com/server/how-to/software/package-management/",
+        "https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/"
+      ],
+      "original": 18,
+      "number": 17
+    },
+    {
+      "type": "code",
+      "title": "twstock：台湾株式の過去データ",
+      "lead": "インストール：python -m pip install twstock",
+      "code": "import twstock\n\nstock = twstock.Stock(\"2330\")\nif stock.date and stock.price:\n    print(stock.date[-1])\n    print(stock.price[-1])",
+      "notes": [
+        "stock はオブジェクトで、date と price に取得した日付と終値が保存されます。",
+        "通信が必要です。連続した大量取得を避け、空のデータや通信失敗に対応します。"
+      ],
+      "src": [
+        "https://pypi.org/project/twstock/"
+      ],
+      "original": 19,
+      "number": 18
+    },
+    {
+      "type": "code",
+      "title": "FinMind：台湾の金融データセットを取得する",
+      "lead": "インストール：python -m pip install FinMind",
+      "code": "from FinMind.data import DataLoader\n\napi = DataLoader()\ndf = api.taiwan_stock_daily(\n    stock_id=\"2330\",\n    start_date=\"2026-01-05\",\n    end_date=\"2026-01-09\"\n)\nprint(df.head())",
+      "notes": [
+        "銘柄コードと期間を渡すと、表形式の DataFrame が返ります。",
+        "権限、利用枠、ログイン要件はプランによります。token は公式文書に従って設定します。"
+      ],
+      "src": [
+        "https://finmind.github.io/"
+      ],
+      "original": 20,
+      "number": 19
+    },
+    {
+      "type": "code",
+      "title": "OpenCC：台湾向けの繁体字へ変換する",
+      "lead": "インストール：python -m pip install opencc-python-reimplemented",
+      "code": "from opencc import OpenCC\n\nconverter = OpenCC(\"s2twp\")\ntext = \"软件与数据库\"\nresult = converter.convert(text)\nprint(result)",
+      "notes": [
+        "s2twp は簡体字を繁体字に変換し、台湾で使う語彙にも置き換えます。",
+        "導入名と import 名は異なります。導入後、この変換はオフラインで実行できます。"
+      ],
+      "src": [
+        "https://pypi.org/project/opencc-python-reimplemented/"
+      ],
+      "original": 21,
+      "number": 20
+    },
+    {
+      "type": "code",
+      "title": "holidays：台湾の祝日を調べる",
+      "lead": "インストール：python -m pip install holidays",
+      "code": "import holidays\n\ntw = holidays.country_holidays(\"TW\", years=2026)\nday = \"2026-01-01\"\nprint(day in tw)\nprint(tw.get(day))",
+      "notes": [
+        "in で日付が祝日かを判定し、get で祝日名を取得します。",
+        "カレンダーに利用できます。実際の勤務日は当年の公式発表と組織の規則に従います。"
+      ],
+      "src": [
+        "https://holidays.readthedocs.io/en/latest/auto_gen_docs/taiwan/"
+      ],
+      "original": 22,
+      "number": 21
+    },
+    {
+      "type": "code",
+      "title": "python-stdnum：台湾の統一番号を検証する",
+      "lead": "インストール：python -m pip install python-stdnum",
+      "code": "from stdnum.tw import ubn\n\nprint(ubn.is_valid(\"00501503\"))\nprint(ubn.is_valid(\"12345\"))\n\n# 対応する結果\n# True\n# False",
+      "notes": [
+        "先頭の 0 を失わないように、番号は文字列として扱います。",
+        "形式とチェックサムを検証します。企業の実在や営業状況を保証するものではありません。"
+      ],
+      "src": [
+        "https://arthurdejong.org/python-stdnum/doc/2.0/stdnum.tw.ubn"
+      ],
+      "original": 23,
+      "number": 22
+    },
+    {
+      "type": "table",
+      "title": "モジュール・パッケージ・配布パッケージ",
+      "lead": "同じコードでも、扱う段階によって呼び名が異なります。",
+      "values": [
+        [
+          "用語",
+          "この例",
+          "用途"
+        ],
+        [
+          "モジュール",
+          "rates.py",
+          "関連する関数を一つの .py に集約"
+        ],
+        [
+          "import パッケージ",
+          "house_price/",
+          "__init__.py で複数モジュールを整理"
+        ],
+        [
+          "配布パッケージ",
+          "oo2026-house-price-yourid",
+          "pip で導入するプロジェクト名"
+        ],
+        [
+          "仮想環境",
+          ".venv/",
+          "独立したパッケージ環境"
+        ]
+      ],
+      "widths": [
+        260,
+        430,
+        446
+      ],
+      "foot": "yourid を自分の英数字に置き換えます。import 名は house_price のままです。",
+      "src": [
+        "https://packaging.python.org/en/latest/tutorials/packaging-projects/"
+      ],
+      "original": 24,
+      "number": 23
+    },
+    {
+      "type": "code",
+      "title": "プロジェクト構造：計算・取得・表示を分ける",
+      "lead": "house_price_demo.zip を展開し、プロジェクトのルートで操作します。",
+      "code": "house_price_demo/\n    pyproject.toml\n    README.md\n    demo.py\n    house_price/\n        __init__.py\n        rates.py",
+      "notes": [
+        "__init__.py は換算と公開入口、rates.py はオンラインの為替取得を担当します。",
+        "demo.py は入力と表示を担当します。公開前にライセンスを選び、LICENSE を追加します。"
+      ],
+      "src": [],
+      "original": 25,
+      "number": 24
+    },
+    {
+      "type": "code",
+      "title": "仮想環境：プロジェクトのパッケージを分離する",
+      "lead": "以下は Windows PowerShell。macOS／Linux の代替コマンドは下部に記載。",
+      "code": "python --version\npython -m venv .venv\n.\\.venv\\Scripts\\Activate.ps1\npython -m pip install --upgrade pip\npython -m pip install build twine\npython -m pip --version",
+      "notes": [
+        "macOS／Linux：python3 -m venv .venv の後に source .venv/bin/activate。",
+        "Windows で有効化できない場合は .\\.venv\\Scripts\\python.exe を直接使います。"
+      ],
+      "src": [
+        "https://packaging.python.org/en/latest/tutorials/packaging-projects/"
+      ],
+      "original": 26,
+      "number": 25
+    },
+    {
+      "type": "code",
+      "title": "パッケージの入口：公開 API を提供する",
+      "lead": "house_price/__init__.py の公開インターフェースです。",
+      "code": "from decimal import Decimal\nfrom .rates import QuoteError, fetch_cny_sell_quote\n\nPING_PER_SQM = Decimal(\"0.3025\")\n\ndef twd_per_ping(cny_per_sqm, twd_per_cny):\n    return cny_per_sqm * twd_per_cny / PING_PER_SQM",
+      "notes": [
+        ".rates は同じパッケージ内の rates モジュールを指します。",
+        "利用者は from house_price import twd_per_ping で換算関数を使えます。"
+      ],
+      "src": [],
+      "original": 27,
+      "number": 26
+    },
+    {
+      "type": "code",
+      "title": "pyproject.toml：パッケージの情報を記述する",
+      "lead": "次のページに続きます。未使用の自分用プロジェクト名を指定します。",
+      "code": "[build-system]\nrequires = [\"setuptools>=64\"]\nbuild-backend = \"setuptools.build_meta\"\n\n[project]\nname = \"oo2026-house-price-yourid\"\nversion = \"0.1.0\"\ndescription = \"Convert CNY per sqm to TWD per ping\"\nrequires-python = \">=3.9\"\nreadme = \"README.md\"",
+      "notes": [
+        "[build-system] は配布ファイルを生成するビルドツールを指定します。",
+        "[project] に名前、版、互換条件を記録します。yourid は置き換える仮の文字列です。"
+      ],
+      "src": [
+        "https://packaging.python.org/en/latest/tutorials/packaging-projects/"
+      ],
+      "original": 28,
+      "number": 27
+    },
+    {
+      "type": "code",
+      "title": "パッケージの内容と依存関係",
+      "lead": "前のページの pyproject.toml に続けて記述します。",
+      "code": "[tool.setuptools]\npackages = [\"house_price\"]\n\n# この例では Python 標準ライブラリのみを使用。\n# requests を使う場合は [project] に以下を追加：\n# dependencies = [\"requests>=2.32\"]",
+      "notes": [
+        "build と twine は公開用ツールであり、このパッケージの実行時依存には含めません。",
+        "README には導入、import、単位、データの出典、エラー処理を記載します。"
+      ],
+      "src": [
+        "https://packaging.python.org/en/latest/tutorials/packaging-projects/"
+      ],
+      "original": 29,
+      "number": 28
+    },
+    {
+      "type": "prose",
+      "title": "住宅価格の例：通貨と面積の単位をそろえる",
+      "lead": "入力は「人民元／平方メートル」、出力は「台湾ドル／坪」です。",
+      "items": [
+        "住宅単価を入力します。例：1 平方メートルあたり 30,000 人民元。",
+        "1 人民元に相当する台湾ドルをオンラインで取得し、出典時刻を保存します。",
+        "通貨と面積の両方を換算し、1 坪あたりの金額を表示します。",
+        "物件比較では、延べ面積・使用可能面積など、面積の定義も確認します。"
+      ],
+      "src": [
+        "https://w3.land.gov.taipei/calareacnvr/",
+        "https://rate.bot.com.tw/xrt"
+      ],
+      "original": 30,
+      "number": 29
+    },
+    {
+      "type": "prose",
+      "title": "換算式：1 坪は約 3.3058 平方メートル",
+      "lead": "1 m² = 0.3025 坪なので、m² あたりの単価を 0.3025 で割ります。",
+      "items": [
+        "台湾ドル／坪 = 人民元／m² × 台湾ドル／人民元 ÷ 0.3025",
+        "計算例：30,250 × 4.5 ÷ 0.3025 = 450,000 台湾ドル／坪。",
+        "万台湾ドル／坪では、450,000 ÷ 10,000 = 45 となります。",
+        "4.5 は例示用の為替レートです。\n実際のプログラムは最新の取得可能な値を参照します。"
+      ],
+      "src": [
+        "https://w3.land.gov.taipei/calareacnvr/"
+      ],
+      "original": 31,
+      "number": 30
+    },
+    {
+      "type": "code",
+      "title": "Decimal：金額を十進数で扱う",
+      "lead": "文字列から Decimal を作ると、入力した十進数の値を保持できます。",
+      "code": "from decimal import Decimal\nfrom house_price import twd_per_ping\n\nprice = Decimal(\"30250\")\nrate = Decimal(\"4.5\")\nresult = twd_per_ping(price, rate)\nprint(f\"{result:,.0f} 台湾ドル／坪\")\nprint(f\"{result / 10000:.2f} 万台湾ドル／坪\")",
+      "notes": [
+        "出力は 450,000 台湾ドル／坪、および 45.00 万台湾ドル／坪です。",
+        "ここでは計算を確認するだけで、為替のオンライン取得は行いません。"
+      ],
+      "src": [
+        "https://docs.python.org/3/library/decimal.html"
+      ],
+      "original": 32,
+      "number": 31
+    },
+    {
+      "type": "prose",
+      "title": "オンライン為替：出典と時刻を残す",
+      "lead": "RateWise／HaoRate が同期した台湾銀行の公示データを利用します。",
+      "items": [
+        "台湾ドルで人民元を買う場合として、人民元の即期売りレートを使います。",
+        "公開 JSON を読み、台湾銀行のデータスナップショットを取得します。",
+        "銀行の公示時刻を表示します。ダウンロード時刻とは異なる場合があります。",
+        "第三者の同期には遅延があり得ます。オンライン取得は取引ごとのリアルタイム値ではありません。"
+      ],
+      "src": [
+        "https://app.haotool.org/ratewise/open-data/",
+        "https://rate.bot.com.tw/xrt"
+      ],
+      "original": 33,
+      "number": 32
+    },
+    {
+      "type": "code",
+      "title": "JSON の読み込み：ネット上の内容をデータにする",
+      "lead": "rates.py の取得関数にはハッシュ値の検証も含まれています。",
+      "code": "def _download(path, expected_hash=None):\n    with urlopen(DATA_ROOT + path, timeout=10) as response:\n        content = response.read()\n    if expected_hash:\n        actual = hashlib.sha256(content).hexdigest()\n        if actual != expected_hash:\n            raise QuoteError(\"為替データのチェックサムが一致しません\")\n    return json.loads(content)",
+      "notes": [
+        "urlopen で内容を取得し、json.loads で dict や list などに変換します。",
+        "json、hashlib、urllib.request.urlopen の import が必要です。DATA_ROOT は次ページ。"
+      ],
+      "src": [
+        "https://app.haotool.org/ratewise/open-data/"
+      ],
+      "original": 34,
+      "number": 33
+    },
+    {
+      "type": "code",
+      "title": "インデックスから台湾銀行のスナップショットへ",
+      "lead": "API v3 は current、manifest、provider snapshot を使います。",
+      "code": "DATA_ROOT = (\n    \"https://raw.githubusercontent.com/haotool/app/\"\n    \"data/public/rates/v3/\"\n)\npointer = _download(\"current.json\")\nref = pointer[\"manifest\"]\nmanifest = _download(ref[\"path\"], ref[\"sha256\"])\nbank = next(p for p in manifest[\"providers\"]\n            if p[\"providerId\"] == \"bot\")\nref = bank[\"snapshot\"]\nsnapshot = _download(ref[\"path\"], ref[\"sha256\"])",
+      "notes": [
+        "ここでは取得経路を示しています。完全版では bank[\"checkStatus\"] も確認します。",
+        "SHA-256 は内容が索引と一致するかを検証しますが、為替の鮮度は保証しません。"
+      ],
+      "src": [
+        "https://app.haotool.org/ratewise/open-data/"
+      ],
+      "original": 35,
+      "number": 34
+    },
+    {
+      "type": "code",
+      "title": "人民元レートの選択：通貨の方向を読む",
+      "lead": "利用可能な TWD → CNY の行を選択した後の中心部分です。",
+      "code": "original = row[\"sourceQuote\"]\n# 完全版では originalSellField == \"spot.sell\" を確認\n# subjectCurrency == \"CNY\"、priceCurrency == \"TWD\" も確認\nprice = Decimal(original[\"providerSellPrice\"])\nunits = Decimal(original[\"unitAmount\"])\ntwd_per_cny = price / units\nstamp = datetime.fromisoformat(\n    original[\"sourcePublishedAt\"].replace(\"Z\", \"+00:00\")\n)",
+      "notes": [
+        "providerSellPrice／unitAmount が、1 人民元あたりの台湾ドル価格です。",
+        "完全版では、状態、正の有限値、時刻のタイムゾーンも確認します。"
+      ],
+      "src": [
+        "https://app.haotool.org/ratewise/open-data/"
+      ],
+      "original": 36,
+      "number": 35
+    },
+    {
+      "type": "code",
+      "title": "Quote オブジェクト：レートと時刻をまとめる",
+      "lead": "取得した為替情報を属性から読み取ります。",
+      "code": "@dataclass(frozen=True)\nclass Quote:\n    twd_per_cny: Decimal\n    published_at: datetime\n\nquote = fetch_cny_sell_quote()\nprint(quote.twd_per_cny)\nprint(quote.published_at)",
+      "notes": [
+        "dataclass は基本メソッドを生成し、frozen=True は属性への直接代入を防ぎます。",
+        "型ヒントは想定する型を示します。外部データの検証は別途必要です。"
+      ],
+      "src": [
+        "https://docs.python.org/3/library/dataclasses.html"
+      ],
+      "original": 37,
+      "number": 36
+    },
+    {
+      "type": "code",
+      "title": "メインプログラム：取得と換算を組み合わせる",
+      "lead": "quick_demo.py として保存し、プロジェクトのルートで実行します。",
+      "code": "from decimal import Decimal\nfrom house_price import fetch_cny_sell_quote, twd_per_ping\n\nprice = Decimal(\"30000\")\nquote = fetch_cny_sell_quote()\nresult = twd_per_ping(price, quote.twd_per_cny)\nprint(f\"為替レート：{quote.twd_per_cny}\")\nprint(f\"公示時刻：{quote.published_at}\")\nprint(f\"1 坪あたり {result:,.0f} 台湾ドル\")",
+      "notes": [
+        "メイン側は JSON の内部構造を知らずに、公開された関数を利用できます。",
+        "完全版の demo.py には引数入力、エラー表示、出典表示も含まれます。"
+      ],
+      "src": [],
+      "original": 38,
+      "number": 37
+    },
+    {
+      "type": "code",
+      "title": "エラー処理：取得失敗をレート 0 にしない",
+      "lead": "通信失敗、項目変更、データ不足を明確に報告します。",
+      "code": "from house_price import QuoteError, fetch_cny_sell_quote\n\ntry:\n    quote = fetch_cny_sell_quote()\nexcept QuoteError as error:\n    print(\"為替取得エラー：\", error)\nelse:\n    print(\"取得したレート：\", quote.twd_per_cny)",
+      "notes": [
+        "demo.py は数値でない値、有限でない値、0 以下の住宅単価を拒否します。",
+        "実行：python demo.py 30000。値と公示時刻は取得したデータによって変わります。"
+      ],
+      "src": [],
+      "original": 39,
+      "number": 38
+    },
+    {
+      "type": "code",
+      "title": "ローカル検証：計算と通信を個別に確認する",
+      "lead": "開発中はルートで editable install を行い、修正を反映させます。",
+      "code": "# ターミナル\npython -m pip install -e .\npython demo.py 30000\n\n# Python：固定の入力で換算を検証\nfrom decimal import Decimal\nfrom house_price import twd_per_ping\nassert twd_per_ping(Decimal(\"30250\"),\n                    Decimal(\"4.5\")) == Decimal(\"450000\")",
+      "notes": [
+        "固定レートで計算を検証し、通信時は通貨、値の妥当性、出典時刻を確認します。",
+        "editable install では修正が反映されます。公開前には実際の wheel もテストします。"
+      ],
+      "src": [],
+      "original": 40,
+      "number": 39
+    },
+    {
+      "type": "code",
+      "title": "ビルド：公開できるファイルを作る",
+      "lead": "pyproject.toml があるプロジェクトのルートで実行します。",
+      "code": "python -m pip install --upgrade build twine\npython -m build --outdir dist-0.1.0\npython -m twine check dist-0.1.0/*",
+      "notes": [
+        "build は設定されたバックエンドを呼び、新しい版用のフォルダーに出力します。",
+        "twine check はメタデータや README を検査します。機能テストの代わりにはなりません。"
+      ],
+      "src": [
+        "https://packaging.python.org/en/latest/tutorials/packaging-projects/"
+      ],
+      "original": 41,
+      "number": 40
+    },
+    {
+      "type": "table",
+      "title": "配布ファイル：wheel とソースアーカイブ",
+      "lead": "yourid を自分のプロジェクト名に置き換えます。",
+      "values": [
+        [
+          "ファイル",
+          "内容",
+          "用途"
+        ],
+        [
+          "…-0.1.0-py3-none-any.whl",
+          "パッケージとメタデータ",
+          "通常 pip が直接導入"
+        ],
+        [
+          "…-0.1.0.tar.gz",
+          "ソースとビルド用データ",
+          "導入時に再ビルド可能"
+        ],
+        [
+          "README.md",
+          "機能・導入・使用方法",
+          "プロジェクトページに表示"
+        ],
+        [
+          "LICENSE",
+          "作者が選んだライセンス",
+          "利用条件を明示"
+        ]
+      ],
+      "widths": [
+        470,
+        330,
+        336
+      ],
+      "foot": "送信前に中身を確認し、token、.venv、個人データを含めないようにします。",
+      "src": [
+        "https://packaging.python.org/en/latest/tutorials/packaging-projects/"
+      ],
+      "original": 42,
+      "number": 41
+    },
+    {
+      "type": "prose",
+      "title": "アカウントと token：二つのサイトで別々に準備",
+      "lead": "TestPyPI と PyPI のアカウント、プロジェクト、API token は独立しています。",
+      "items": [
+        "各サイトに登録し、メールを検証し、復旧コードを保存して二要素認証を設定します。",
+        "設定画面で API token を作成します。\n初回はアカウント全体の権限が必要な場合があります。",
+        "作成後はプロジェクト限定 token に切り替え、不要な広い権限の token を失効させます。",
+        "token は送信ツールが要求したときだけ入力し、コード、スライド、Git には保存しません。"
+      ],
+      "src": [
+        "https://packaging.python.org/en/latest/guides/using-testpypi/",
+        "https://docs.pypi.org/your-account/two-factor-authentication/",
+        "https://docs.pypi.org/publishing/publishing-to-pypi/"
+      ],
+      "original": 43,
+      "number": 42
+    },
+    {
+      "type": "code",
+      "title": "TestPyPI：まずテスト版を公開する",
+      "lead": "テストサイトに一般公開されます。自分の名前と TestPyPI の token を使います。",
+      "code": "python -m twine upload --repository testpypi dist-0.1.0/*\n\n# ツールが認証情報を要求した場合：\n# Username: __token__\n# Password: 非表示の入力欄に TestPyPI token を貼り付け",
+      "notes": [
+        "送信後に表示されたリンクを開き、README、バージョン、配布ファイルを確認します。",
+        "TestPyPI は永続保存を保証しません。正式な配布には PyPI を使います。"
+      ],
+      "src": [
+        "https://packaging.python.org/en/latest/guides/using-testpypi/"
+      ],
+      "original": 44,
+      "number": 43
+    },
+    {
+      "type": "code",
+      "title": "再インストール：ソースフォルダーの外で検証",
+      "lead": "Windows PowerShell で、プロジェクトの一つ上に新しい環境を作ります。",
+      "code": "cd ..\npython -m venv verify-env\n.\\verify-env\\Scripts\\Activate.ps1\npython -m pip install --no-deps `\n    --index-url https://test.pypi.org/simple/ `\n    oo2026-house-price-yourid==0.1.0\npython -c \"import house_price; print(house_price.__file__)\"",
+      "notes": [
+        "バッククォートは PowerShell の行継続です。依存なしの例なので --no-deps を使います。",
+        "自分の配布名を使います。表示パスが verify-env の site-packages 内か確認します。"
+      ],
+      "src": [
+        "https://packaging.python.org/en/latest/guides/using-testpypi/"
+      ],
+      "original": 45,
+      "number": 44
+    },
+    {
+      "type": "code",
+      "title": "正式な PyPI：検証済みの同じファイルを公開",
+      "lead": "ルートに戻り、twine を入れた開発環境を使用します。",
+      "code": "python -m twine upload dist-0.1.0/*\n\n# TestPyPI ではなく PyPI の token を使用。\n# 公開後は利用者の仮想環境にインストール：\npython -m pip install oo2026-house-price-yourid==0.1.0",
+      "notes": [
+        "公開前に名前の空き状況、プロジェクト説明、ライセンスを確認します。",
+        "名前を変更する場合は設定を修正し、再ビルドした配布物をもう一度検証します。"
+      ],
+      "src": [
+        "https://packaging.python.org/en/latest/tutorials/packaging-projects/",
+        "https://packaging.python.org/en/latest/guides/using-testpypi/"
+      ],
+      "original": 46,
+      "number": 45
+    },
+    {
+      "type": "code",
+      "title": "バージョン更新：公開する版を明確にする",
+      "lead": "機能を変更したら、pyproject.toml の version を 0.1.1 にします。",
+      "code": "python -m build --outdir dist-0.1.1\npython -m twine check dist-0.1.1/*\npython -m twine upload --repository testpypi dist-0.1.1/*\n\n# 新しい環境で検証後、正式な PyPI へ公開\npython -m twine upload dist-0.1.1/*\npython -m pip install --upgrade oo2026-house-price-yourid",
+      "notes": [
+        "PyPI では公開済みのファイル名を上書きできず、削除後も再使用できません。",
+        "版ごとに新しい出力先を使い、古い配布物の誤送信を防ぎます。"
+      ],
+      "src": [
+        "https://packaging.python.org/en/latest/tutorials/packaging-projects/"
+      ],
+      "original": 47,
+      "number": 46
+    },
+    {
+      "type": "code",
+      "title": "複数の住宅価格：リスト内包表記",
+      "lead": "同じ為替で複数の価格を換算し、1 坪あたりの単価を比較します。",
+      "code": "from decimal import Decimal\nfrom house_price import twd_per_ping\n\nprices = [Decimal(\"30250\"), Decimal(\"60500\")]\nrate = Decimal(\"4.5\")\nresults = [twd_per_ping(p, rate) for p in prices]\nprint(results[0] / 10000)\nprint(results[1] / results[0])",
+      "notes": [
+        "最初の出力は 45（45 万台湾ドル／坪）、二つ目の出力は 2 です。",
+        "為替が一定なら、元の単価が 2 倍になると、換算後の単価も 2 倍になります。"
+      ],
+      "src": [],
+      "original": 50,
+      "number": 47
+    },
+    {
+      "type": "prose",
+      "title": "参考資料：Python の公開と住宅価格の例",
+      "lead": "リンクから出典を開けます。操作や利用条件は最新の公式文書を参照してください。",
+      "items": [
+        "Python Packaging User Guide：構造、ビルド、公開。",
+        "Using TestPyPI：テストサイトへの送信とインストール。",
+        "台北市地政局の面積換算、台湾銀行の公示為替。",
+        "RateWise／HaoRate：API v3、データの出典、時刻の項目。"
+      ],
+      "src": [
+        "https://packaging.python.org/en/latest/tutorials/packaging-projects/",
+        "https://packaging.python.org/en/latest/guides/using-testpypi/",
+        "https://w3.land.gov.taipei/calareacnvr/",
+        "https://rate.bot.com.tw/xrt",
+        "https://app.haotool.org/ratewise/open-data/"
+      ],
+      "original": 52,
+      "number": 48
+    },
+    {
+      "type": "prose",
+      "title": "参考資料：パッケージと管理ツール",
+      "lead": "各トピックの出典リンクからも文書を参照できます。",
+      "items": [
+        "npm、RubyGems、Chocolatey、WinGet、Homebrew、Ubuntu APT の公式文書。",
+        "twstock と FinMind：台湾の金融データ用パッケージ。",
+        "OpenCC、holidays、python-stdnum：文字、日付、番号の検証。",
+        "為替の出典：台湾銀行。データの同期・整理：RateWise／HaoRate。"
+      ],
+      "src": [
+        "https://docs.npmjs.com/cli/v11/commands/npm-install/",
+        "https://guides.rubygems.org/rubygems-basics/",
+        "https://docs.chocolatey.org/en-us/choco/commands/install/",
+        "https://learn.microsoft.com/windows/package-manager/winget/",
+        "https://docs.brew.sh/Manpage",
+        "https://documentation.ubuntu.com/server/how-to/software/package-management/",
+        "https://pypi.org/project/twstock/",
+        "https://finmind.github.io/",
+        "https://pypi.org/project/opencc-python-reimplemented/",
+        "https://holidays.readthedocs.io/en/latest/auto_gen_docs/taiwan/",
+        "https://arthurdejong.org/python-stdnum/doc/2.0/stdnum.tw.ubn",
+        "https://app.haotool.org/ratewise/open-data/"
+      ],
+      "original": 53,
+      "number": 49
+    }
+  ]
+}
