@@ -35,7 +35,7 @@ class Page(HTMLParser):
 
 pages = {('/'+str(file.relative_to(OUT)).replace('\\','/').removesuffix('index.html')):Page(file) for file in OUT.rglob('index.html')}
 lessons=json.loads((ROOT/"content/lessons.json").read_text(encoding="utf-8"))
-units=[1,2,3,4,5,6,7,8,"gui","django","pygame","memory","pypi"]
+units=[1,2,3,4,5,6,7,8,"gui","django","pygame","memory","pypi","django-case"]
 for locale, prefix, html_lang in [('zh','','zh-Hant'),('en','/en','en'),('ja','/ja','ja')]:
     home=pages[prefix+'/']
     assert home.lang == html_lang
@@ -104,7 +104,7 @@ for locale, prefix, html_lang in [('zh','','zh-Hant'),('en','/en','en'),('ja','/
     html=(OUT/route.lstrip('/')/'index.html').read_text(encoding='utf-8')
     assert 'rel="canonical" href="https://minhuangyuntech.github.io'+BASE+route+'"' in html
 
-manifest=[source for name in ['source-manifest.json','additional-source-manifest.json','django-source-manifest.json','pygame-source-manifest.json','memory-source-manifest.json','week8-source-manifest.json','week7-source-manifest.json','pypi-source-manifest.json'] for source in json.loads((ROOT/'content'/name).read_text(encoding='utf-8'))]
+manifest=[source for name in ['source-manifest.json','additional-source-manifest.json','django-source-manifest.json','pygame-source-manifest.json','memory-source-manifest.json','week8-source-manifest.json','week7-source-manifest.json','pypi-source-manifest.json','django-case-source-manifest.json'] for source in json.loads((ROOT/'content'/name).read_text(encoding='utf-8'))]
 for source in manifest:
     file=ROOT/'public/materials'/source['download']
     assert hashlib.sha256(file.read_bytes()).hexdigest()==source['sha256'],source['source']
@@ -140,7 +140,7 @@ for source_key,deck in additional.items():
             ast.parse(code)
             codes+=1
 for lang in ['zh','en','ja']:
-    for unit in [5,6,8,'gui','django','pygame','memory','pypi']:
+    for unit in [5,6,8,'gui','django','pygame','memory','pypi','django-case']:
         lesson=lessons[f'{lang}-{unit}']
         route=('' if lang=='zh' else '/'+lang)+(f'/{unit}/' if isinstance(unit,str) else f'/week/{unit}/')
         for name in [lesson['download'],lesson['examples']]:assert f'{BASE}/materials/{name}' in pages[route].links

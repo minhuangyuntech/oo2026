@@ -1,0 +1,26 @@
+[
+  {
+    "week": "django-case",
+    "language": "zh",
+    "source": "django-case-zh.pptx",
+    "download": "django-case-zh.pptx",
+    "slides": 127,
+    "sha256": "1015759fcfb108848c18995857579325bc4deda74f56b6f60e4450973004e24f"
+  },
+  {
+    "week": "django-case",
+    "language": "en",
+    "source": "django-case-en.pptx",
+    "download": "django-case-en.pptx",
+    "slides": 127,
+    "sha256": "66994b0225dca049481c38bb3b9192fbbfb9f17c189afe5ede54a3c5e356ca3b"
+  },
+  {
+    "week": "django-case",
+    "language": "ja",
+    "source": "django-case-ja.pptx",
+    "download": "django-case-ja.pptx",
+    "slides": 127,
+    "sha256": "fc6649d1c1f2efb6cef4618178f1c93ea9dc13c1491a73fcd7fb4d2e61155e6d"
+  }
+]

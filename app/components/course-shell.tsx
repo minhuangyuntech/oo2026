@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { basePath, coursePath, languageNames, locales, ui, modernWeeks, unitInfo, weekLabel, guiInfo, djangoInfo, pygameInfo, memoryInfo, pypiInfo, type UnitId, type Language } from "../data";
+import { basePath, coursePath, languageNames, locales, ui, modernWeeks, unitInfo, weekLabel, guiInfo, djangoInfo, pygameInfo, memoryInfo, pypiInfo, djangoCaseInfo, type UnitId, type Language } from "../data";
 
 export default function CourseShell({lang,week,children}:{lang:Language;week?:UnitId;children:React.ReactNode}) {
   const t=ui[lang];
@@ -24,6 +24,7 @@ export default function CourseShell({lang,week,children}:{lang:Language;week?:Un
         {modernWeeks.map(unit=>{const item=unitInfo(lang,unit);return <Link className={`nav-week ${week===unit?"active":""}`} key={item.title} href={coursePath(lang,unit)} aria-current={week===unit?"page":undefined}><span className="nav-number">{String(unit).padStart(2,"0")}</span><span><small>{item.tag}</small><b>{item.title}</b></span>{week===unit&&<i aria-hidden="true"/>}</Link>;})}
         <Link className={`nav-week ${week==="gui"?"active":""}`} href={coursePath(lang,"gui")} aria-current={week==="gui"?"page":undefined}><span className="nav-number">GUI</span><span><small>{guiInfo[lang].tag}</small><b>{guiInfo[lang].title}</b></span></Link>
         <Link className={`nav-week ${week==="django"?"active":""}`} href={coursePath(lang,"django")} aria-current={week==="django"?"page":undefined}><span className="nav-number">WEB</span><span><small>{djangoInfo[lang].tag}</small><b>{djangoInfo[lang].title}</b></span></Link>
+        <Link className={`nav-week ${week==="django-case"?"active":""}`} href={coursePath(lang,"django-case")} aria-current={week==="django-case"?"page":undefined}><span className="nav-number">CASE</span><span><small>{djangoCaseInfo[lang].tag}</small><b>{djangoCaseInfo[lang].title}</b></span></Link>
         <Link className={`nav-week ${week==="pygame"?"active":""}`} href={coursePath(lang,"pygame")} aria-current={week==="pygame"?"page":undefined}><span className="nav-number">OOP</span><span><small>{pygameInfo[lang].tag}</small><b>{pygameInfo[lang].title}</b></span></Link>
         <Link className={`nav-week ${week==="memory"?"active":""}`} href={coursePath(lang,"memory")} aria-current={week==="memory"?"page":undefined}><span className="nav-number">PAIR</span><span><small>{memoryInfo[lang].tag}</small><b>{memoryInfo[lang].title}</b></span></Link>
         <Link className={`nav-week ${week==="pypi"?"active":""}`} href={coursePath(lang,"pypi")} aria-current={week==="pypi"?"page":undefined}><span className="nav-number">PyPI</span><span><small>{pypiInfo[lang].tag}</small><b>{pypiInfo[lang].title}</b></span></Link>

@@ -50,6 +50,7 @@ for lang in ['en','ja']:
         slide['body'] = [({'type':'table','rows':[row.split(' | ') for row in b[1:].split('\n')]} if b.startswith('|') else {'type':'text','text':b}) for b in t['body']]
     lessons[lang+'-4'] = {'source':SOURCE['zh-4']['file'], 'slides':slides}
 
+from sync_django_case import sync_django_case
 from sync_pypi import sync_pypi
 from sync_week7 import sync_week7
 from sync_week8 import sync_week8
@@ -64,6 +65,7 @@ sync_memory(lessons, Path(sys.argv[1]) if len(sys.argv)>1 else None)
 sync_week7(lessons, Path(sys.argv[1]) if len(sys.argv)>1 else None)
 sync_week8(lessons, Path(sys.argv[1]) if len(sys.argv)>1 else None)
 sync_pypi(lessons)
+sync_django_case(lessons)
 (ROOT/'content/lessons.json').write_text(json.dumps(lessons,ensure_ascii=False,separators=(',',':')),encoding='utf-8')
 if len(sys.argv)>1:
     folder = Path(sys.argv[1])
