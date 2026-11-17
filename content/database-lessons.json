@@ -1,0 +1,3677 @@
+{
+  "zh": {
+    "source": "用 Python 直接存取 SQLite 與 MongoDB",
+    "download": "databases-zh.pptx",
+    "examples": "database-lab-zh.zip",
+    "sourceLanguage": "zh",
+    "slides": [
+      {
+        "number": 1,
+        "title": "用 Python 直接存取 SQLite 與 MongoDB",
+        "body": [
+          {
+            "type": "text",
+            "text": "Python 程式設計　／　資料庫實作"
+          },
+          {
+            "type": "text",
+            "text": "把三筆讀書紀錄寫入資料庫，查出本週讀得最久的一本書。"
+          },
+          {
+            "type": "text",
+            "text": "sqlite3   /   PyMongo"
+          }
+        ]
+      },
+      {
+        "number": 2,
+        "title": "關掉 Python 之後，讀書紀錄去哪裡了？",
+        "body": [
+          {
+            "type": "heading",
+            "text": "資料庫（database）"
+          },
+          {
+            "type": "text",
+            "text": "有組織地保存資料，讓人或程式能再次查詢、增修。\n這個例子保存的是「哪次閱讀、哪本書、讀了幾分鐘」。"
+          },
+          {
+            "type": "heading",
+            "text": "資料庫管理系統（DBMS）"
+          },
+          {
+            "type": "text",
+            "text": "負責讀寫資料、執行查詢與檢查規則的軟體。\nSQLite 的引擎在程式裡執行；MongoDB 則由服務回應請求。"
+          },
+          {
+            "type": "heading",
+            "text": "Python 在哪裡？"
+          },
+          {
+            "type": "text",
+            "text": "Python 決定要做什麼，再透過 sqlite3 或 PyMongo 送出操作。\n學生關掉程式後，已成功存下的資料仍可重新開啟。"
+          }
+        ],
+        "intro": "在程式裡建立一個 list，可以算出今天讀了幾分鐘。若明天還要接著記，就要把資料存下來。"
+      },
+      {
+        "number": 3,
+        "title": "四種日常操作合稱 CRUD",
+        "body": [
+          {
+            "type": "table",
+            "rows": [
+              [
+                "操作",
+                "使用者需求",
+                "R01 的狀態"
+              ],
+              [
+                "Create　新增",
+                "登記《海邊散步》25 分鐘",
+                "從無到有"
+              ],
+              [
+                "Read　讀取",
+                "查詢 R01 的書名與閱讀時間",
+                "仍為 25 分鐘"
+              ],
+              [
+                "Update　修改",
+                "補登漏記的 10 分鐘",
+                "25 變成 35"
+              ],
+              [
+                "Delete　刪除",
+                "移除這次誤建的紀錄",
+                "依 R01 查詢時找不到"
+              ]
+            ]
+          },
+          {
+            "type": "text",
+            "text": "這裡的 Create 指新增一筆紀錄。SQL 的 CREATE TABLE 則是在定義一張資料表。"
+          }
+        ],
+        "intro": "以讀書紀錄 R01 為例。編號指向同一次閱讀，書名和分鐘數是這次閱讀的內容。"
+      },
+      {
+        "number": 4,
+        "title": "資料庫還要處理哪些問題？",
+        "body": [
+          {
+            "type": "heading",
+            "text": "查得快：索引"
+          },
+          {
+            "type": "text",
+            "text": "像依編號編好的目錄，索引可減少查找時要檢查的資料。\n新增或修改紀錄時，相關索引也需要更新。"
+          },
+          {
+            "type": "heading",
+            "text": "存得對：約束"
+          },
+          {
+            "type": "text",
+            "text": "編號重複、分鐘數為負，應在寫入時就發現。\n主鍵、條件限制或文件驗證能把這些規則交給資料庫檢查。"
+          },
+          {
+            "type": "heading",
+            "text": "多人改：併行控制"
+          },
+          {
+            "type": "text",
+            "text": "兩人都讀到 25，再各自寫回計算結果，可能覆蓋彼此的更動。\n請資料庫直接將現值加 10，可避免這種先讀後寫的競爭。"
+          }
+        ],
+        "intro": "當紀錄從三筆增加到三萬筆，又開放兩個人同時編輯，就會遇到查找、規則與更新衝突。"
+      },
+      {
+        "number": 5,
+        "title": "一本書可以對應很多次閱讀",
+        "body": [
+          {
+            "type": "table",
+            "rows": [
+              [
+                "資料表",
+                "主鍵（每列唯一）",
+                "欄位與範例"
+              ],
+              [
+                "books　書籍",
+                "book_id = B01",
+                "title = 海邊散步"
+              ],
+              [
+                "readings　閱讀",
+                "code = R01",
+                "book_id = B01，minutes = 25"
+              ],
+              [
+                "readings　閱讀",
+                "code = R04",
+                "book_id = B01，minutes = 30"
+              ]
+            ]
+          },
+          {
+            "type": "text",
+            "text": "外鍵 readings.book_id 指向 books.book_id。SQLite 連線可執行 PRAGMA foreign_keys = ON 啟用外鍵檢查。"
+          }
+        ],
+        "intro": "關聯式資料庫把資料存成表：每列是一筆紀錄，每欄是一種屬性。這裡用書籍編號連起兩張表。"
+      },
+      {
+        "number": 6,
+        "title": "JOIN 如何從兩張表找回書名？",
+        "body": [
+          {
+            "type": "text",
+            "text": "ON 以共同的書籍編號配對，R01 與 R04 都配到《海邊散步》。\nGROUP BY 把同一本書的列歸組，SUM 加總 25 與 30，結果是《海邊散步》55 分鐘。"
+          }
+        ],
+        "intro": "問題是「B01 這本書總共讀了多久？」以下 SQL 對應上一頁的兩表範例。",
+        "code": "SELECT b.title, SUM(r.minutes) AS total\nFROM books AS b\nJOIN readings AS r ON r.book_id = b.book_id\nWHERE b.book_id = 'B01'\nGROUP BY b.book_id, b.title;",
+        "codeLanguage": "sql"
+      },
+      {
+        "number": 7,
+        "title": "NoSQL 是一類資料庫，各有不同模型",
+        "body": [
+          {
+            "type": "heading",
+            "text": "資料怎麼放？"
+          },
+          {
+            "type": "text",
+            "text": "一筆資訊可以是一份文件、一組鍵與值、一組分區內的列，\n也可以是圖中的節點與關係。MongoDB 採用文件模型。"
+          },
+          {
+            "type": "heading",
+            "text": "通常怎麼查？"
+          },
+          {
+            "type": "text",
+            "text": "例如購物車憑顧客編號整份取回；交友網站則沿著「認識」\n這條關係找朋友的朋友。兩個問題適合不同的資料組織方式。"
+          },
+          {
+            "type": "heading",
+            "text": "有哪些取捨？"
+          },
+          {
+            "type": "text",
+            "text": "資料如何驗證、可以跨幾筆一起更新，以及能否跨機器分割，\n都要看產品與部署設定。選型時先寫出實際要回答的問題。"
+          }
+        ],
+        "intro": "NoSQL 常解作「Not Only SQL」，泛指以非關聯式模型組織資料的系統。不同模型擅長的查詢也不同。"
+      },
+      {
+        "number": 8,
+        "title": "四種常見模型，各適合哪種查詢？",
+        "body": [
+          {
+            "type": "table",
+            "rows": [
+              [
+                "模型與產品例子",
+                "如何組織",
+                "具體用途"
+              ],
+              [
+                "鍵值型　Redis",
+                "用唯一的鍵取回一個值",
+                "依工作階段代號取回登入狀態"
+              ],
+              [
+                "文件型　MongoDB",
+                "文件含欄位、陣列或子文件",
+                "讀取一篇心得及其標籤"
+              ],
+              [
+                "寬欄型　Cassandra",
+                "按分區鍵組織列，區內可再排序",
+                "依裝置與日期分區查事件紀錄"
+              ],
+              [
+                "圖形　Neo4j",
+                "把對象存成節點，關係存成邊",
+                "沿兩層朋友關係尋找推薦者"
+              ]
+            ]
+          }
+        ],
+        "intro": "同樣是校園閱讀平台，登入狀態、讀書心得、裝置事件與推薦關係有不同的查找方式。"
+      },
+      {
+        "number": 9,
+        "title": "一份閱讀文件可以包含哪些資料？",
+        "body": [
+          {
+            "type": "text",
+            "text": "book 是內嵌文件，tags 是陣列。讀到 R01 就能一起取得書名與兩個標籤。\n若許多紀錄都複製同一本書的名稱，更正書名時就要決定哪些文件也要更新。"
+          }
+        ],
+        "intro": "假設閱讀頁面常一起顯示書名、閱讀時間與標籤。以下用 Python 字典表示準備寫入的文件。",
+        "code": "reading = {\n    \"_id\": \"R01\",\n    \"book\": {\"id\": \"B01\", \"title\": \"海邊散步\"},\n    \"minutes\": 25,\n    \"tags\": [\"散文\", \"旅行\"]\n}",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 10,
+        "title": "一本書改名時，要更新幾個地方？",
+        "body": [
+          {
+            "type": "table",
+            "rows": [
+              [
+                "設計",
+                "讀取畫面時",
+                "改名時"
+              ],
+              [
+                "SQLite 分表",
+                "用 book_id 接合書籍與紀錄",
+                "更新 books 中 B01 的一列"
+              ],
+              [
+                "MongoDB 內嵌書名",
+                "從一次閱讀的文件取得書名",
+                "若要顯示現名，更新所有副本"
+              ],
+              [
+                "MongoDB 引用書籍",
+                "紀錄存 book_id；另查書籍， 也可用 $lookup 接合",
+                "書名集中在書籍文件，改一筆"
+              ]
+            ]
+          },
+          {
+            "type": "text",
+            "text": "如果閱讀日誌必須保留當時看到的書名，保留舊書名就是有意保存的歷史快照。"
+          }
+        ],
+        "intro": "《海邊散步》更名為《海岸散步》。要更新幾筆，取決於書名存在哪裡、代表哪個時間點。"
+      },
+      {
+        "number": 11,
+        "title": "臨時加一個「心情」欄位會怎樣？",
+        "body": [
+          {
+            "type": "heading",
+            "text": "SQLite：變更結構"
+          },
+          {
+            "type": "text",
+            "text": "可以用 ALTER TABLE 增加可為 NULL 的 mood 欄位。\n原有資料列也有這個欄位，尚未填寫時可用 IS NULL 查詢。"
+          },
+          {
+            "type": "heading",
+            "text": "MongoDB：逐筆新增"
+          },
+          {
+            "type": "text",
+            "text": "可只在新文件寫入 mood，舊文件可以缺少這個欄位。\n讀回 Python 後，可用 doc.get(\"mood\", \"未填\") 處理缺欄情形。"
+          },
+          {
+            "type": "heading",
+            "text": "共同的資料品質問題"
+          },
+          {
+            "type": "text",
+            "text": "若 minutes 有的存 25、有的存成字串，統計可能失真。\nSQLite 可用型別與限制；MongoDB 可用驗證規則限定型別與範圍。"
+          }
+        ],
+        "intro": "原本只有編號、書名和分鐘數。現在希望部分心得多記一個 mood 欄位。"
+      },
+      {
+        "number": 12,
+        "title": "一次借書涉及兩次更新，如何一起成功？",
+        "body": [
+          {
+            "type": "heading",
+            "text": "交易（transaction）"
+          },
+          {
+            "type": "text",
+            "text": "將相關寫入視為一個工作單位。成功便一起提交；\n若中途失敗就回復。整組全有或全無稱為原子性。"
+          },
+          {
+            "type": "heading",
+            "text": "以 SQLite 實作"
+          },
+          {
+            "type": "text",
+            "text": "可把借閱列與庫存列的更新放進同一筆交易。\n程式仍要先確認庫存足夠，並在扣減失敗時取消整筆借閱。"
+          },
+          {
+            "type": "heading",
+            "text": "以 MongoDB 實作"
+          },
+          {
+            "type": "text",
+            "text": "單一文件的更新具原子性。跨文件可在複本集或分片叢集上使用交易。\n後面的單機容器練習只會更新單一文件。"
+          }
+        ],
+        "intro": "借出最後一本書時，要新增借閱紀錄，也要將可借數量減一。若只完成其中一項，兩處資料就不一致。"
+      },
+      {
+        "number": 13,
+        "title": "資料量成長，先分辨是哪種瓶頸",
+        "body": [
+          {
+            "type": "heading",
+            "text": "查詢慢：先看查詢與索引"
+          },
+          {
+            "type": "text",
+            "text": "若經常依讀者與日期查紀錄，可評估相應索引、量測查詢時間。\n關聯式資料庫與 MongoDB 都能建立索引，也都有維護成本。"
+          },
+          {
+            "type": "heading",
+            "text": "單機容量不足：分片"
+          },
+          {
+            "type": "text",
+            "text": "分片把不同資料分配到不同機器。例如依讀者編號分配紀錄。\n分片鍵會影響流量是否集中，以及查詢要聯絡多少台機器。"
+          },
+          {
+            "type": "heading",
+            "text": "服務可用性：複寫"
+          },
+          {
+            "type": "text",
+            "text": "複寫讓多個節點保有同一批資料的副本。副本可支援故障接手；\n誤刪也可能同步到副本，因此還需要可還原的備份。"
+          }
+        ],
+        "intro": "查詢緩慢、資料持續增加、服務必須不中斷，是三個不同的問題。"
+      },
+      {
+        "number": 14,
+        "title": "同一個查詢：哪本書讀了至少 25 分鐘？",
+        "body": [
+          {
+            "type": "text",
+            "text": "兩種查詢都以分鐘數遞減排序。讀取結果時，先得到《城市地圖》40 分鐘，再得到《海邊散步》25 分鐘。"
+          }
+        ],
+        "intro": "以下採實作的單表／單集合結構，每筆都存書名。三筆資料為 25、40、15 分鐘，結果依時間遞減。",
+        "snippets": [
+          {
+            "code": "SELECT title, minutes\nFROM readings\nWHERE minutes >= 25\nORDER BY minutes DESC;",
+            "label": "SQLite｜SQL",
+            "language": "sql"
+          },
+          {
+            "code": "books.find(\n    {\"minutes\": {\"$gte\": 25}},\n    {\"_id\": 0, \"title\": 1, \"minutes\": 1}\n).sort(\"minutes\", -1)",
+            "label": "MongoDB｜PyMongo",
+            "language": "python"
+          }
+        ]
+      },
+      {
+        "number": 15,
+        "title": "三個閱讀平台功能，會怎麼選？",
+        "body": [
+          {
+            "type": "heading",
+            "text": "離線個人閱讀日誌"
+          },
+          {
+            "type": "text",
+            "text": "只在自己的筆電使用，需要一個可攜檔案；SQLite 可在程式內\n直接開啟。若常按月份統計分鐘數，也可直接用 SQL 分組。"
+          },
+          {
+            "type": "heading",
+            "text": "讀書社群的心得頁"
+          },
+          {
+            "type": "text",
+            "text": "一篇心得常連同標籤、短評一起顯示；MongoDB 可將適量且\n一起讀取的欄位內嵌。持續成長的留言則可另外儲存、分頁讀取。"
+          },
+          {
+            "type": "heading",
+            "text": "全校借閱與逾期報表"
+          },
+          {
+            "type": "text",
+            "text": "讀者、館藏與借閱需要反覆配對。關聯式資料表、外鍵與交易\n便於表達這些規則；多人使用時，還要評估寫入量與部署方式。"
+          }
+        ],
+        "intro": "先列出最常讀什麼、哪些資料一起改、有哪些不能違反的規則，再挑選合適的模型。"
+      },
+      {
+        "number": 16,
+        "title": "同一份讀書紀錄，有兩種儲存方式",
+        "body": [
+          {
+            "type": "heading",
+            "text": "SQLite｜資料表"
+          },
+          {
+            "type": "text",
+            "text": "一列是一筆紀錄。每列共用書名、分鐘數等欄位，\n用 SQL 描述要讀取或改動哪些列。"
+          },
+          {
+            "type": "heading",
+            "text": "MongoDB｜集合"
+          },
+          {
+            "type": "text",
+            "text": "一份文件是一筆紀錄。Python 字典對應文件，\n欄位可以放字串、數值，也可以放標籤陣列。"
+          },
+          {
+            "type": "heading",
+            "text": "Python 如何連線"
+          },
+          {
+            "type": "text",
+            "text": "sqlite3 在程式內開啟檔案；PyMongo 連到一個\n正在執行的 MongoDB 服務。"
+          }
+        ],
+        "intro": "每筆紀錄代表本週的一次閱讀。程式要能找出花最多時間的書，也能更正輸入錯誤。"
+      },
+      {
+        "number": 17,
+        "title": "先記下三筆資料，後面用來核對結果",
+        "body": [
+          {
+            "type": "heading",
+            "text": "R01　海邊散步"
+          },
+          {
+            "type": "text",
+            "text": "25 分鐘"
+          },
+          {
+            "type": "heading",
+            "text": "R02　城市地圖"
+          },
+          {
+            "type": "text",
+            "text": "40 分鐘"
+          },
+          {
+            "type": "heading",
+            "text": "R03　森林日記"
+          },
+          {
+            "type": "text",
+            "text": "15 分鐘"
+          },
+          {
+            "type": "text",
+            "text": "初始合計 80 分鐘。閱讀至少 25 分鐘的有兩筆，最久的是《城市地圖》。"
+          }
+        ],
+        "intro": "編號識別一次閱讀；同一本書可以在不同時間留下不同紀錄。分鐘數一律使用整數。"
+      },
+      {
+        "number": 18,
+        "title": "在自己的電腦建立練習目錄與 .venv",
+        "body": [
+          {
+            "type": "heading",
+            "text": "Windows PowerShell"
+          },
+          {
+            "type": "text",
+            "text": "py -m venv .venv\n.\\.venv\\Scripts\\Activate.ps1"
+          },
+          {
+            "type": "heading",
+            "text": "macOS／Linux"
+          },
+          {
+            "type": "text",
+            "text": "python3 -m venv .venv\nsource .venv/bin/activate"
+          },
+          {
+            "type": "heading",
+            "text": "確認環境"
+          },
+          {
+            "type": "text",
+            "text": "python -c \"import sys; print(sys.executable)\"\n印出的路徑應包含這個專案的 .venv。"
+          },
+          {
+            "type": "text",
+            "text": "以下安裝指令都在已啟用環境的終端機執行。"
+          }
+        ],
+        "intro": "先安裝 Python 3，建立並進入空資料夾 reading_lab，再依作業系統選一組指令。"
+      },
+      {
+        "number": 19,
+        "title": "SQL、SQLite 與 MongoDB 的練習順序",
+        "body": [
+          {
+            "type": "heading",
+            "text": "sqlite_lab.py"
+          },
+          {
+            "type": "text",
+            "text": "依序貼入第 33–40 頁的程式區塊，存檔後執行一次：\npython sqlite_lab.py"
+          },
+          {
+            "type": "heading",
+            "text": "mongo_lab.py"
+          },
+          {
+            "type": "text",
+            "text": "完成 MongoDB 環境設定後，依序貼入第 44–51 頁，\n存檔後執行一次：python mongo_lab.py"
+          },
+          {
+            "type": "heading",
+            "text": "再次練習"
+          },
+          {
+            "type": "text",
+            "text": "保留原本的資料。再次執行整支程式前，請改用新的\nSQLite 檔名或 MongoDB 集合名稱，避免編號重複。"
+          }
+        ],
+        "intro": "解壓縮 database-lab-zh.zip，先依下一頁執行 SQL 練習，再使用以下兩支 Python 程式。"
+      },
+      {
+        "number": 20,
+        "title": "SQL 怎麼讀？先看它要操作什麼",
+        "body": [
+          {
+            "type": "text",
+            "text": "在終端機執行上方指令，會用 SQLite 依序執行範例包裡的 sql_basics.sql，並印出查詢結果。\nCREATE 定義資料表，INSERT、UPDATE、DELETE 改變資料，SELECT 讀取結果。\n每次執行都從空的記憶體資料庫開始，適合修改條件後重試。"
+          }
+        ],
+        "intro": "SQL（Structured Query Language，結構化查詢語言）用來描述要哪些資料，以及想如何變更資料。",
+        "code": "python run_sql_lab.py",
+        "codeLanguage": "shell"
+      },
+      {
+        "number": 21,
+        "title": "CREATE TABLE 定義一筆紀錄的形狀",
+        "body": [
+          {
+            "type": "text",
+            "text": "code 是唯一的紀錄編號；NOT NULL 表示必須提供值；CHECK 要求分鐘數至少為 0。\n執行後只有空表。SQL 可以分行縮排，分號標記一條敘述的結尾。"
+          }
+        ],
+        "intro": "一列代表一次閱讀。這個 SQL 練習多放一個 reader 欄位，稍後用來統計每位讀者的閱讀量。",
+        "code": "CREATE TABLE log (\n    code TEXT NOT NULL PRIMARY KEY,\n    reader TEXT NOT NULL,\n    title TEXT NOT NULL,\n    minutes INTEGER NOT NULL CHECK (minutes >= 0)\n);",
+        "codeLanguage": "sql"
+      },
+      {
+        "number": 22,
+        "title": "INSERT INTO 把三次閱讀寫進表裡",
+        "body": [
+          {
+            "type": "text",
+            "text": "三組括號代表三列。U1 讀了兩次，U2 讀了一次，25、40、15 都以整數寫入。\n同一個讀者代號可以出現多次；若再次插入 R01，會違反主鍵唯一性的規則。"
+          }
+        ],
+        "intro": "先列出欄名，再按相同順序填入每組值。書名、讀者代號與紀錄編號都用單引號表示字串。",
+        "code": "INSERT INTO log (code, reader, title, minutes)\nVALUES\n    ('R01', 'U1', '海邊散步', 25),\n    ('R02', 'U2', '城市地圖', 40),\n    ('R03', 'U1', '森林日記', 15);",
+        "codeLanguage": "sql"
+      },
+      {
+        "number": 23,
+        "title": "SELECT 選欄位，FROM 選資料表",
+        "body": [
+          {
+            "type": "text",
+            "text": "結果依編號為《海邊散步》25、《城市地圖》40、《森林日記》15。\nSELECT * 可取回全部欄位。用 ORDER BY 指定順序，顯示結果時才有排序保證。"
+          }
+        ],
+        "intro": "想看每本書的書名和分鐘數，只需列出這兩個欄位。",
+        "code": "SELECT title, minutes\nFROM log\nORDER BY code;",
+        "codeLanguage": "sql"
+      },
+      {
+        "number": 24,
+        "title": "WHERE 決定哪些列可以留下",
+        "body": [
+          {
+            "type": "text",
+            "text": "答案是 R01《海邊散步》。AND 要求兩個條件都成立；改成 OR 時，只要其中一個成立就保留。\n若把 >= 改成 >，剛好 25 分鐘也會被排除，這次就查不到任何一列。"
+          }
+        ],
+        "intro": "U1 的兩筆紀錄分別為 25 與 15 分鐘。如果只找 U1 讀了至少 25 分鐘的書，哪一列會通過？",
+        "code": "SELECT code, title\nFROM log\nWHERE reader = 'U1' AND minutes >= 25;",
+        "codeLanguage": "sql"
+      },
+      {
+        "number": 25,
+        "title": "ORDER BY 與 LIMIT 找出前兩名",
+        "body": [
+          {
+            "type": "text",
+            "text": "DESC 表示遞減，ASC 表示遞增。本例得到《城市地圖》40，接著是《海邊散步》25。\n把 LIMIT 2 改成 LIMIT 1，就能回答「讀得最久的是哪一次？」"
+          }
+        ],
+        "intro": "先排好，再取前兩列。若分鐘數相同，用紀錄編號決定誰先顯示。",
+        "code": "SELECT title, minutes\nFROM log\nORDER BY minutes DESC, code ASC\nLIMIT 2;",
+        "codeLanguage": "sql"
+      },
+      {
+        "number": 26,
+        "title": "COUNT、SUM 與 AVG 把多列算成一列",
+        "body": [
+          {
+            "type": "text",
+            "text": "結果是 3 次、80 分鐘、平均 26.7 分鐘。ROUND(..., 1) 將平均值四捨五入至小數第一位。\nAS 替結果欄位命名，原資料表的欄名保持不變。"
+          }
+        ],
+        "intro": "要做全班摘要，可以在同一個 SELECT 計算紀錄數、總分鐘與平均分鐘。",
+        "code": "SELECT COUNT(*) AS sessions,\n       SUM(minutes) AS total,\n       ROUND(AVG(minutes), 1) AS average\nFROM log;",
+        "codeLanguage": "sql"
+      },
+      {
+        "number": 27,
+        "title": "GROUP BY 分組，HAVING 篩選整組",
+        "body": [
+          {
+            "type": "text",
+            "text": "U1 有兩次，25 + 15 = 40；U2 只有一次。最後只留下 U1、2、40。\nWHERE 在分組前篩單筆紀錄；HAVING 在分組後依每組的統計值篩選。"
+          }
+        ],
+        "intro": "要找出讀了至少兩次的讀者，先以 reader 分組，再對每組計次與加總。",
+        "code": "SELECT reader, COUNT(*) AS sessions, SUM(minutes) AS total\nFROM log\nGROUP BY reader\nHAVING COUNT(*) >= 2;",
+        "codeLanguage": "sql"
+      },
+      {
+        "number": 28,
+        "title": "JOIN 用共同的讀者代號找回姓名",
+        "body": [
+          {
+            "type": "text",
+            "text": "依序得到「小安／海邊散步」、「小禾／城市地圖」、「小安／森林日記」。\nAS l 與 AS r 是表的簡稱。這個 JOIN 只保留兩邊都有配對的紀錄。"
+          }
+        ],
+        "intro": "新增讀者對照表。log.reader 存代號，readers.name 存姓名，查詢時以代號配對。",
+        "code": "CREATE TABLE readers (id TEXT NOT NULL PRIMARY KEY, name TEXT NOT NULL);\nINSERT INTO readers VALUES ('U1', '小安'), ('U2', '小禾');\nSELECT r.name, l.title\nFROM log AS l\nJOIN readers AS r ON r.id = l.reader\nORDER BY l.code;",
+        "codeLanguage": "sql"
+      },
+      {
+        "number": 29,
+        "title": "UPDATE 修改既有紀錄",
+        "body": [
+          {
+            "type": "text",
+            "text": "兩次查詢先後得到 R01、25 和 R01、35。SET 指定如何計算新值；WHERE 指定更新對象。\n如果省略 UPDATE 的 WHERE，三筆都會增加 10 分鐘。"
+          }
+        ],
+        "intro": "《海邊散步》漏記了 10 分鐘。先確認 R01 的原值，再更新並讀回。",
+        "code": "SELECT code, minutes FROM log WHERE code = 'R01';\nUPDATE log\nSET minutes = minutes + 10\nWHERE code = 'R01';\nSELECT code, minutes FROM log WHERE code = 'R01';",
+        "codeLanguage": "sql"
+      },
+      {
+        "number": 30,
+        "title": "BEGIN 與 ROLLBACK：先試刪，再復原",
+        "body": [
+          {
+            "type": "text",
+            "text": "兩次結果依序為 2、3。交易中已可看到刪除效果；ROLLBACK 撤銷了這筆交易的刪除。\n上一頁已完成的修改仍在，R01 仍是 35 分鐘。"
+          }
+        ],
+        "intro": "在一筆明確的交易內刪除 R03，分別在回復前後查詢紀錄數。",
+        "code": "BEGIN;\nDELETE FROM log WHERE code = 'R03';\nSELECT COUNT(*) FROM log;\nROLLBACK;\nSELECT COUNT(*) FROM log;",
+        "codeLanguage": "sql"
+      },
+      {
+        "number": 31,
+        "title": "DELETE 與 COMMIT：確認後保留刪除",
+        "body": [
+          {
+            "type": "text",
+            "text": "先印出《森林日記》，最後得到 2 筆、75 分鐘（35 + 40）。DELETE 省略 WHERE 會刪除全部列。\nCOMMIT 完成這筆交易。本章使用記憶體資料庫；下一章改用 .db 檔讓資料跨次執行保存。"
+          }
+        ],
+        "intro": "這次確定要刪除 R03。先核對標題，再執行刪除、提交及最後統計。",
+        "code": "SELECT title FROM log WHERE code = 'R03';\nBEGIN;\nDELETE FROM log WHERE code = 'R03';\nCOMMIT;\nSELECT COUNT(*), SUM(minutes) FROM log;",
+        "codeLanguage": "sql"
+      },
+      {
+        "number": 32,
+        "title": "從 SQL 接回 Python：把查詢值當參數傳入",
+        "body": [
+          {
+            "type": "text",
+            "text": "? 代表要綁定的值；(code,) 是含一個元素的 tuple。使用者輸入也用相同方式傳入。\n這時輸出 ('海邊散步', 35)。若改查已刪除的 R03，fetchone() 會得到 None。"
+          }
+        ],
+        "intro": "SQL 讓資料庫篩選紀錄，Python 則提供要查的編號。以下片段對應附檔 run_sql_lab.py 的最後一次查詢。",
+        "code": "code = \"R01\"\nsql = \"SELECT title, minutes FROM log WHERE code = ?\"\nrow = con.execute(sql, (code,)).fetchone()\nprint(row)",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 33,
+        "title": "開啟資料庫，取得 Connection",
+        "body": [
+          {
+            "type": "text",
+            "text": "con 是連線物件，後續 SQL 都透過它送出。檔案不存在時，SQLite 會建立檔案。\n先看印出的完整路徑，之後就能找到同一份資料庫。"
+          }
+        ],
+        "intro": "sqlite_lab.py｜從這一段開始。reading_01.db 會存放在終端機目前的工作目錄。",
+        "code": "import sqlite3\nfrom pathlib import Path\n\npath = Path(\"reading_01.db\")\ncon = sqlite3.connect(path)\nprint(path.resolve())",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 34,
+        "title": "建立資料表，讓資料庫檢查輸入",
+        "body": [
+          {
+            "type": "text",
+            "text": "PRIMARY KEY 讓編號唯一；NOT NULL 要求提供值；CHECK 拒絕負數分鐘。\nIF NOT EXISTS 表示資料表已存在就略過建表。"
+          }
+        ],
+        "intro": "sqlite_lab.py｜接續上一段。將一次閱讀拆成編號、書名、分鐘數三個欄位。",
+        "code": "con.execute(\"\"\"\n    CREATE TABLE IF NOT EXISTS readings (\n        code TEXT NOT NULL PRIMARY KEY,\n        title TEXT NOT NULL,\n        minutes INTEGER NOT NULL CHECK (minutes >= 0)\n    )\n\"\"\")",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 35,
+        "title": "用參數把三筆紀錄寫入資料表",
+        "body": [
+          {
+            "type": "text",
+            "text": "? 是值的佔位符，請將輸入值當作參數傳入。executemany 對每筆資料重複這個指令。\n在本例的交易設定下，離開 with 區塊時成功就提交，發生未處理的例外就回復。"
+          }
+        ],
+        "intro": "sqlite_lab.py｜接續上一段。每個 tuple 的順序都要對應 INSERT 所列的欄位。",
+        "code": "records = [\n    (\"R01\", \"海邊散步\", 25),\n    (\"R02\", \"城市地圖\", 40),\n    (\"R03\", \"森林日記\", 15),\n]\nsql = \"INSERT INTO readings (code, title, minutes) VALUES (?, ?, ?)\"\nwith con:\n    con.executemany(sql, records)",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 36,
+        "title": "用 WHERE 篩選，再依分鐘數排序",
+        "body": [
+          {
+            "type": "text",
+            "text": "輸出依序是「城市地圖 40」、「海邊散步 25」。DESC 由大到小，時間相同時依編號遞增。\n(25,) 是單一元素的 tuple；逗號讓 Python 知道這是一組參數。"
+          }
+        ],
+        "intro": "sqlite_lab.py｜找出至少讀了 25 分鐘的紀錄，先顯示讀得最久的書。",
+        "code": "query = \"\"\"\n    SELECT title, minutes FROM readings\n    WHERE minutes >= ? ORDER BY minutes DESC, code ASC\n\"\"\"\ncursor = con.execute(query, (25,))\nfor title, minutes in cursor:\n    print(title, minutes)",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 37,
+        "title": "fetchone() 取得一列，查無資料得到 None",
+        "body": [
+          {
+            "type": "text",
+            "text": "第一行輸出 ('海邊散步', 25)，第二行輸出 None。讀取 row[0] 前要先確認有找到紀錄。\n若要一次拿到所有符合的列，可用 fetchall()，其回傳值是 list。"
+          }
+        ],
+        "intro": "sqlite_lab.py｜用唯一編號找書。資料庫回傳的游標可逐列讀取，也可一次取出結果。",
+        "code": "by_code = \"SELECT title, minutes FROM readings WHERE code = ?\"\nrow = con.execute(by_code, (\"R01\",)).fetchone()\nprint(row)\nmissing = con.execute(by_code, (\"R99\",)).fetchone()\nprint(missing)",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 38,
+        "title": "修改 R01，再讀回確認",
+        "body": [
+          {
+            "type": "text",
+            "text": "預期輸出 1 和 ('海邊散步', 35)。SET 決定改動內容；WHERE 指定目標。\n若省略 WHERE，整張表的分鐘數都會增加。再次執行加 10 的操作會再累加一次。"
+          }
+        ],
+        "intro": "sqlite_lab.py｜《海邊散步》漏記了 10 分鐘。只更新 R01，從 25 分鐘改成 35 分鐘。",
+        "code": "with con:\n    changed = con.execute(\n        \"UPDATE readings SET minutes = minutes + ? WHERE code = ?\",\n        (10, \"R01\"),\n    )\nprint(changed.rowcount)\nprint(con.execute(by_code, (\"R01\",)).fetchone())",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 39,
+        "title": "用一筆失敗的交易觀察回復",
+        "body": [
+          {
+            "type": "text",
+            "text": "第二個指令違反 CHECK，例外離開 with 區塊，第一個更動也一起撤銷。\nR01 的輸出仍是 ('海邊散步', 35)。例外處理放在 with 外面。"
+          }
+        ],
+        "intro": "sqlite_lab.py｜這次先將 R01 改成 99，再故意把 R02 改成負數，觀察第一項更動。",
+        "code": "try:\n    with con:\n        con.execute(\"UPDATE readings SET minutes=99 WHERE code='R01'\")\n        con.execute(\"UPDATE readings SET minutes=-1 WHERE code='R02'\")\nexcept sqlite3.IntegrityError:\n    print(\"分鐘數違反限制，整筆交易已回復\")\nprint(con.execute(by_code, (\"R01\",)).fetchone())",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 40,
+        "title": "刪除 R03，統計剩餘紀錄",
+        "body": [
+          {
+            "type": "text",
+            "text": "預期刪除 1 列，統計結果為 (2, 75)，也就是 35 + 40 分鐘。\nwith con 管理交易；con.close() 關閉連線。已提交的資料保存在 .db 檔。"
+          }
+        ],
+        "intro": "sqlite_lab.py｜最後一段。存檔後，在已啟用 .venv 的終端機執行 python sqlite_lab.py。",
+        "code": "with con:\n    removed = con.execute(\"DELETE FROM readings WHERE code = ?\", (\"R03\",))\nprint(removed.rowcount)\nsummary = \"SELECT COUNT(*), SUM(minutes) FROM readings\"\nprint(con.execute(summary).fetchone())\ncon.close()",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 41,
+        "title": "先啟動本機 MongoDB 服務",
+        "body": [
+          {
+            "type": "text",
+            "text": "第一行是一個完整指令。127.0.0.1 只接受本機連線，reading-data 保存資料檔。\n在 docker ps 看到 reading-mongo 後再繼續。已有可用服務者可直接使用現有連線網址。"
+          }
+        ],
+        "intro": "終端機｜以下使用自己電腦上的 Docker。先啟動 Docker Desktop 或 Docker Engine，再執行。",
+        "code": "docker run -d --name reading-mongo -p 127.0.0.1:27017:27017 -v reading-data:/data/db mongo:8.0\ndocker ps",
+        "codeLanguage": "shell"
+      },
+      {
+        "number": 42,
+        "title": "安裝 Python 驅動程式 PyMongo",
+        "body": [
+          {
+            "type": "text",
+            "text": "第二行應印出 4.x 版號。PyMongo 負責讓 Python 與服務交談；服務本身由上一頁啟動。\n課後可用 docker stop reading-mongo 停止，再用 docker start reading-mongo 繼續使用。"
+          }
+        ],
+        "intro": "終端機｜在 reading_lab 裡啟用 .venv，再把 PyMongo 安裝到這個環境。",
+        "code": "python -m pip install \"pymongo>=4,<5\"\npython -c \"import pymongo; print(pymongo.version)\"",
+        "codeLanguage": "shell"
+      },
+      {
+        "number": 43,
+        "title": "資料庫、集合、文件與欄位",
+        "body": [
+          {
+            "type": "heading",
+            "text": "資料庫與集合"
+          },
+          {
+            "type": "text",
+            "text": "reading_lab 是資料庫；readings_01 是其中一個集合。\n集合可以放很多筆讀書文件。"
+          },
+          {
+            "type": "heading",
+            "text": "文件與識別碼"
+          },
+          {
+            "type": "text",
+            "text": "每份文件有唯一的 _id。本例指定字串 R01，方便和\nSQLite 對照；省略 _id 時，驅動程式通常會產生 ObjectId。"
+          },
+          {
+            "type": "heading",
+            "text": "欄位與型別"
+          },
+          {
+            "type": "text",
+            "text": "title 放字串、minutes 放整數、tags 放字串陣列。\n比較或累加數值時，分鐘數應存成 25，而非字串「25」。"
+          }
+        ],
+        "intro": "這次把同一筆 R01 寫成文件。Python 用字典表示一筆資料，用 list 表示一組標籤。"
+      },
+      {
+        "number": 44,
+        "title": "建立 MongoClient，確認服務能回應",
+        "body": [
+          {
+            "type": "text",
+            "text": "ping 成功會印出 1.0。5000 毫秒是等候選取伺服器的上限。\nbooks 是集合物件，第一次寫入時會建立尚不存在的資料庫與集合。連線網址含密碼時請勿寫入程式。"
+          }
+        ],
+        "intro": "mongo_lab.py｜預設連到本機。若要連其他服務，可用環境變數 MONGODB_URI 指定網址。",
+        "code": "import os\nfrom pymongo import MongoClient\n\nuri = os.getenv(\"MONGODB_URI\", \"mongodb://127.0.0.1:27017/\")\nclient = MongoClient(uri, serverSelectionTimeoutMS=5000)\nprint(client.admin.command(\"ping\")[\"ok\"])\nbooks = client[\"reading_lab\"][\"readings_01\"]",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 45,
+        "title": "insert_many() 一次寫入三份文件",
+        "body": [
+          {
+            "type": "text",
+            "text": "空集合第一次執行時會印出 ['R01', 'R02', 'R03']。若只新增一份文件，可用 insert_one()。\n已存在的 _id 無法再次新增；整支程式要重跑時，先在上一頁改用新的練習集合名稱。"
+          }
+        ],
+        "intro": "mongo_lab.py｜接續上一段。對照 SQLite 的 tuple，字典的每個值都直接帶有欄位名稱。",
+        "code": "docs = [\n    {\"_id\": \"R01\", \"title\": \"海邊散步\", \"minutes\": 25, \"tags\": [\"散文\"]},\n    {\"_id\": \"R02\", \"title\": \"城市地圖\", \"minutes\": 40, \"tags\": [\"旅行\"]},\n    {\"_id\": \"R03\", \"title\": \"森林日記\", \"minutes\": 15, \"tags\": [\"自然\"]},\n]\nadded = books.insert_many(docs)\nprint(added.inserted_ids)",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 46,
+        "title": "find() 的兩個字典，各負責什麼？",
+        "body": [
+          {
+            "type": "text",
+            "text": "$gte 表示大於或等於。投影中的 1 代表保留欄位，_id: 0 可以省略識別碼。\n排序值 -1 是遞減，1 是遞增。輸出和 SQLite 相同：城市地圖 40、海邊散步 25。"
+          }
+        ],
+        "intro": "mongo_lab.py｜找出至少讀了 25 分鐘的書。第一個字典指定篩選條件，第二個指定要取回的欄位。",
+        "code": "condition = {\"minutes\": {\"$gte\": 25}}\nfields = {\"_id\": 0, \"title\": 1, \"minutes\": 1}\nmatches = books.find(condition, fields)\nfor book in matches.sort([(\"minutes\", -1), (\"_id\", 1)]):\n    print(book[\"title\"], book[\"minutes\"])",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 47,
+        "title": "find_one() 找一筆，也能比對陣列元素",
+        "body": [
+          {
+            "type": "text",
+            "text": "預期依序印出「海邊散步 ['散文']」、None、R01。查無文件時，應先處理 None 再讀取欄位。\n當 tags 是陣列時，條件 {\"tags\": \"散文\"} 可以比對其中一個元素。"
+          }
+        ],
+        "intro": "mongo_lab.py｜同一份資料，可以依唯一編號搜尋，也可以找出帶有「散文」標籤的紀錄。",
+        "code": "one = books.find_one({\"_id\": \"R01\"})\nprint(one[\"title\"], one[\"tags\"])\nprint(books.find_one({\"_id\": \"R99\"}))\nfor book in books.find({\"tags\": \"散文\"}):\n    print(book[\"_id\"])",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 48,
+        "title": "用 $inc 增加分鐘數，用 $set 設定值",
+        "body": [
+          {
+            "type": "text",
+            "text": "預期輸出「1 1」及「35 True」。matched_count 指符合的文件數，modified_count 指實際修改數。\n對同一份文件的這次更新具有原子性。重複執行 $inc 會再加 10。"
+          }
+        ],
+        "intro": "mongo_lab.py｜更新 R01 的分鐘數，並在同一份文件留下已核對的記號。",
+        "code": "change = {\"$inc\": {\"minutes\": 10}, \"$set\": {\"checked\": True}}\nupdated = books.update_one({\"_id\": \"R01\"}, change)\nprint(updated.matched_count, updated.modified_count)\none = books.find_one({\"_id\": \"R01\"})\nprint(one[\"minutes\"], one[\"checked\"])",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 49,
+        "title": "只設定相同的值，算不算修改？",
+        "body": [
+          {
+            "type": "text",
+            "text": "第一組是「1 0」：找到 R01，但欄位值相同。第二組是「0 0」：沒有 R99。\n預設找不到就不會新增，因此只看 modified_count 無法區分這兩種情況。"
+          }
+        ],
+        "intro": "mongo_lab.py｜R01 的 checked 已經是 True。先預測兩個計數，再看執行結果。",
+        "code": "again = books.update_one(\n    {\"_id\": \"R01\"}, {\"$set\": {\"checked\": True}}\n)\nprint(again.matched_count, again.modified_count)\nmissing = books.update_one({\"_id\": \"R99\"}, {\"$set\": {\"checked\": True}})\nprint(missing.matched_count, missing.modified_count)",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 50,
+        "title": "delete_one() 精準刪除一筆",
+        "body": [
+          {
+            "type": "text",
+            "text": "預期依序印出「森林日記」、1、None。deleted_count 是實際刪除的文件數。\n這裡用唯一的 _id 當條件，可以明確知道刪除的是哪一筆。"
+          }
+        ],
+        "intro": "mongo_lab.py｜先讀到要刪除的書名，再用相同編號刪除，最後重新查一次。",
+        "code": "target = {\"_id\": \"R03\"}\nprint(books.find_one(target)[\"title\"])\ndeleted = books.delete_one(target)\nprint(deleted.deleted_count)\nprint(books.find_one(target))",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 51,
+        "title": "用 aggregate() 統計，關閉連線",
+        "body": [
+          {
+            "type": "text",
+            "text": "_id 設為 None 表示把所有文件分成一組。每筆加 1 得到數量，加總 $minutes 得到分鐘數。\n預期輸出「2 75」。client.close() 釋放連線資源，資料留在 MongoDB 服務中。"
+          }
+        ],
+        "intro": "mongo_lab.py｜最後一段。存檔後執行 python mongo_lab.py，比對 SQLite 的統計結果。",
+        "code": "group = {\"_id\": None,\n         \"count\": {\"$sum\": 1},\n         \"total\": {\"$sum\": \"$minutes\"}}\nfor item in books.aggregate([{\"$group\": group}]):\n    print(item[\"count\"], item[\"total\"])\nclient.close()",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 52,
+        "title": "同一個問題，兩種查詢寫法",
+        "body": [
+          {
+            "type": "heading",
+            "text": "選哪些紀錄？"
+          },
+          {
+            "type": "text",
+            "text": "SQL　WHERE minutes >= ?　參數 (25,)\nPyMongo　{\"minutes\": {\"$gte\": 25}}"
+          },
+          {
+            "type": "heading",
+            "text": "回傳哪些欄位？"
+          },
+          {
+            "type": "text",
+            "text": "SQL　SELECT title, minutes\nPyMongo　{\"title\": 1, \"minutes\": 1, \"_id\": 0}"
+          },
+          {
+            "type": "heading",
+            "text": "如何排序？"
+          },
+          {
+            "type": "text",
+            "text": "SQL　ORDER BY minutes DESC, code ASC\nPyMongo　.sort([(\"minutes\", -1), (\"_id\", 1)])"
+          }
+        ],
+        "intro": "把查詢拆成三個問題：要哪些紀錄、要哪些欄位、用什麼順序顯示。"
+      },
+      {
+        "number": 53,
+        "title": "怎麼選擇資料庫？先看資料如何使用",
+        "body": [
+          {
+            "type": "heading",
+            "text": "自己電腦上的紀錄簿"
+          },
+          {
+            "type": "text",
+            "text": "希望離線使用、檔案方便備份，且沒有另外維護服務的需求，\nSQLite 很適合當起點。"
+          },
+          {
+            "type": "heading",
+            "text": "需要常常關聯其他資料"
+          },
+          {
+            "type": "text",
+            "text": "若要把讀者、書籍、借閱拆表，常以主鍵和外鍵做 JOIN，\n可以先用 SQLite 表達關係。"
+          },
+          {
+            "type": "heading",
+            "text": "每筆有不同的附加資料"
+          },
+          {
+            "type": "text",
+            "text": "如單筆含多個標籤、筆記或來源，而程式常整筆取回，\n可評估 MongoDB 的文件模型與服務維護成本。"
+          }
+        ],
+        "intro": "想像讀書紀錄接下來要成為一個小工具。部署方式與查詢需求都會影響選擇。"
+      },
+      {
+        "number": 54,
+        "title": "SQLite：從例外名稱找出原因",
+        "body": [
+          {
+            "type": "heading",
+            "text": "no such table"
+          },
+          {
+            "type": "text",
+            "text": "確認程式是否使用同一個 .db 檔，以及建表程式是否先執行。\n可比較第 33 頁印出的完整路徑。"
+          },
+          {
+            "type": "heading",
+            "text": "IntegrityError"
+          },
+          {
+            "type": "text",
+            "text": "檢查編號是否重複、分鐘數是否為負。重跑整支練習程式時，\n將 reading_01.db 換成尚未使用的檔名。"
+          },
+          {
+            "type": "heading",
+            "text": "database is locked"
+          },
+          {
+            "type": "text",
+            "text": "可能有另一個程式正在寫入。先讓它完成提交或回復，\n再重試。寫入的交易區塊應保持簡短。"
+          }
+        ],
+        "intro": "先核對工作目錄與資料庫路徑，再區分資料內容或檔案存取的問題。"
+      },
+      {
+        "number": 55,
+        "title": "MongoDB：分清服務、套件與重複資料",
+        "body": [
+          {
+            "type": "heading",
+            "text": "找不到 pymongo"
+          },
+          {
+            "type": "text",
+            "text": "啟用 .venv 後執行 python -m pip show pymongo。\n若查不到套件，用同一個 python 依第 42 頁重新安裝。"
+          },
+          {
+            "type": "heading",
+            "text": "連線逾時"
+          },
+          {
+            "type": "text",
+            "text": "用 docker ps -a 檢查容器，再比對 URI 與本機埠。\n若 27017 已占用，可將映射左側換埠，並同步修改 URI。"
+          },
+          {
+            "type": "heading",
+            "text": "重複鍵值"
+          },
+          {
+            "type": "text",
+            "text": "同一集合內的 _id 必須唯一。insert_many 遇到重複鍵時，\n先前成功的文件可能已寫入；先核對現況再重試。"
+          }
+        ],
+        "intro": "先看發生錯誤的那一行。匯入、連線、寫入失敗，各有不同的檢查方式。"
+      },
+      {
+        "number": 56,
+        "title": "先預測，再核對三個結果",
+        "body": [
+          {
+            "type": "heading",
+            "text": "01　改變條件"
+          },
+          {
+            "type": "text",
+            "text": "若第 36 頁把參數從 (25,) 改成 (26,)，會印出哪本書？"
+          },
+          {
+            "type": "heading",
+            "text": "02　檢查交易"
+          },
+          {
+            "type": "text",
+            "text": "第 39 頁若 R01 一度變成 99，為何後來讀到 35？"
+          },
+          {
+            "type": "heading",
+            "text": "03　讀取更新結果"
+          },
+          {
+            "type": "text",
+            "text": "第 49 頁兩次更新的 modified_count 都是 0。\n哪個屬性能分辨「找到但值相同」和「根本找不到」？"
+          }
+        ],
+        "intro": "用第 17 頁的初始資料思考。每題都可以只靠讀程式作答。"
+      },
+      {
+        "number": 57,
+        "title": "答案與判讀依據",
+        "body": [
+          {
+            "type": "heading",
+            "text": "01　只有《城市地圖》"
+          },
+          {
+            "type": "text",
+            "text": "40 ≥ 26；25 和 15 不符合。排序不會改變符合條件的筆數。"
+          },
+          {
+            "type": "heading",
+            "text": "02　交易整體回復"
+          },
+          {
+            "type": "text",
+            "text": "R02 的負數觸發 CHECK；例外離開 with 時，\n同一筆交易先前對 R01 的修改也被撤銷。"
+          },
+          {
+            "type": "heading",
+            "text": "03　matched_count"
+          },
+          {
+            "type": "text",
+            "text": "對 R01 設定相同值時為 1；找 R99 時為 0。\n兩者的 modified_count 都是 0。"
+          }
+        ],
+        "intro": "先定位篩選條件，再看資料是否真的被修改，最後核對回傳物件。"
+      },
+      {
+        "number": 58,
+        "title": "官方文件與範例索引",
+        "body": [
+          {
+            "type": "heading",
+            "text": "Python 標準函式庫"
+          },
+          {
+            "type": "text",
+            "text": "sqlite3：Connection、Cursor、參數綁定與交易。\ndocs.python.org/3/library/sqlite3.html"
+          },
+          {
+            "type": "heading",
+            "text": "MongoDB Python 驅動"
+          },
+          {
+            "type": "text",
+            "text": "PyMongo CRUD Operations：查詢、更新與刪除方法。\nmongodb.com/docs/languages/python/pymongo-driver/current/crud/"
+          },
+          {
+            "type": "heading",
+            "text": "MongoDB 本機服務"
+          },
+          {
+            "type": "text",
+            "text": "Docker Hub 的 mongo 映像與啟動方式。\nhub.docker.com/_/mongo"
+          }
+        ],
+        "intro": "用函式或方法名稱查文件，確認參數、回傳值與例外型別。完整連結也收錄於本頁備忘稿。"
+      }
+    ]
+  },
+  "en": {
+    "source": "Accessing SQLite and MongoDB with Python",
+    "download": "databases-en.pptx",
+    "examples": "database-lab-en.zip",
+    "sourceLanguage": "en",
+    "slides": [
+      {
+        "number": 1,
+        "title": "Accessing SQLite and MongoDB with Python",
+        "body": [
+          {
+            "type": "text",
+            "text": "Python Programming / Database Lab"
+          },
+          {
+            "type": "text",
+            "text": "Save three reading sessions and find the book you spent the most time on this week."
+          },
+          {
+            "type": "text",
+            "text": "sqlite3   /   PyMongo"
+          }
+        ]
+      },
+      {
+        "number": 2,
+        "title": "What happens to your reading log when Python exits?",
+        "body": [
+          {
+            "type": "heading",
+            "text": "Database"
+          },
+          {
+            "type": "text",
+            "text": "An organized store of data that a program or person can retrieve and edit.\nHere, each record identifies a reading session, its book and its duration."
+          },
+          {
+            "type": "heading",
+            "text": "Database management system (DBMS)"
+          },
+          {
+            "type": "text",
+            "text": "The software that reads and writes data, runs queries and enforces rules.\nSQLite runs inside the program. MongoDB responds to requests as a service."
+          },
+          {
+            "type": "heading",
+            "text": "Python’s role"
+          },
+          {
+            "type": "text",
+            "text": "Python decides what to do and sends the operation via sqlite3 or PyMongo.\nCommitted data can still be opened after the program exits."
+          }
+        ],
+        "intro": "A Python list can hold today’s reading times. To open the log tomorrow, you need persistent storage."
+      },
+      {
+        "number": 3,
+        "title": "Four everyday operations: CRUD",
+        "body": [
+          {
+            "type": "table",
+            "rows": [
+              [
+                "Operation",
+                "What the reader wants",
+                "State of R01"
+              ],
+              [
+                "Create",
+                "Log 25 minutes of Seaside Walk",
+                "A new row exists"
+              ],
+              [
+                "Read",
+                "Look up the title and duration for R01",
+                "Still 25 minutes"
+              ],
+              [
+                "Update",
+                "Add 10 minutes that were missed",
+                "25 becomes 35"
+              ],
+              [
+                "Delete",
+                "Remove a session entered by mistake",
+                "R01 is no longer found"
+              ]
+            ]
+          },
+          {
+            "type": "text",
+            "text": "Here, Create means adding a record. The SQL command CREATE TABLE defines a table."
+          }
+        ],
+        "intro": "R01 identifies a single reading session. Its book title and duration describe that session."
+      },
+      {
+        "number": 4,
+        "title": "What else does a database do?",
+        "body": [
+          {
+            "type": "heading",
+            "text": "Faster lookups: indexes"
+          },
+          {
+            "type": "text",
+            "text": "Like a directory arranged by ID, an index can narrow a search.\nChanges to indexed data also require updates to the index."
+          },
+          {
+            "type": "heading",
+            "text": "Valid data: constraints"
+          },
+          {
+            "type": "text",
+            "text": "Duplicate IDs and negative minutes should be caught when data is written.\nPrimary keys, check constraints and document validation enforce rules."
+          },
+          {
+            "type": "heading",
+            "text": "Concurrent edits"
+          },
+          {
+            "type": "text",
+            "text": "If two readers both see 25 and then write their own totals, one edit can be lost.\nAsking the database to add 10 to the current value avoids that race."
+          }
+        ],
+        "intro": "With 30,000 records and two people editing at once, lookups, validation and conflicting updates matter."
+      },
+      {
+        "number": 5,
+        "title": "One book, many reading sessions",
+        "body": [
+          {
+            "type": "table",
+            "rows": [
+              [
+                "Table",
+                "Primary key (unique per row)",
+                "Example fields"
+              ],
+              [
+                "books",
+                "book_id = B01",
+                "title = Seaside Walk"
+              ],
+              [
+                "readings",
+                "code = R01",
+                "book_id = B01, minutes = 25"
+              ],
+              [
+                "readings",
+                "code = R04",
+                "book_id = B01, minutes = 30"
+              ]
+            ]
+          },
+          {
+            "type": "text",
+            "text": "readings.book_id references books.book_id. Enable foreign key checks for a SQLite connection with PRAGMA foreign_keys = ON."
+          }
+        ],
+        "intro": "A relational table has one record per row and one attribute per column. A book ID links these tables."
+      },
+      {
+        "number": 6,
+        "title": "How does JOIN recover the book title?",
+        "body": [
+          {
+            "type": "text",
+            "text": "ON matches the book ID, linking R01 and R04 to Seaside Walk.\nGROUP BY puts the matching rows together. SUM adds 25 and 30, giving Seaside Walk a total of 55 minutes."
+          }
+        ],
+        "intro": "How many minutes were spent reading book B01? This SQL uses the two tables on the previous slide.",
+        "code": "SELECT b.title, SUM(r.minutes) AS total\nFROM books AS b\nJOIN readings AS r ON r.book_id = b.book_id\nWHERE b.book_id = 'B01'\nGROUP BY b.book_id, b.title;",
+        "codeLanguage": "sql"
+      },
+      {
+        "number": 7,
+        "title": "NoSQL includes several database models",
+        "body": [
+          {
+            "type": "heading",
+            "text": "How is data organized?"
+          },
+          {
+            "type": "text",
+            "text": "Data can be a document, a key and value, rows within a partition,\nor nodes and edges in a graph. MongoDB uses documents."
+          },
+          {
+            "type": "heading",
+            "text": "How is data retrieved?"
+          },
+          {
+            "type": "text",
+            "text": "A shop retrieves a whole cart by customer ID. A social network follows\nfriendships to find friends of friends. Each favors a different structure."
+          },
+          {
+            "type": "heading",
+            "text": "What are the trade-offs?"
+          },
+          {
+            "type": "text",
+            "text": "Validation, multi-record updates and distribution depend on the product\nand deployment. Start by writing down the queries your users need."
+          }
+        ],
+        "intro": "NoSQL, often read as “Not Only SQL,” covers nonrelational models designed for different query patterns."
+      },
+      {
+        "number": 8,
+        "title": "Four NoSQL models and their query patterns",
+        "body": [
+          {
+            "type": "table",
+            "rows": [
+              [
+                "Model and example",
+                "Organization",
+                "Typical lookup"
+              ],
+              [
+                "Key–value · Redis",
+                "One value per unique key",
+                "Get login state by session ID"
+              ],
+              [
+                "Document · MongoDB",
+                "Fields, arrays, subdocuments",
+                "Read a review with its tags"
+              ],
+              [
+                "Wide-column · Cassandra",
+                "Rows grouped by partition key",
+                "Read device events by day"
+              ],
+              [
+                "Graph · Neo4j",
+                "Nodes linked by edges",
+                "Follow two levels of friendship"
+              ]
+            ]
+          }
+        ],
+        "intro": "A campus reading platform looks up sessions, reviews, device events and recommendations in different ways."
+      },
+      {
+        "number": 9,
+        "title": "What can one reading document contain?",
+        "body": [
+          {
+            "type": "text",
+            "text": "book is an embedded document and tags is an array. Reading R01 retrieves the title and both tags.\nIf many documents contain the same title, decide which copies should change when the title is corrected."
+          }
+        ],
+        "intro": "Suppose a session page shows the title, reading time and tags together. A Python dictionary can represent the document.",
+        "code": "reading = {\n    \"_id\": \"R01\",\n    \"book\": {\"id\": \"B01\", \"title\": \"Seaside Walk\"},\n    \"minutes\": 25,\n    \"tags\": [\"Essays\", \"Travel\"]\n}",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 10,
+        "title": "A book changes title: what needs updating?",
+        "body": [
+          {
+            "type": "table",
+            "rows": [
+              [
+                "Design",
+                "When displaying a session",
+                "When changing the title"
+              ],
+              [
+                "Separate SQLite tables",
+                "Join a session to its book by book_id",
+                "Update B01 in books"
+              ],
+              [
+                "Embedded MongoDB title",
+                "Read the title inside the session",
+                "Update copies that show the current title"
+              ],
+              [
+                "MongoDB book reference",
+                "Read by book_id or join with $lookup",
+                "Update the book document once"
+              ]
+            ]
+          },
+          {
+            "type": "text",
+            "text": "If a journal must preserve the title as the reader saw it at the time, the old title is a deliberate historical snapshot."
+          }
+        ],
+        "intro": "Seaside Walk becomes Coastal Walk. How many records change depends on where the title is stored and what it represents."
+      },
+      {
+        "number": 11,
+        "title": "What if we add an optional mood field?",
+        "body": [
+          {
+            "type": "heading",
+            "text": "SQLite: change the schema"
+          },
+          {
+            "type": "text",
+            "text": "Use ALTER TABLE to add a nullable mood column. Existing rows have the\nnew column; IS NULL finds rows where no mood has been supplied."
+          },
+          {
+            "type": "heading",
+            "text": "MongoDB: add it per document"
+          },
+          {
+            "type": "text",
+            "text": "New documents may include mood while older ones omit it. In Python,\ndoc.get(\"mood\", \"unspecified\") handles a missing field."
+          },
+          {
+            "type": "heading",
+            "text": "Data quality in both models"
+          },
+          {
+            "type": "text",
+            "text": "Storing minutes as both numbers and strings can distort statistics.\nSQLite has types and constraints; MongoDB validators can check types and ranges."
+          }
+        ],
+        "intro": "Sessions already have an ID, title and duration. Some reviews should now also record the reader’s mood."
+      },
+      {
+        "number": 12,
+        "title": "One loan, two updates: how do both succeed?",
+        "body": [
+          {
+            "type": "heading",
+            "text": "Transaction"
+          },
+          {
+            "type": "text",
+            "text": "Treat related writes as one unit. Commit them together on success or\nroll back on failure. This all-or-nothing property is atomicity."
+          },
+          {
+            "type": "heading",
+            "text": "In SQLite"
+          },
+          {
+            "type": "text",
+            "text": "Update loans and stock in one transaction. The program still has to check\navailability and cancel the loan if it cannot decrement the stock."
+          },
+          {
+            "type": "heading",
+            "text": "In MongoDB"
+          },
+          {
+            "type": "text",
+            "text": "One document update is atomic. Replica sets and sharded clusters support\nmulti-document transactions. The standalone lab updates one document at a time."
+          }
+        ],
+        "intro": "Lending the last copy requires a loan record and a lower stock count. A partial change leaves the two inconsistent."
+      },
+      {
+        "number": 13,
+        "title": "Growing data: which bottleneck matters?",
+        "body": [
+          {
+            "type": "heading",
+            "text": "Slow queries: inspect indexes"
+          },
+          {
+            "type": "text",
+            "text": "If you often search by reader and date, consider an appropriate index\nand measure the query time. Both models incur index maintenance costs."
+          },
+          {
+            "type": "heading",
+            "text": "Capacity: sharding"
+          },
+          {
+            "type": "text",
+            "text": "Put different data on different machines, for example by reader ID.\nThe shard key affects hot spots and how many machines a query contacts."
+          },
+          {
+            "type": "heading",
+            "text": "Availability: replication"
+          },
+          {
+            "type": "text",
+            "text": "Nodes keep copies of the same data so another can take over after failure.\nAccidental deletion can replicate too, so keep recoverable backups."
+          }
+        ],
+        "intro": "Slow queries, a growing dataset and service availability are three different problems."
+      },
+      {
+        "number": 14,
+        "title": "Same query: which sessions lasted at least 25 minutes?",
+        "body": [
+          {
+            "type": "text",
+            "text": "Both queries sort by descending duration. The results are City Atlas, 40 minutes, then Seaside Walk, 25 minutes."
+          }
+        ],
+        "intro": "Here each row or document contains its title. Durations are 25, 40 and 15 minutes. Sort matches from longest to shortest.",
+        "snippets": [
+          {
+            "code": "SELECT title, minutes\nFROM readings\nWHERE minutes >= 25\nORDER BY minutes DESC;",
+            "label": "SQLite / SQL",
+            "language": "sql"
+          },
+          {
+            "code": "books.find(\n    {\"minutes\": {\"$gte\": 25}},\n    {\"_id\": 0, \"title\": 1, \"minutes\": 1}\n).sort(\"minutes\", -1)",
+            "label": "MongoDB / PyMongo",
+            "language": "python"
+          }
+        ]
+      },
+      {
+        "number": 15,
+        "title": "Which database fits each reading platform feature?",
+        "body": [
+          {
+            "type": "heading",
+            "text": "Offline personal reading log"
+          },
+          {
+            "type": "text",
+            "text": "SQLite runs inside the laptop app and stores data in a portable file.\nSQL can group records by month to total the reading time."
+          },
+          {
+            "type": "heading",
+            "text": "A community review page"
+          },
+          {
+            "type": "text",
+            "text": "MongoDB can embed tags and short notes that are normally read together.\nA growing comment thread can live separately and be fetched a page at a time."
+          },
+          {
+            "type": "heading",
+            "text": "Campus loans and overdue reports"
+          },
+          {
+            "type": "text",
+            "text": "Readers, copies and loans are frequently joined. Tables, foreign keys and\ntransactions express those rules. Also assess write traffic and deployment needs."
+          }
+        ],
+        "intro": "Consider what gets read, which changes belong together and which rules must hold."
+      },
+      {
+        "number": 16,
+        "title": "One reading log, two storage models",
+        "body": [
+          {
+            "type": "heading",
+            "text": "SQLite: table"
+          },
+          {
+            "type": "text",
+            "text": "One row represents one session. Rows share columns such as title and\nminutes. SQL describes which rows to read or change."
+          },
+          {
+            "type": "heading",
+            "text": "MongoDB: collection"
+          },
+          {
+            "type": "text",
+            "text": "One document represents one session. A Python dict maps to a document;\nfields can hold strings, numbers or an array of tags."
+          },
+          {
+            "type": "heading",
+            "text": "Connecting from Python"
+          },
+          {
+            "type": "text",
+            "text": "sqlite3 opens a file inside the program. PyMongo connects to a running\nMongoDB service."
+          }
+        ],
+        "intro": "Each entry is one reading session this week. We want to find the longest session and correct recording mistakes."
+      },
+      {
+        "number": 17,
+        "title": "Three records for checking your results",
+        "body": [
+          {
+            "type": "heading",
+            "text": "R01　Seaside Walk"
+          },
+          {
+            "type": "text",
+            "text": "25 minutes"
+          },
+          {
+            "type": "heading",
+            "text": "R02　City Atlas"
+          },
+          {
+            "type": "text",
+            "text": "40 minutes"
+          },
+          {
+            "type": "heading",
+            "text": "R03　Forest Journal"
+          },
+          {
+            "type": "text",
+            "text": "15 minutes"
+          },
+          {
+            "type": "text",
+            "text": "Initially: 80 minutes total. Two sessions lasted at least 25 minutes. City Atlas was the longest."
+          }
+        ],
+        "intro": "Each ID represents one session. The same book may appear in multiple sessions. Store minutes as integers."
+      },
+      {
+        "number": 18,
+        "title": "Create the lab folder and virtual environment",
+        "body": [
+          {
+            "type": "heading",
+            "text": "Windows PowerShell"
+          },
+          {
+            "type": "text",
+            "text": "py -m venv .venv\n.\\.venv\\Scripts\\Activate.ps1"
+          },
+          {
+            "type": "heading",
+            "text": "macOS / Linux"
+          },
+          {
+            "type": "text",
+            "text": "python3 -m venv .venv\nsource .venv/bin/activate"
+          },
+          {
+            "type": "heading",
+            "text": "Confirm the interpreter"
+          },
+          {
+            "type": "text",
+            "text": "python -c \"import sys; print(sys.executable)\"\nThe path should include this project’s .venv."
+          },
+          {
+            "type": "text",
+            "text": "Run the following installation commands in the terminal with the environment active."
+          }
+        ],
+        "intro": "Install Python 3, create an empty reading_lab folder, open it in a terminal, then choose the commands for your system."
+      },
+      {
+        "number": 19,
+        "title": "Running the SQL, SQLite and MongoDB labs",
+        "body": [
+          {
+            "type": "heading",
+            "text": "sqlite_lab.py"
+          },
+          {
+            "type": "text",
+            "text": "Combine the blocks on slides 33–40 and run the script once:\npython sqlite_lab.py"
+          },
+          {
+            "type": "heading",
+            "text": "mongo_lab.py"
+          },
+          {
+            "type": "text",
+            "text": "After setting up MongoDB, combine slides 44–51 and run:\npython mongo_lab.py"
+          },
+          {
+            "type": "heading",
+            "text": "Repeating the lab"
+          },
+          {
+            "type": "text",
+            "text": "To keep earlier work, choose a new SQLite filename or MongoDB collection\nbefore rerunning a full script. This avoids duplicate record IDs."
+          }
+        ],
+        "intro": "Extract database-lab-en.zip. Run the SQL lab on the next slide, then work through the two Python database scripts."
+      },
+      {
+        "number": 20,
+        "title": "Reading SQL: what does the statement act on?",
+        "body": [
+          {
+            "type": "text",
+            "text": "Run this terminal command to execute sql_basics.sql with SQLite and print the results.\nCREATE defines a table. INSERT, UPDATE and DELETE change its data. SELECT reads it.\nEach run starts with a fresh in-memory database, so you can change a filter and try again."
+          }
+        ],
+        "intro": "SQL (Structured Query Language) describes which data to retrieve and what changes to make.",
+        "code": "python run_sql_lab.py",
+        "codeLanguage": "shell"
+      },
+      {
+        "number": 21,
+        "title": "CREATE TABLE defines a reading session",
+        "body": [
+          {
+            "type": "text",
+            "text": "code is unique. NOT NULL requires a value, and CHECK requires zero or more minutes.\nThe new table is empty. You can indent SQL across several lines; a semicolon ends a statement."
+          }
+        ],
+        "intro": "Each row is one session. This SQL lab adds a reader column so we can later calculate reading totals per person.",
+        "code": "CREATE TABLE log (\n    code TEXT NOT NULL PRIMARY KEY,\n    reader TEXT NOT NULL,\n    title TEXT NOT NULL,\n    minutes INTEGER NOT NULL CHECK (minutes >= 0)\n);",
+        "codeLanguage": "sql"
+      },
+      {
+        "number": 22,
+        "title": "INSERT INTO records three sessions",
+        "body": [
+          {
+            "type": "text",
+            "text": "Each parenthesized group supplies one row. U1 read twice and U2 once; 25, 40 and 15 are integers.\nA reader ID can occur in several rows. Inserting R01 a second time violates the primary key."
+          }
+        ],
+        "intro": "List the column names first and supply each row’s values in that order. Put text values in single quotes.",
+        "code": "INSERT INTO log (code, reader, title, minutes)\nVALUES\n    ('R01', 'U1', 'Seaside Walk', 25),\n    ('R02', 'U2', 'City Atlas', 40),\n    ('R03', 'U1', 'Forest Journal', 15);",
+        "codeLanguage": "sql"
+      },
+      {
+        "number": 23,
+        "title": "SELECT chooses columns; FROM chooses the table",
+        "body": [
+          {
+            "type": "text",
+            "text": "In code order: Seaside Walk 25, City Atlas 40, Forest Journal 15.\nSELECT * returns all columns. Use ORDER BY when the order of the results matters."
+          }
+        ],
+        "intro": "To see a session’s book title and duration, name just those two columns.",
+        "code": "SELECT title, minutes\nFROM log\nORDER BY code;",
+        "codeLanguage": "sql"
+      },
+      {
+        "number": 24,
+        "title": "WHERE decides which rows qualify",
+        "body": [
+          {
+            "type": "text",
+            "text": "R01, Seaside Walk. AND requires both conditions to hold; OR accepts either one.\nWith > instead of >=, exactly 25 minutes is excluded and no row matches this query."
+          }
+        ],
+        "intro": "U1 has sessions of 25 and 15 minutes. Which row qualifies when U1 must have read for at least 25 minutes?",
+        "code": "SELECT code, title\nFROM log\nWHERE reader = 'U1' AND minutes >= 25;",
+        "codeLanguage": "sql"
+      },
+      {
+        "number": 25,
+        "title": "ORDER BY and LIMIT select the top two",
+        "body": [
+          {
+            "type": "text",
+            "text": "DESC means descending; ASC means ascending. City Atlas (40) comes before Seaside Walk (25).\nChange LIMIT 2 to LIMIT 1 to answer “Which session was longest?”"
+          }
+        ],
+        "intro": "Sort first, then take two rows. For a tie in minutes, use the session ID as the second sort key.",
+        "code": "SELECT title, minutes\nFROM log\nORDER BY minutes DESC, code ASC\nLIMIT 2;",
+        "codeLanguage": "sql"
+      },
+      {
+        "number": 26,
+        "title": "COUNT, SUM and AVG summarize the log",
+        "body": [
+          {
+            "type": "text",
+            "text": "The result is 3 sessions, 80 minutes and an average of 26.7 minutes. ROUND(..., 1) rounds to one decimal place.\nAS gives a result column a name without renaming a column in the source table."
+          }
+        ],
+        "intro": "Compute the session count, total minutes and average duration in one SELECT statement.",
+        "code": "SELECT COUNT(*) AS sessions,\n       SUM(minutes) AS total,\n       ROUND(AVG(minutes), 1) AS average\nFROM log;",
+        "codeLanguage": "sql"
+      },
+      {
+        "number": 27,
+        "title": "GROUP BY forms groups; HAVING filters them",
+        "body": [
+          {
+            "type": "text",
+            "text": "U1 logged two sessions (25 + 15 = 40); U2 logged one. The query returns U1, 2, 40.\nWHERE filters individual rows before grouping. HAVING filters groups using their aggregate values."
+          }
+        ],
+        "intro": "To find readers with at least two sessions, group by reader, then count and sum within each group.",
+        "code": "SELECT reader, COUNT(*) AS sessions, SUM(minutes) AS total\nFROM log\nGROUP BY reader\nHAVING COUNT(*) >= 2;",
+        "codeLanguage": "sql"
+      },
+      {
+        "number": 28,
+        "title": "JOIN looks up a reader’s name by ID",
+        "body": [
+          {
+            "type": "text",
+            "text": "In order: Ann / Seaside Walk, Kai / City Atlas, Ann / Forest Journal.\nAS l and AS r introduce aliases. This JOIN keeps only records that match on both sides."
+          }
+        ],
+        "intro": "Add a reader directory. log.reader holds an ID and readers.name holds a name. Match them using the shared ID.",
+        "code": "CREATE TABLE readers (id TEXT NOT NULL PRIMARY KEY, name TEXT NOT NULL);\nINSERT INTO readers VALUES ('U1', 'Ann'), ('U2', 'Kai');\nSELECT r.name, l.title\nFROM log AS l\nJOIN readers AS r ON r.id = l.reader\nORDER BY l.code;",
+        "codeLanguage": "sql"
+      },
+      {
+        "number": 29,
+        "title": "UPDATE corrects an existing session",
+        "body": [
+          {
+            "type": "text",
+            "text": "The queries return R01, 25 and then R01, 35. SET gives the new value; WHERE selects the target.\nIf the UPDATE omitted WHERE, all three sessions would gain 10 minutes."
+          }
+        ],
+        "intro": "Seaside Walk is missing 10 minutes. Check R01, update it, then read it again.",
+        "code": "SELECT code, minutes FROM log WHERE code = 'R01';\nUPDATE log\nSET minutes = minutes + 10\nWHERE code = 'R01';\nSELECT code, minutes FROM log WHERE code = 'R01';",
+        "codeLanguage": "sql"
+      },
+      {
+        "number": 30,
+        "title": "BEGIN and ROLLBACK: try a deletion and undo it",
+        "body": [
+          {
+            "type": "text",
+            "text": "The counts are 2 and then 3. The deletion is visible in the transaction; ROLLBACK undoes it.\nThe earlier update was already complete, so R01 still has 35 minutes."
+          }
+        ],
+        "intro": "Delete R03 in an explicit transaction. Count the records before and after rolling back.",
+        "code": "BEGIN;\nDELETE FROM log WHERE code = 'R03';\nSELECT COUNT(*) FROM log;\nROLLBACK;\nSELECT COUNT(*) FROM log;",
+        "codeLanguage": "sql"
+      },
+      {
+        "number": 31,
+        "title": "DELETE and COMMIT: keep the deletion",
+        "body": [
+          {
+            "type": "text",
+            "text": "The first query returns Forest Journal. The last returns 2 sessions and 75 minutes (35 + 40).\nDELETE without WHERE removes every row. COMMIT completes this in-memory transaction; the next lab uses a file."
+          }
+        ],
+        "intro": "This time R03 should be removed. Check its title, delete it, commit the transaction, then calculate the total.",
+        "code": "SELECT title FROM log WHERE code = 'R03';\nBEGIN;\nDELETE FROM log WHERE code = 'R03';\nCOMMIT;\nSELECT COUNT(*), SUM(minutes) FROM log;",
+        "codeLanguage": "sql"
+      },
+      {
+        "number": 32,
+        "title": "Passing a query parameter from Python",
+        "body": [
+          {
+            "type": "text",
+            "text": "The ? is a placeholder. (code,) is a one-item tuple. Pass values entered by users the same way.\nThis prints ('Seaside Walk', 35). Looking up the deleted R03 instead would make fetchone() return None."
+          }
+        ],
+        "intro": "SQL filters the rows; Python supplies the ID. This is the final lookup in run_sql_lab.py.",
+        "code": "code = \"R01\"\nsql = \"SELECT title, minutes FROM log WHERE code = ?\"\nrow = con.execute(sql, (code,)).fetchone()\nprint(row)",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 33,
+        "title": "Opening the database returns a Connection",
+        "body": [
+          {
+            "type": "text",
+            "text": "con is the connection used to send SQL to SQLite. A missing database file is created on connection.\nRead the full path printed by the script so you can find the same database again."
+          }
+        ],
+        "intro": "sqlite_lab.py · Start here. reading_01.db will be stored in the terminal’s current working directory.",
+        "code": "import sqlite3\nfrom pathlib import Path\n\npath = Path(\"reading_01.db\")\ncon = sqlite3.connect(path)\nprint(path.resolve())",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 34,
+        "title": "CREATE TABLE sets rules for incoming data",
+        "body": [
+          {
+            "type": "text",
+            "text": "PRIMARY KEY makes the code unique; NOT NULL requires a value; CHECK rejects negative minutes.\nIF NOT EXISTS skips creation if the table already exists."
+          }
+        ],
+        "intro": "sqlite_lab.py · Continue the same file. Give each session a code, a title and a duration in minutes.",
+        "code": "con.execute(\"\"\"\n    CREATE TABLE IF NOT EXISTS readings (\n        code TEXT NOT NULL PRIMARY KEY,\n        title TEXT NOT NULL,\n        minutes INTEGER NOT NULL CHECK (minutes >= 0)\n    )\n\"\"\")",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 35,
+        "title": "Binding values for three inserts",
+        "body": [
+          {
+            "type": "text",
+            "text": "Each ? stands for a bound value. executemany runs the statement once for each record.\nWith this connection’s settings, a successful with block commits. An exception leaving the block triggers rollback."
+          }
+        ],
+        "intro": "sqlite_lab.py · Continue. Each tuple’s values must follow the column order in INSERT.",
+        "code": "records = [\n    (\"R01\", \"Seaside Walk\", 25),\n    (\"R02\", \"City Atlas\", 40),\n    (\"R03\", \"Forest Journal\", 15),\n]\nsql = \"INSERT INTO readings (code, title, minutes) VALUES (?, ?, ?)\"\nwith con:\n    con.executemany(sql, records)",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 36,
+        "title": "Filter with WHERE, then sort by duration",
+        "body": [
+          {
+            "type": "text",
+            "text": "The loop prints City Atlas 40, then Seaside Walk 25. DESC sorts highest first; code breaks ties in ascending order.\nThe comma in (25,) creates the one-item tuple that supplies the query parameter."
+          }
+        ],
+        "intro": "sqlite_lab.py · Continue. Find sessions lasting at least 25 minutes, longest first.",
+        "code": "query = \"\"\"\n    SELECT title, minutes FROM readings\n    WHERE minutes >= ? ORDER BY minutes DESC, code ASC\n\"\"\"\ncursor = con.execute(query, (25,))\nfor title, minutes in cursor:\n    print(title, minutes)",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 37,
+        "title": "fetchone() returns one row, or None",
+        "body": [
+          {
+            "type": "text",
+            "text": "The first print shows ('Seaside Walk', 25); the second shows None. Check for a match before indexing row[0].\nUse fetchall() for a list containing all remaining rows."
+          }
+        ],
+        "intro": "sqlite_lab.py · Continue. A cursor lets you read results one row at a time or fetch them together.",
+        "code": "by_code = \"SELECT title, minutes FROM readings WHERE code = ?\"\nrow = con.execute(by_code, (\"R01\",)).fetchone()\nprint(row)\nmissing = con.execute(by_code, (\"R99\",)).fetchone()\nprint(missing)",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 38,
+        "title": "Update R01 and read it back",
+        "body": [
+          {
+            "type": "text",
+            "text": "Expect 1, then ('Seaside Walk', 35). SET describes the change and WHERE selects the session.\nWithout WHERE, every row would gain 10 minutes. Repeating this increment adds another 10."
+          }
+        ],
+        "intro": "sqlite_lab.py · Continue. Add the missing 10 minutes to Seaside Walk, changing only R01 from 25 to 35.",
+        "code": "with con:\n    changed = con.execute(\n        \"UPDATE readings SET minutes = minutes + ? WHERE code = ?\",\n        (10, \"R01\"),\n    )\nprint(changed.rowcount)\nprint(con.execute(by_code, (\"R01\",)).fetchone())",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 39,
+        "title": "A failed transaction rolls back its earlier change",
+        "body": [
+          {
+            "type": "text",
+            "text": "The second UPDATE violates CHECK. The exception leaves the with block, so the first change is rolled back too.\nR01 still reads ('Seaside Walk', 35). Catch the exception outside the with block."
+          }
+        ],
+        "intro": "sqlite_lab.py · Continue. Set R01 to 99, then deliberately give R02 a negative duration. What happens to R01?",
+        "code": "try:\n    with con:\n        con.execute(\"UPDATE readings SET minutes=99 WHERE code='R01'\")\n        con.execute(\"UPDATE readings SET minutes=-1 WHERE code='R02'\")\nexcept sqlite3.IntegrityError:\n    print(\"Invalid minutes; transaction rolled back\")\nprint(con.execute(by_code, (\"R01\",)).fetchone())",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 40,
+        "title": "Delete R03 and count what remains",
+        "body": [
+          {
+            "type": "text",
+            "text": "One row is deleted. The summary (2, 75) means two sessions totaling 35 + 40 minutes.\nwith con manages the transaction; con.close() closes the connection. Committed data remains in the .db file."
+          }
+        ],
+        "intro": "sqlite_lab.py · Final block. Save the script and run python sqlite_lab.py in your active .venv.",
+        "code": "with con:\n    removed = con.execute(\"DELETE FROM readings WHERE code = ?\", (\"R03\",))\nprint(removed.rowcount)\nsummary = \"SELECT COUNT(*), SUM(minutes) FROM readings\"\nprint(con.execute(summary).fetchone())\ncon.close()",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 41,
+        "title": "Starting a local MongoDB service",
+        "body": [
+          {
+            "type": "text",
+            "text": "Run the first line as one command. The 127.0.0.1 binding permits local connections only; reading-data holds the files.\nWhen docker ps lists reading-mongo, continue. To use an existing service, use its connection URI instead."
+          }
+        ],
+        "intro": "Terminal · Start Docker Desktop or Docker Engine on your own computer, then run these commands.",
+        "code": "docker run -d --name reading-mongo -p 127.0.0.1:27017:27017 -v reading-data:/data/db mongo:8.0\ndocker ps",
+        "codeLanguage": "shell"
+      },
+      {
+        "number": 42,
+        "title": "Installing the PyMongo driver",
+        "body": [
+          {
+            "type": "text",
+            "text": "The second command prints a 4.x version. PyMongo talks to the database service started on the previous slide.\nUse docker stop reading-mongo after class and docker start reading-mongo when you return."
+          }
+        ],
+        "intro": "Terminal · Activate .venv inside reading_lab, then install PyMongo in that environment.",
+        "code": "python -m pip install \"pymongo>=4,<5\"\npython -c \"import pymongo; print(pymongo.version)\"",
+        "codeLanguage": "shell"
+      },
+      {
+        "number": 43,
+        "title": "Databases, collections, documents and fields",
+        "body": [
+          {
+            "type": "heading",
+            "text": "Database and collection"
+          },
+          {
+            "type": "text",
+            "text": "reading_lab is the database and readings_01 is a collection inside it.\nA collection can hold many reading-session documents."
+          },
+          {
+            "type": "heading",
+            "text": "Document and ID"
+          },
+          {
+            "type": "text",
+            "text": "Every document has a unique _id. We use the string R01 to match SQLite.\nIf you omit _id, the driver normally generates an ObjectId."
+          },
+          {
+            "type": "heading",
+            "text": "Fields and types"
+          },
+          {
+            "type": "text",
+            "text": "title is text, minutes is an integer and tags is an array of strings.\nFor numeric comparisons and sums, store 25 as a number, not the string \"25\"."
+          }
+        ],
+        "intro": "Represent R01 as a document. Use a Python dict for its fields and a list for its tags."
+      },
+      {
+        "number": 44,
+        "title": "Create a MongoClient and check the connection",
+        "body": [
+          {
+            "type": "text",
+            "text": "A successful ping prints 1.0. The server selection timeout is 5,000 milliseconds.\nbooks is the collection handle. The first write creates the database and collection if needed. Keep credentials out of code."
+          }
+        ],
+        "intro": "mongo_lab.py · Start here. Use the local service by default or set MONGODB_URI to another connection URI.",
+        "code": "import os\nfrom pymongo import MongoClient\n\nuri = os.getenv(\"MONGODB_URI\", \"mongodb://127.0.0.1:27017/\")\nclient = MongoClient(uri, serverSelectionTimeoutMS=5000)\nprint(client.admin.command(\"ping\")[\"ok\"])\nbooks = client[\"reading_lab\"][\"readings_01\"]",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 45,
+        "title": "insert_many() writes three documents",
+        "body": [
+          {
+            "type": "text",
+            "text": "A first run on an empty collection prints ['R01', 'R02', 'R03']. Use insert_one() for a single document.\nAn existing _id cannot be inserted again. To rerun the full lab, choose a new collection on the previous slide."
+          }
+        ],
+        "intro": "mongo_lab.py · Continue. Unlike a positional tuple, a dictionary names the field for each value.",
+        "code": "docs = [\n    {\"_id\": \"R01\", \"title\": \"Seaside Walk\", \"minutes\": 25, \"tags\": [\"Essays\"]},\n    {\"_id\": \"R02\", \"title\": \"City Atlas\", \"minutes\": 40, \"tags\": [\"Travel\"]},\n    {\"_id\": \"R03\", \"title\": \"Forest Journal\", \"minutes\": 15, \"tags\": [\"Nature\"]},\n]\nadded = books.insert_many(docs)\nprint(added.inserted_ids)",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 46,
+        "title": "What do the two dictionaries in find() do?",
+        "body": [
+          {
+            "type": "text",
+            "text": "$gte means greater than or equal to. In the projection, 1 includes a field and _id: 0 omits the ID.\nSort with -1 for descending and 1 for ascending. As in SQLite, the results are City Atlas 40 and Seaside Walk 25."
+          }
+        ],
+        "intro": "mongo_lab.py · Continue. For sessions of at least 25 minutes, tell MongoDB what to match and which fields to return.",
+        "code": "condition = {\"minutes\": {\"$gte\": 25}}\nfields = {\"_id\": 0, \"title\": 1, \"minutes\": 1}\nmatches = books.find(condition, fields)\nfor book in matches.sort([(\"minutes\", -1), (\"_id\", 1)]):\n    print(book[\"title\"], book[\"minutes\"])",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 47,
+        "title": "Find one document or match an array element",
+        "body": [
+          {
+            "type": "text",
+            "text": "Expect Seaside Walk ['Essays'], then None, then R01. Handle None before accessing a missing document’s fields.\nFor an array field, {\"tags\": \"Essays\"} matches documents containing that element."
+          }
+        ],
+        "intro": "mongo_lab.py · Continue. Look up a session by its ID, then find sessions with the Essays tag.",
+        "code": "one = books.find_one({\"_id\": \"R01\"})\nprint(one[\"title\"], one[\"tags\"])\nprint(books.find_one({\"_id\": \"R99\"}))\nfor book in books.find({\"tags\": \"Essays\"}):\n    print(book[\"_id\"])",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 48,
+        "title": "$inc adds minutes and $set assigns a value",
+        "body": [
+          {
+            "type": "text",
+            "text": "Expect 1 1, then 35 True. matched_count counts documents found; modified_count counts those changed.\nThe update to this one document is atomic. Repeating $inc would add another 10."
+          }
+        ],
+        "intro": "mongo_lab.py · Continue. Adjust R01’s duration and mark the session as checked in the same document.",
+        "code": "change = {\"$inc\": {\"minutes\": 10}, \"$set\": {\"checked\": True}}\nupdated = books.update_one({\"_id\": \"R01\"}, change)\nprint(updated.matched_count, updated.modified_count)\none = books.find_one({\"_id\": \"R01\"})\nprint(one[\"minutes\"], one[\"checked\"])",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 49,
+        "title": "Is setting a field to its existing value a change?",
+        "body": [
+          {
+            "type": "text",
+            "text": "The first pair is 1 0: R01 matched, but the value was already True. The second is 0 0: R99 did not match.\nA missing document is not inserted by default. modified_count alone cannot distinguish these cases."
+          }
+        ],
+        "intro": "mongo_lab.py · Continue. R01 already has checked set to True. Predict the counts before checking the output.",
+        "code": "again = books.update_one(\n    {\"_id\": \"R01\"}, {\"$set\": {\"checked\": True}}\n)\nprint(again.matched_count, again.modified_count)\nmissing = books.update_one({\"_id\": \"R99\"}, {\"$set\": {\"checked\": True}})\nprint(missing.matched_count, missing.modified_count)",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 50,
+        "title": "delete_one() removes a specific document",
+        "body": [
+          {
+            "type": "text",
+            "text": "Expect Forest Journal, then 1, then None. deleted_count is the number of documents actually removed.\nUsing the unique _id as the filter identifies exactly which document to remove."
+          }
+        ],
+        "intro": "mongo_lab.py · Continue. Read the title first, delete by the same unique ID, then query once more.",
+        "code": "target = {\"_id\": \"R03\"}\nprint(books.find_one(target)[\"title\"])\ndeleted = books.delete_one(target)\nprint(deleted.deleted_count)\nprint(books.find_one(target))",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 51,
+        "title": "Aggregate the remaining data and close the client",
+        "body": [
+          {
+            "type": "text",
+            "text": "_id: None groups all documents together. Add 1 per document for the count and add $minutes for the duration.\nExpect 2 75. client.close() releases connection resources; the MongoDB service retains the data."
+          }
+        ],
+        "intro": "mongo_lab.py · Final block. Save it and run python mongo_lab.py. Compare the totals with SQLite.",
+        "code": "group = {\"_id\": None,\n         \"count\": {\"$sum\": 1},\n         \"total\": {\"$sum\": \"$minutes\"}}\nfor item in books.aggregate([{\"$group\": group}]):\n    print(item[\"count\"], item[\"total\"])\nclient.close()",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 52,
+        "title": "The same question in two query languages",
+        "body": [
+          {
+            "type": "heading",
+            "text": "Which records?"
+          },
+          {
+            "type": "text",
+            "text": "SQL: WHERE minutes >= ? with (25,)\nPyMongo: {\"minutes\": {\"$gte\": 25}}"
+          },
+          {
+            "type": "heading",
+            "text": "Which fields?"
+          },
+          {
+            "type": "text",
+            "text": "SQL: SELECT title, minutes\nPyMongo: {\"title\": 1, \"minutes\": 1, \"_id\": 0}"
+          },
+          {
+            "type": "heading",
+            "text": "In what order?"
+          },
+          {
+            "type": "text",
+            "text": "SQL: ORDER BY minutes DESC, code ASC\nPyMongo: .sort([(\"minutes\", -1), (\"_id\", 1)])"
+          }
+        ],
+        "intro": "Break a query into three decisions: which records, which fields, and in what order?"
+      },
+      {
+        "number": 53,
+        "title": "Choosing a database for the application",
+        "body": [
+          {
+            "type": "heading",
+            "text": "A personal offline log"
+          },
+          {
+            "type": "text",
+            "text": "SQLite is a good starting point for an offline tool on one computer.\nIt stores the log in a file and requires no separate database service."
+          },
+          {
+            "type": "heading",
+            "text": "Frequent joins"
+          },
+          {
+            "type": "text",
+            "text": "If readers, books and loans have separate tables and queries join them by\nkey, SQLite can express these relationships directly."
+          },
+          {
+            "type": "heading",
+            "text": "Varying optional details"
+          },
+          {
+            "type": "text",
+            "text": "If reviews contain different tags, notes or sources and are read as a unit,\nconsider MongoDB documents and the cost of operating the service."
+          }
+        ],
+        "intro": "Imagine turning the reading log into a small application. Where it runs and what it queries influence the choice."
+      },
+      {
+        "number": 54,
+        "title": "Diagnosing SQLite errors",
+        "body": [
+          {
+            "type": "heading",
+            "text": "no such table"
+          },
+          {
+            "type": "text",
+            "text": "Check that table creation ran first and that the script opened the expected\n.db file. Compare the full path printed on slide 33."
+          },
+          {
+            "type": "heading",
+            "text": "IntegrityError"
+          },
+          {
+            "type": "text",
+            "text": "Check for duplicate IDs or negative minutes. Before rerunning the full\nscript, change reading_01.db to an unused filename."
+          },
+          {
+            "type": "heading",
+            "text": "database is locked"
+          },
+          {
+            "type": "text",
+            "text": "Another program may be writing. Let it commit or roll back, then retry.\nKeep write transactions short."
+          }
+        ],
+        "intro": "First check the working directory and database path. Then distinguish a data error from a file-access problem."
+      },
+      {
+        "number": 55,
+        "title": "MongoDB: driver, service or duplicate data?",
+        "body": [
+          {
+            "type": "heading",
+            "text": "Module not found"
+          },
+          {
+            "type": "text",
+            "text": "With .venv active, run python -m pip show pymongo. If it is missing,\ninstall it with the same interpreter using slide 42."
+          },
+          {
+            "type": "heading",
+            "text": "Connection timeout"
+          },
+          {
+            "type": "text",
+            "text": "Check docker ps -a, then compare the URI with the host port. If 27017\nis busy, choose another host port on the left of the mapping and update the URI."
+          },
+          {
+            "type": "heading",
+            "text": "Duplicate key"
+          },
+          {
+            "type": "text",
+            "text": "An _id must be unique within its collection. If insert_many encounters\na duplicate, earlier inserts may already exist. Check before retrying."
+          }
+        ],
+        "intro": "Start with the failing line. Import errors, connection errors and write errors call for different checks."
+      },
+      {
+        "number": 56,
+        "title": "Predict three results before running the code",
+        "body": [
+          {
+            "type": "heading",
+            "text": "01 · Change a filter"
+          },
+          {
+            "type": "text",
+            "text": "On slide 36, replace (25,) with (26,). Which book will be printed?"
+          },
+          {
+            "type": "heading",
+            "text": "02 · Check a transaction"
+          },
+          {
+            "type": "text",
+            "text": "On slide 39, R01 briefly had 99 minutes. Why does the later query read 35?"
+          },
+          {
+            "type": "heading",
+            "text": "03 · Read update results"
+          },
+          {
+            "type": "text",
+            "text": "On slide 49, both updates have modified_count equal to 0. Which attribute\ndistinguishes an unchanged match from a missing record?"
+          }
+        ],
+        "intro": "Use the initial data on slide 17. All three questions can be answered by reading the code."
+      },
+      {
+        "number": 57,
+        "title": "Answers and reasoning",
+        "body": [
+          {
+            "type": "heading",
+            "text": "01 · City Atlas only"
+          },
+          {
+            "type": "text",
+            "text": "40 is at least 26; 25 and 15 do not qualify. Sorting changes the order,\nnot the number of matching rows."
+          },
+          {
+            "type": "heading",
+            "text": "02 · Transaction rollback"
+          },
+          {
+            "type": "text",
+            "text": "The negative value for R02 violates CHECK. When the exception leaves\nthe with block, the earlier change to R01 in the same transaction is undone."
+          },
+          {
+            "type": "heading",
+            "text": "03 · matched_count"
+          },
+          {
+            "type": "text",
+            "text": "It is 1 when R01 is found with the same value, and 0 when R99 is absent.\nmodified_count is 0 in both cases."
+          }
+        ],
+        "intro": "Identify the filter, determine which changes took effect, then inspect the result object."
+      },
+      {
+        "number": 58,
+        "title": "Official documentation and example index",
+        "body": [
+          {
+            "type": "heading",
+            "text": "Python standard library"
+          },
+          {
+            "type": "text",
+            "text": "sqlite3: connections, cursors, parameter binding and transactions.\ndocs.python.org/3/library/sqlite3.html"
+          },
+          {
+            "type": "heading",
+            "text": "MongoDB Python driver"
+          },
+          {
+            "type": "text",
+            "text": "PyMongo CRUD Operations: reads, updates and deletes.\nmongodb.com/docs/languages/python/pymongo-driver/current/crud/"
+          },
+          {
+            "type": "heading",
+            "text": "MongoDB local service"
+          },
+          {
+            "type": "text",
+            "text": "Docker Hub documentation for the mongo image and startup options.\nhub.docker.com/_/mongo"
+          }
+        ],
+        "intro": "Look up a function or method to check its parameters, return value and exceptions."
+      }
+    ]
+  },
+  "ja": {
+    "source": "Pythonから直接使う SQLiteとMongoDB",
+    "download": "databases-ja.pptx",
+    "examples": "database-lab-ja.zip",
+    "sourceLanguage": "ja",
+    "slides": [
+      {
+        "number": 1,
+        "title": "Pythonから直接使う SQLiteとMongoDB",
+        "body": [
+          {
+            "type": "text",
+            "text": "Pythonプログラミング　／　データベース実習"
+          },
+          {
+            "type": "text",
+            "text": "3件の読書記録を保存し、今週もっとも長く読んだ本を調べます。"
+          },
+          {
+            "type": "text",
+            "text": "sqlite3   /   PyMongo"
+          }
+        ]
+      },
+      {
+        "number": 2,
+        "title": "Pythonを終了すると、読書記録はどうなる？",
+        "body": [
+          {
+            "type": "heading",
+            "text": "データベース（DB）"
+          },
+          {
+            "type": "text",
+            "text": "データを整理して保存し、後から検索・更新できます。\nここでは「どの回に、どの本を、何分読んだか」を保存します。"
+          },
+          {
+            "type": "heading",
+            "text": "データベース管理システム"
+          },
+          {
+            "type": "text",
+            "text": "DBMSはデータの読み書き、検索、制約の検査を行うソフトウェアです。\nSQLiteはプログラム内で動き、MongoDBはサービスとして要求に応じます。"
+          },
+          {
+            "type": "heading",
+            "text": "Pythonの役割"
+          },
+          {
+            "type": "text",
+            "text": "Pythonは処理を決め、sqlite3またはPyMongoを通じて実行します。\nプログラムを終了しても、保存済みのデータは再び読み込めます。"
+          }
+        ],
+        "intro": "リストを作れば今日の読書時間を計算できます。明日も記録を続けるには、データを保存する必要があります。"
+      },
+      {
+        "number": 3,
+        "title": "データを扱う4つの基本操作：CRUD",
+        "body": [
+          {
+            "type": "table",
+            "rows": [
+              [
+                "操作",
+                "利用者がしたいこと",
+                "R01の状態"
+              ],
+              [
+                "Create　作成",
+                "『海辺の散歩』を25分読んだと登録",
+                "新しい記録ができる"
+              ],
+              [
+                "Read　読取",
+                "R01の書名と読書時間を確認",
+                "25分のまま"
+              ],
+              [
+                "Update　更新",
+                "記入漏れの10分を追加",
+                "25分から35分へ"
+              ],
+              [
+                "Delete　削除",
+                "誤って登録した記録を削除",
+                "R01を検索すると該当なし"
+              ]
+            ]
+          },
+          {
+            "type": "text",
+            "text": "ここでのCreateは記録の追加です。SQLのCREATE TABLEは表の構造を定義します。"
+          }
+        ],
+        "intro": "読書記録R01で考えます。IDは同じ読書を指し、書名と分数はその内容を表します。"
+      },
+      {
+        "number": 4,
+        "title": "データベースが解決する問題",
+        "body": [
+          {
+            "type": "heading",
+            "text": "検索を速くする索引"
+          },
+          {
+            "type": "text",
+            "text": "番号順の目録と同じように、索引があると調べるデータを絞れます。\nただし、データの追加や変更に伴い、対応する索引も更新されます。"
+          },
+          {
+            "type": "heading",
+            "text": "入力を確かめる制約"
+          },
+          {
+            "type": "text",
+            "text": "IDの重複や負の読書時間は、書き込む時点で検出したい誤りです。\n主キー、検査制約、ドキュメント検証で規則を定められます。"
+          },
+          {
+            "type": "heading",
+            "text": "同時更新を扱う仕組み"
+          },
+          {
+            "type": "text",
+            "text": "2人が25を読み、各自の計算結果を書き戻すと、片方の変更が失われます。\nデータベース側で現在値に10を加算すれば、この競合を避けられます。"
+          }
+        ],
+        "intro": "3件の記録が3万件になり、2人が同時に編集すると、検索速度、入力規則、更新の競合が問題になります。"
+      },
+      {
+        "number": 5,
+        "title": "1冊の本に複数の読書記録を結び付ける",
+        "body": [
+          {
+            "type": "table",
+            "rows": [
+              [
+                "表",
+                "主キー（各行を識別）",
+                "列と値の例"
+              ],
+              [
+                "books　書籍",
+                "book_id = B01",
+                "title = 海辺の散歩"
+              ],
+              [
+                "readings　読書記録",
+                "code = R01",
+                "book_id = B01、minutes = 25"
+              ],
+              [
+                "readings　読書記録",
+                "code = R04",
+                "book_id = B01、minutes = 30"
+              ]
+            ]
+          },
+          {
+            "type": "text",
+            "text": "外部キーreadings.book_idはbooks.book_idを参照します。SQLiteでは接続ごとにPRAGMA foreign_keys = ONで検査を有効にできます。"
+          }
+        ],
+        "intro": "関係データベースでは、表の各行が1件の記録、列がその属性です。ここでは書籍IDで2つの表を結びます。"
+      },
+      {
+        "number": 6,
+        "title": "JOINで2つの表から書名を取り出す",
+        "body": [
+          {
+            "type": "text",
+            "text": "ONで同じ書籍IDを結ぶと、R01とR04の両方が『海辺の散歩』に対応します。\nGROUP BYで同じ本の行をまとめ、SUMで25と30を合計します。答えは55分です。"
+          }
+        ],
+        "intro": "「B01の本を合計何分読んだか」を、前ページの2つの表で調べます。",
+        "code": "SELECT b.title, SUM(r.minutes) AS total\nFROM books AS b\nJOIN readings AS r ON r.book_id = b.book_id\nWHERE b.book_id = 'B01'\nGROUP BY b.book_id, b.title;",
+        "codeLanguage": "sql"
+      },
+      {
+        "number": 7,
+        "title": "NoSQLが扱うさまざまなモデル",
+        "body": [
+          {
+            "type": "heading",
+            "text": "データの持ち方"
+          },
+          {
+            "type": "text",
+            "text": "1件をドキュメント、キーと値、パーティション内の行、あるいは\nグラフのノードと関係として表せます。MongoDBはドキュメント型です。"
+          },
+          {
+            "type": "heading",
+            "text": "典型的な検索"
+          },
+          {
+            "type": "text",
+            "text": "買い物かごは顧客IDで丸ごと取得し、SNSでは友人関係をたどって\n友人の友人を探します。問いに応じて使いやすい構造が変わります。"
+          },
+          {
+            "type": "heading",
+            "text": "何を比較する？"
+          },
+          {
+            "type": "text",
+            "text": "検証方法、複数レコードの一括更新、複数マシンへの分割は製品と構成に\n依存します。まず、実際に答えたい問いを書き出してみましょう。"
+          }
+        ],
+        "intro": "NoSQLは「Not Only SQL」とも呼ばれ、関係モデル以外の方法でデータを整理する仕組みを含みます。"
+      },
+      {
+        "number": 8,
+        "title": "4種類のNoSQLモデルと用途",
+        "body": [
+          {
+            "type": "table",
+            "rows": [
+              [
+                "モデルと代表製品",
+                "データの構造",
+                "用途の例"
+              ],
+              [
+                "キー・バリュー型　Redis",
+                "一意のキーで値を取得",
+                "セッションIDでログイン状態を取得"
+              ],
+              [
+                "ドキュメント型　MongoDB",
+                "フィールド、配列、埋め込み文書",
+                "感想とタグをまとめて表示"
+              ],
+              [
+                "ワイドカラム型　Cassandra",
+                "分割キーで行をまとめ、内部で整列",
+                "機器と日付でイベントを検索"
+              ],
+              [
+                "グラフ型　Neo4j",
+                "対象をノード、関係をエッジで表現",
+                "友人関係を2段たどり推薦者を探す"
+              ]
+            ]
+          }
+        ],
+        "intro": "学内の読書サービスでも、ログイン状態、感想、機器のイベント、推薦では検索方法が異なります。"
+      },
+      {
+        "number": 9,
+        "title": "読書記録を1つのドキュメントで表す",
+        "body": [
+          {
+            "type": "text",
+            "text": "bookは埋め込みドキュメント、tagsは配列です。R01を読むと書名と2つのタグを一度に取得できます。\n同じ書名を複数の記録に持たせる場合、改題時にどの記録を更新するか決める必要があります。"
+          }
+        ],
+        "intro": "書名、読書時間、タグを一緒に表示する画面を考えます。次のPython辞書をドキュメントとして保存します。",
+        "code": "reading = {\n    \"_id\": \"R01\",\n    \"book\": {\"id\": \"B01\", \"title\": \"海辺の散歩\"},\n    \"minutes\": 25,\n    \"tags\": [\"随筆\", \"旅行\"]\n}",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 10,
+        "title": "本が改題されたら、どこを直す？",
+        "body": [
+          {
+            "type": "table",
+            "rows": [
+              [
+                "設計",
+                "画面を表示するとき",
+                "改題されたとき"
+              ],
+              [
+                "SQLiteで表を分割",
+                "book_idで書籍と記録を結合",
+                "booksのB01の行を更新"
+              ],
+              [
+                "MongoDBに書名を埋め込む",
+                "1件の読書記録から書名を取得",
+                "現題を表示するなら全コピーを更新"
+              ],
+              [
+                "MongoDBで書籍を参照",
+                "book_idで書籍を別途取得。\n$lookupでも結合可能",
+                "書籍ドキュメント1件を更新"
+              ]
+            ]
+          },
+          {
+            "type": "text",
+            "text": "読んだ当時の書名を残す日誌なら、旧題を保存しておくことで、その時点の記録を再現できます。"
+          }
+        ],
+        "intro": "『海辺の散歩』が『海岸の散歩』に改題されました。書名の保存先と、記録したい時点によって更新箇所が決まります。"
+      },
+      {
+        "number": 11,
+        "title": "「気分」フィールドを後から加えると？",
+        "body": [
+          {
+            "type": "heading",
+            "text": "SQLiteで列を追加"
+          },
+          {
+            "type": "text",
+            "text": "ALTER TABLEでNULLを許すmood列を追加できます。\n既存行にも列ができ、未入力の行はIS NULLで検索できます。"
+          },
+          {
+            "type": "heading",
+            "text": "MongoDBで個別に追加"
+          },
+          {
+            "type": "text",
+            "text": "新しい文書だけにmoodを保存できます。古い文書にはなくても構いません。\nPythonではdoc.get(\"mood\", \"未入力\")で未設定に対応できます。"
+          },
+          {
+            "type": "heading",
+            "text": "データ品質の共通課題"
+          },
+          {
+            "type": "text",
+            "text": "minutesに数値25と文字列を混在させると、集計が狂うことがあります。\nSQLiteでは型と制約、MongoDBでは検証規則で型や範囲を指定できます。"
+          }
+        ],
+        "intro": "これまでの記録にはID、書名、分数だけがあります。一部の感想にmoodを加える場合を考えます。"
+      },
+      {
+        "number": 12,
+        "title": "貸出と在庫の更新を一緒に確定するには？",
+        "body": [
+          {
+            "type": "heading",
+            "text": "トランザクション"
+          },
+          {
+            "type": "text",
+            "text": "関連する書き込みをひとまとまりにし、成功時にまとめて確定し、\n失敗時には取り消します。すべて成功するか、すべて取り消す性質を原子性と呼びます。"
+          },
+          {
+            "type": "heading",
+            "text": "SQLiteの場合"
+          },
+          {
+            "type": "text",
+            "text": "貸出行の追加と在庫の更新を1つのトランザクションに入れます。\n在庫が足りるかを確認し、差し引けなければ貸出全体を取り消します。"
+          },
+          {
+            "type": "heading",
+            "text": "MongoDBの場合"
+          },
+          {
+            "type": "text",
+            "text": "1ドキュメントの更新は原子的です。複数文書のトランザクションは\nレプリカセットまたはシャードクラスタで利用できます。本実習は単一文書を更新します。"
+          }
+        ],
+        "intro": "最後の1冊を貸すときは、貸出記録を追加して在庫を1冊減らします。片方だけ成功すると数が合いません。"
+      },
+      {
+        "number": 13,
+        "title": "データが増えたら、何が問題かを切り分ける",
+        "body": [
+          {
+            "type": "heading",
+            "text": "検索速度：索引"
+          },
+          {
+            "type": "text",
+            "text": "読者と日付でよく検索するなら、その条件に適した索引を検討し、時間を計測します。\n関係データベースでもMongoDBでも、索引には維持コストがあります。"
+          },
+          {
+            "type": "heading",
+            "text": "容量：シャーディング"
+          },
+          {
+            "type": "text",
+            "text": "読者IDなどを分割キーにして、データを複数のマシンに分散します。\nキーの選び方は負荷の偏りや、検索でアクセスするマシンの数に影響します。"
+          },
+          {
+            "type": "heading",
+            "text": "可用性：レプリケーション"
+          },
+          {
+            "type": "text",
+            "text": "同じデータの複製を複数のノードに保持し、障害時の引き継ぎを可能にします。\n誤削除も複製され得るため、復元できるバックアップも必要です。"
+          }
+        ],
+        "intro": "検索が遅い、容量が足りない、サービスを止められないという問題は、それぞれ対策が異なります。"
+      },
+      {
+        "number": 14,
+        "title": "同じ問い：25分以上読んだ本は？",
+        "body": [
+          {
+            "type": "text",
+            "text": "どちらも分数の降順に並べます。結果は『街の地図』40分、次に『海辺の散歩』25分です。"
+          }
+        ],
+        "intro": "各記録が書名を持つ実習の構造を使います。読書時間は25分、40分、15分で、長い順に表示します。",
+        "snippets": [
+          {
+            "code": "SELECT title, minutes\nFROM readings\nWHERE minutes >= 25\nORDER BY minutes DESC;",
+            "label": "SQLite｜SQL",
+            "language": "sql"
+          },
+          {
+            "code": "books.find(\n    {\"minutes\": {\"$gte\": 25}},\n    {\"_id\": 0, \"title\": 1, \"minutes\": 1}\n).sort(\"minutes\", -1)",
+            "label": "MongoDB｜PyMongo",
+            "language": "python"
+          }
+        ]
+      },
+      {
+        "number": 15,
+        "title": "読書サービスの3つの機能には何を選ぶ？",
+        "body": [
+          {
+            "type": "heading",
+            "text": "オフラインの読書日誌"
+          },
+          {
+            "type": "text",
+            "text": "自分のPCで持ち運べるファイルを使うなら、SQLiteをアプリ内で開けます。\n月別の読書時間なども、SQLのグループ化で計算できます。"
+          },
+          {
+            "type": "heading",
+            "text": "読書コミュニティの感想"
+          },
+          {
+            "type": "text",
+            "text": "感想とタグ、短評を一緒に表示するなら、適度な量の関連情報をMongoDBに\n埋め込めます。増え続けるコメントは別に保存し、ページごとに読み出せます。"
+          },
+          {
+            "type": "heading",
+            "text": "学内の貸出・延滞報告"
+          },
+          {
+            "type": "text",
+            "text": "読者、蔵書、貸出を何度も照合するなら、表、外部キー、トランザクションで\n規則を表せます。多数が利用する場合は書き込み量と運用構成も検討します。"
+          }
+        ],
+        "intro": "よく読むデータ、一緒に更新するデータ、必ず守る規則を挙げてから、適切なモデルを選びます。"
+      },
+      {
+        "number": 16,
+        "title": "同じ読書記録を2つの方法で保存する",
+        "body": [
+          {
+            "type": "heading",
+            "text": "SQLite｜表"
+          },
+          {
+            "type": "text",
+            "text": "1行が1件の記録です。各行に共通する書名、分数などの列を定義し、\nSQLで読み取りや更新の対象を指定します。"
+          },
+          {
+            "type": "heading",
+            "text": "MongoDB｜コレクション"
+          },
+          {
+            "type": "text",
+            "text": "1ドキュメントが1件の記録です。Pythonの辞書が文書に対応し、\n各フィールドには文字列、数値、タグの配列などを保存できます。"
+          },
+          {
+            "type": "heading",
+            "text": "Pythonからの接続"
+          },
+          {
+            "type": "text",
+            "text": "sqlite3はプログラム内でファイルを開きます。\nPyMongoは実行中のMongoDBサービスに接続します。"
+          }
+        ],
+        "intro": "1件は今週の読書1回分です。最長の読書を探し、入力ミスがあれば訂正できるようにします。"
+      },
+      {
+        "number": 17,
+        "title": "結果を確かめるための3件の記録",
+        "body": [
+          {
+            "type": "heading",
+            "text": "R01　海辺の散歩"
+          },
+          {
+            "type": "text",
+            "text": "25分"
+          },
+          {
+            "type": "heading",
+            "text": "R02　街の地図"
+          },
+          {
+            "type": "text",
+            "text": "40分"
+          },
+          {
+            "type": "heading",
+            "text": "R03　森の日記"
+          },
+          {
+            "type": "text",
+            "text": "15分"
+          },
+          {
+            "type": "text",
+            "text": "合計は80分です。25分以上の記録は2件、最長は『街の地図』です。"
+          }
+        ],
+        "intro": "IDは1回の読書を識別します。同じ本でも、別の日に読めば別の記録です。読書時間は整数で表します。"
+      },
+      {
+        "number": 18,
+        "title": "作業フォルダーと.venvの準備",
+        "body": [
+          {
+            "type": "heading",
+            "text": "Windows PowerShell"
+          },
+          {
+            "type": "text",
+            "text": "py -m venv .venv\n.\\.venv\\Scripts\\Activate.ps1"
+          },
+          {
+            "type": "heading",
+            "text": "macOS／Linux"
+          },
+          {
+            "type": "text",
+            "text": "python3 -m venv .venv\nsource .venv/bin/activate"
+          },
+          {
+            "type": "heading",
+            "text": "環境を確認"
+          },
+          {
+            "type": "text",
+            "text": "python -c \"import sys; print(sys.executable)\"\nこのプロジェクトの.venvを含むパスが表示されます。"
+          },
+          {
+            "type": "text",
+            "text": "以降のインストールコマンドは、有効化した環境のターミナルで実行します。"
+          }
+        ],
+        "intro": "Python 3をインストールし、空のreading_labフォルダーを作って移動します。OSに合ったコマンドを実行します。"
+      },
+      {
+        "number": 19,
+        "title": "SQL、SQLite、MongoDBを試す順序",
+        "body": [
+          {
+            "type": "heading",
+            "text": "sqlite_lab.py"
+          },
+          {
+            "type": "text",
+            "text": "33〜40ページのコードを順番につなげたファイルです。\n実行コマンド：python sqlite_lab.py"
+          },
+          {
+            "type": "heading",
+            "text": "mongo_lab.py"
+          },
+          {
+            "type": "text",
+            "text": "MongoDBの準備後に44〜51ページのコードをまとめて実行します。\n実行コマンド：python mongo_lab.py"
+          },
+          {
+            "type": "heading",
+            "text": "もう一度練習するには"
+          },
+          {
+            "type": "text",
+            "text": "既存データを残す場合、再実行前に新しいSQLiteファイル名、または\nMongoDBコレクション名に変えて、IDの重複を避けます。"
+          }
+        ],
+        "intro": "database-lab-ja.zipを展開します。次のページでSQLを試し、その後、下記のPythonプログラムを実行します。"
+      },
+      {
+        "number": 20,
+        "title": "SQLは何を操作する言語か",
+        "body": [
+          {
+            "type": "text",
+            "text": "このコマンドはSQLiteでsql_basics.sqlを順番に実行し、検索結果を表示します。\nCREATEは表の定義、INSERT・UPDATE・DELETEはデータの変更、SELECTは読み取りです。\n実行のたびに空のメモリ内データベースを作るので、条件を変えて試せます。"
+          }
+        ],
+        "intro": "SQL（Structured Query Language、構造化問合せ言語）は、必要なデータや加えたい変更を記述する言語です。",
+        "code": "python run_sql_lab.py",
+        "codeLanguage": "shell"
+      },
+      {
+        "number": 21,
+        "title": "CREATE TABLEで記録の構造を定義する",
+        "body": [
+          {
+            "type": "text",
+            "text": "codeは記録の一意なIDです。NOT NULLは必須値、CHECKは0分以上という条件を指定します。\n実行直後の表は空です。SQLは改行や字下げが可能で、セミコロンが文の終わりを示します。"
+          }
+        ],
+        "intro": "1行が1回の読書です。今回はreader列も加え、後で読者ごとの読書量を集計します。",
+        "code": "CREATE TABLE log (\n    code TEXT NOT NULL PRIMARY KEY,\n    reader TEXT NOT NULL,\n    title TEXT NOT NULL,\n    minutes INTEGER NOT NULL CHECK (minutes >= 0)\n);",
+        "codeLanguage": "sql"
+      },
+      {
+        "number": 22,
+        "title": "INSERT INTOで3件の読書を登録する",
+        "body": [
+          {
+            "type": "text",
+            "text": "3組の括弧が3行を表します。U1が2回、U2が1回読んでおり、25、40、15は整数です。\n読者IDは繰り返せますが、同じR01を再度挿入すると主キーの一意性に違反します。"
+          }
+        ],
+        "intro": "最初に列名を書き、同じ順番で値を指定します。書名、読者ID、記録IDなどの文字列は一重引用符で囲みます。",
+        "code": "INSERT INTO log (code, reader, title, minutes)\nVALUES\n    ('R01', 'U1', '海辺の散歩', 25),\n    ('R02', 'U2', '街の地図', 40),\n    ('R03', 'U1', '森の日記', 15);",
+        "codeLanguage": "sql"
+      },
+      {
+        "number": 23,
+        "title": "SELECTで列、FROMで表を選ぶ",
+        "body": [
+          {
+            "type": "text",
+            "text": "ID順の結果は『海辺の散歩』25、『街の地図』40、『森の日記』15です。\nSELECT * は全列を取得します。表示順を保証するにはORDER BYを指定します。"
+          }
+        ],
+        "intro": "書名と分数だけを表示するには、その2列を指定します。",
+        "code": "SELECT title, minutes\nFROM log\nORDER BY code;",
+        "codeLanguage": "sql"
+      },
+      {
+        "number": 24,
+        "title": "WHEREで残す行を決める",
+        "body": [
+          {
+            "type": "text",
+            "text": "該当するのはR01『海辺の散歩』です。ANDは両方の条件、ORはいずれかの条件を満たす行を残します。\n>= を > に変えると、ちょうど25分の行も除かれ、該当する行はなくなります。"
+          }
+        ],
+        "intro": "U1の読書時間は25分と15分です。U1が25分以上読んだ本という条件を満たすのはどの行でしょうか。",
+        "code": "SELECT code, title\nFROM log\nWHERE reader = 'U1' AND minutes >= 25;",
+        "codeLanguage": "sql"
+      },
+      {
+        "number": 25,
+        "title": "ORDER BYとLIMITで上位2件を取得する",
+        "body": [
+          {
+            "type": "text",
+            "text": "DESCは降順、ASCは昇順です。結果は『街の地図』40、『海辺の散歩』25の順です。\nLIMIT 2をLIMIT 1に変えると、もっとも長く読んだ回だけを取り出せます。"
+          }
+        ],
+        "intro": "最初に並べ替え、先頭の2行を返します。分数が同じならIDで順序を決めます。",
+        "code": "SELECT title, minutes\nFROM log\nORDER BY minutes DESC, code ASC\nLIMIT 2;",
+        "codeLanguage": "sql"
+      },
+      {
+        "number": 26,
+        "title": "COUNT・SUM・AVGで複数行を集計する",
+        "body": [
+          {
+            "type": "text",
+            "text": "結果は3回、合計80分、平均26.7分です。ROUND(..., 1)は小数第1位までに丸めます。\nASで結果の列に名前を付けられます。元の表の列名は変わりません。"
+          }
+        ],
+        "intro": "1回のSELECTで、記録数、合計時間、平均時間を計算します。",
+        "code": "SELECT COUNT(*) AS sessions,\n       SUM(minutes) AS total,\n       ROUND(AVG(minutes), 1) AS average\nFROM log;",
+        "codeLanguage": "sql"
+      },
+      {
+        "number": 27,
+        "title": "GROUP BYでまとめ、HAVINGで絞る",
+        "body": [
+          {
+            "type": "text",
+            "text": "U1は2回で25 + 15 = 40分、U2は1回です。結果にはU1、2、40だけが残ります。\nWHEREはグループ化前の行を、HAVINGは集計後のグループを条件で絞り込みます。"
+          }
+        ],
+        "intro": "2回以上読んだ読者を探すには、readerごとにまとめ、各グループの件数と合計を求めます。",
+        "code": "SELECT reader, COUNT(*) AS sessions, SUM(minutes) AS total\nFROM log\nGROUP BY reader\nHAVING COUNT(*) >= 2;",
+        "codeLanguage": "sql"
+      },
+      {
+        "number": 28,
+        "title": "JOINで読者IDに対応する名前を調べる",
+        "body": [
+          {
+            "type": "text",
+            "text": "結果は「アン／海辺の散歩」「カイ／街の地図」「アン／森の日記」の順です。\nAS lとAS rは表の別名です。このJOINは両方の表に一致する行がある場合だけ結果に含めます。"
+          }
+        ],
+        "intro": "読者の対応表を追加します。log.readerにID、readers.nameに名前を持ち、IDで照合します。",
+        "code": "CREATE TABLE readers (id TEXT NOT NULL PRIMARY KEY, name TEXT NOT NULL);\nINSERT INTO readers VALUES ('U1', 'アン'), ('U2', 'カイ');\nSELECT r.name, l.title\nFROM log AS l\nJOIN readers AS r ON r.id = l.reader\nORDER BY l.code;",
+        "codeLanguage": "sql"
+      },
+      {
+        "number": 29,
+        "title": "UPDATEで既存の記録を変更する",
+        "body": [
+          {
+            "type": "text",
+            "text": "2回の検索は順にR01、25とR01、35を返します。SETで新しい値、WHEREで対象行を指定します。\nUPDATEのWHEREを省くと、3件すべてに10分が加算されます。"
+          }
+        ],
+        "intro": "『海辺の散歩』に記入漏れが10分ありました。R01の元の値を確認してから更新し、再度読み取ります。",
+        "code": "SELECT code, minutes FROM log WHERE code = 'R01';\nUPDATE log\nSET minutes = minutes + 10\nWHERE code = 'R01';\nSELECT code, minutes FROM log WHERE code = 'R01';",
+        "codeLanguage": "sql"
+      },
+      {
+        "number": 30,
+        "title": "BEGINとROLLBACKで削除を試して取り消す",
+        "body": [
+          {
+            "type": "text",
+            "text": "結果は順に2と3です。トランザクション内では削除が見えますが、ROLLBACKで元に戻ります。\n前ページですでに完了した変更はそのままで、R01は35分です。"
+          }
+        ],
+        "intro": "トランザクションを明示的に開始し、R03を削除します。取り消す前後で記録数を調べます。",
+        "code": "BEGIN;\nDELETE FROM log WHERE code = 'R03';\nSELECT COUNT(*) FROM log;\nROLLBACK;\nSELECT COUNT(*) FROM log;",
+        "codeLanguage": "sql"
+      },
+      {
+        "number": 31,
+        "title": "DELETEとCOMMITで削除を確定する",
+        "body": [
+          {
+            "type": "text",
+            "text": "最初に『森の日記』、最後に2件・75分（35 + 40）が表示されます。DELETEでWHEREを省くと全行が消えます。\nCOMMITでトランザクションを確定します。この章はメモリ内で実行し、次章では.dbファイルに保存します。"
+          }
+        ],
+        "intro": "今度はR03を削除して確定します。書名を確認した後で、削除、コミット、最終集計を実行します。",
+        "code": "SELECT title FROM log WHERE code = 'R03';\nBEGIN;\nDELETE FROM log WHERE code = 'R03';\nCOMMIT;\nSELECT COUNT(*), SUM(minutes) FROM log;",
+        "codeLanguage": "sql"
+      },
+      {
+        "number": 32,
+        "title": "PythonからSQLに検索値を渡す",
+        "body": [
+          {
+            "type": "text",
+            "text": "?は値を結び付ける位置です。(code,) は要素が1つのタプルで、利用者の入力も同じ方法で渡せます。\nここでは ('海辺の散歩', 35) が表示されます。削除済みのR03を探すとfetchone()はNoneを返します。"
+          }
+        ],
+        "intro": "SQLで行を絞り、Pythonで検索したいIDを渡します。これはrun_sql_lab.pyの最後の検索に対応します。",
+        "code": "code = \"R01\"\nsql = \"SELECT title, minutes FROM log WHERE code = ?\"\nrow = con.execute(sql, (code,)).fetchone()\nprint(row)",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 33,
+        "title": "データベースを開いてConnectionを取得する",
+        "body": [
+          {
+            "type": "text",
+            "text": "conは接続オブジェクトで、以降はここからSQLを送ります。ファイルがなければSQLiteが作成します。\n表示された絶対パスを確認しておくと、後で同じデータベースを見つけられます。"
+          }
+        ],
+        "intro": "sqlite_lab.pyの先頭です。reading_01.dbはターミナルの現在の作業フォルダーに保存されます。",
+        "code": "import sqlite3\nfrom pathlib import Path\n\npath = Path(\"reading_01.db\")\ncon = sqlite3.connect(path)\nprint(path.resolve())",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 34,
+        "title": "表を作り、入力を検証する",
+        "body": [
+          {
+            "type": "text",
+            "text": "PRIMARY KEYでIDを一意にし、NOT NULLで値を必須にし、CHECKで負の分数を拒否します。\nIF NOT EXISTSがあるので、表がすでに存在する場合は作成をスキップします。"
+          }
+        ],
+        "intro": "sqlite_lab.pyの続きです。1回の読書をID、書名、分数の3列で表します。",
+        "code": "con.execute(\"\"\"\n    CREATE TABLE IF NOT EXISTS readings (\n        code TEXT NOT NULL PRIMARY KEY,\n        title TEXT NOT NULL,\n        minutes INTEGER NOT NULL CHECK (minutes >= 0)\n    )\n\"\"\")",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 35,
+        "title": "パラメーターを使って3件の記録を書き込む",
+        "body": [
+          {
+            "type": "text",
+            "text": "?は値のプレースホルダーです。入力値は別の引数として渡し、executemanyで各行に同じ文を実行します。\nこの設定ではwithブロックが正常終了するとコミットし、例外が外へ伝わるとロールバックします。"
+          }
+        ],
+        "intro": "sqlite_lab.pyの続きです。各タプルの値は、INSERTに書いた列と同じ順番に並べます。",
+        "code": "records = [\n    (\"R01\", \"海辺の散歩\", 25),\n    (\"R02\", \"街の地図\", 40),\n    (\"R03\", \"森の日記\", 15),\n]\nsql = \"INSERT INTO readings (code, title, minutes) VALUES (?, ?, ?)\"\nwith con:\n    con.executemany(sql, records)",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 36,
+        "title": "WHEREで絞り、分数の順に並べる",
+        "body": [
+          {
+            "type": "text",
+            "text": "出力は「街の地図 40」「海辺の散歩 25」です。DESCは降順で、同じ分数ならIDを昇順に並べます。\n(25,) の末尾のカンマは、値が1つのタプルとしてパラメーターを渡すために必要です。"
+          }
+        ],
+        "intro": "sqlite_lab.pyの続きです。25分以上読んだ記録を、長く読んだ順に取り出します。",
+        "code": "query = \"\"\"\n    SELECT title, minutes FROM readings\n    WHERE minutes >= ? ORDER BY minutes DESC, code ASC\n\"\"\"\ncursor = con.execute(query, (25,))\nfor title, minutes in cursor:\n    print(title, minutes)",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 37,
+        "title": "fetchone()は1行、見つからなければNoneを返す",
+        "body": [
+          {
+            "type": "text",
+            "text": "最初は ('海辺の散歩', 25)、次はNoneです。row[0]にアクセスする前に、行が見つかったか確認します。\n一致する全行をまとめて取得するfetchall()の戻り値はリストです。"
+          }
+        ],
+        "intro": "sqlite_lab.pyの続きです。一意なIDで探します。カーソルからは1行ずつ、またはまとめて結果を取得できます。",
+        "code": "by_code = \"SELECT title, minutes FROM readings WHERE code = ?\"\nrow = con.execute(by_code, (\"R01\",)).fetchone()\nprint(row)\nmissing = con.execute(by_code, (\"R99\",)).fetchone()\nprint(missing)",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 38,
+        "title": "R01を更新して読み直す",
+        "body": [
+          {
+            "type": "text",
+            "text": "出力は1と ('海辺の散歩', 35) です。SETで変更内容を、WHEREで対象を指定します。\nWHEREを省くと全行に加算されます。+10を再実行すると、さらに10分増えます。"
+          }
+        ],
+        "intro": "sqlite_lab.pyの続きです。『海辺の散歩』の記入漏れ10分を補い、R01だけを25分から35分にします。",
+        "code": "with con:\n    changed = con.execute(\n        \"UPDATE readings SET minutes = minutes + ? WHERE code = ?\",\n        (10, \"R01\"),\n    )\nprint(changed.rowcount)\nprint(con.execute(by_code, (\"R01\",)).fetchone())",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 39,
+        "title": "失敗するトランザクションで取り消しを観察する",
+        "body": [
+          {
+            "type": "text",
+            "text": "2番目の文がCHECK制約に違反します。例外がwithブロックの外に伝わり、最初の変更も取り消されます。\nR01は ('海辺の散歩', 35) のままです。例外はwithの外で捕捉します。"
+          }
+        ],
+        "intro": "sqlite_lab.pyの続きです。R01を99にした後、意図的にR02を負の値にして、最初の変更がどうなるか確かめます。",
+        "code": "try:\n    with con:\n        con.execute(\"UPDATE readings SET minutes=99 WHERE code='R01'\")\n        con.execute(\"UPDATE readings SET minutes=-1 WHERE code='R02'\")\nexcept sqlite3.IntegrityError:\n    print(\"分数が制約に違反したため、トランザクションをロールバックしました\")\nprint(con.execute(by_code, (\"R01\",)).fetchone())",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 40,
+        "title": "R03を削除し、残った記録を集計する",
+        "body": [
+          {
+            "type": "text",
+            "text": "削除件数は1、集計結果は (2, 75) です。35 + 40で合計75分になります。\nwith conはトランザクションを管理し、con.close()は接続を閉じます。確定したデータは.dbに残ります。"
+          }
+        ],
+        "intro": "sqlite_lab.pyの最後です。保存したら、.venvを有効にしたターミナルでpython sqlite_lab.pyを実行します。",
+        "code": "with con:\n    removed = con.execute(\"DELETE FROM readings WHERE code = ?\", (\"R03\",))\nprint(removed.rowcount)\nsummary = \"SELECT COUNT(*), SUM(minutes) FROM readings\"\nprint(con.execute(summary).fetchone())\ncon.close()",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 41,
+        "title": "ローカルのMongoDBサービスを起動する",
+        "body": [
+          {
+            "type": "text",
+            "text": "1行目は1つのコマンドです。127.0.0.1はローカル接続だけを受け付け、reading-dataにデータを保持します。\ndocker psでreading-mongoを確認したら次へ進みます。既存のサービスの接続先も使用できます。"
+          }
+        ],
+        "intro": "自分のPCでDocker DesktopまたはDocker Engineを起動してから、ターミナルで実行します。",
+        "code": "docker run -d --name reading-mongo -p 127.0.0.1:27017:27017 -v reading-data:/data/db mongo:8.0\ndocker ps",
+        "codeLanguage": "shell"
+      },
+      {
+        "number": 42,
+        "title": "PythonドライバーPyMongoをインストールする",
+        "body": [
+          {
+            "type": "text",
+            "text": "2行目で4.xのバージョン番号が表示されます。PyMongoはPythonと、前ページで起動したサービスをつなぎます。\n終了時はdocker stop reading-mongo、次回はdocker start reading-mongoで再開できます。"
+          }
+        ],
+        "intro": "reading_labで.venvを有効にしてから、この環境にPyMongoをインストールします。",
+        "code": "python -m pip install \"pymongo>=4,<5\"\npython -c \"import pymongo; print(pymongo.version)\"",
+        "codeLanguage": "shell"
+      },
+      {
+        "number": 43,
+        "title": "データベース、コレクション、文書、フィールド",
+        "body": [
+          {
+            "type": "heading",
+            "text": "DBとコレクション"
+          },
+          {
+            "type": "text",
+            "text": "reading_labがデータベースで、その中のreadings_01がコレクションです。\n1つのコレクションに多数の読書ドキュメントを入れられます。"
+          },
+          {
+            "type": "heading",
+            "text": "文書と識別子"
+          },
+          {
+            "type": "text",
+            "text": "各ドキュメントに一意の_idがあります。今回は比較用に文字列R01を指定します。\n省略すれば通常はドライバーがObjectIdを生成します。"
+          },
+          {
+            "type": "heading",
+            "text": "フィールドと型"
+          },
+          {
+            "type": "text",
+            "text": "titleは文字列、minutesは整数、tagsは文字列の配列です。\n比較や加算のため、分数は文字列の「25」ではなく数値25で保存します。"
+          }
+        ],
+        "intro": "同じR01をドキュメントとして保存します。Pythonでは1件を辞書、タグの集まりをリストで表します。"
+      },
+      {
+        "number": 44,
+        "title": "MongoClientを作り、応答を確認する",
+        "body": [
+          {
+            "type": "text",
+            "text": "pingに成功すると1.0を表示します。5000ミリ秒はサーバー選択の待機時間の上限です。\nbooksはコレクションを表します。初回書き込みでDBとコレクションが作られます。パスワードをコードに含めないでください。"
+          }
+        ],
+        "intro": "mongo_lab.pyの先頭です。既定ではローカルに接続します。他のサービスは環境変数MONGODB_URIで指定します。",
+        "code": "import os\nfrom pymongo import MongoClient\n\nuri = os.getenv(\"MONGODB_URI\", \"mongodb://127.0.0.1:27017/\")\nclient = MongoClient(uri, serverSelectionTimeoutMS=5000)\nprint(client.admin.command(\"ping\")[\"ok\"])\nbooks = client[\"reading_lab\"][\"readings_01\"]",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 45,
+        "title": "insert_many()で3つの文書を書き込む",
+        "body": [
+          {
+            "type": "text",
+            "text": "空のコレクションなら ['R01', 'R02', 'R03'] と表示されます。1件だけ追加する場合はinsert_one()を使えます。\n既存の_idは再登録できません。再実行するときは、前ページで未使用のコレクション名に変更します。"
+          }
+        ],
+        "intro": "mongo_lab.pyの続きです。SQLiteのタプルと異なり、辞書では各値に対応するフィールド名を明示します。",
+        "code": "docs = [\n    {\"_id\": \"R01\", \"title\": \"海辺の散歩\", \"minutes\": 25, \"tags\": [\"随筆\"]},\n    {\"_id\": \"R02\", \"title\": \"街の地図\", \"minutes\": 40, \"tags\": [\"旅行\"]},\n    {\"_id\": \"R03\", \"title\": \"森の日記\", \"minutes\": 15, \"tags\": [\"自然\"]},\n]\nadded = books.insert_many(docs)\nprint(added.inserted_ids)",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 46,
+        "title": "find()に渡す2つの辞書の役割",
+        "body": [
+          {
+            "type": "text",
+            "text": "$gteは「以上」です。射影の1はフィールドを含める指定で、_id: 0は識別子を除きます。\n並べ替えの-1は降順、1は昇順です。SQLiteと同じく「街の地図 40」「海辺の散歩 25」と表示されます。"
+          }
+        ],
+        "intro": "mongo_lab.pyの続きです。25分以上読んだ本を探します。第1引数で条件、第2引数で取得する項目を指定します。",
+        "code": "condition = {\"minutes\": {\"$gte\": 25}}\nfields = {\"_id\": 0, \"title\": 1, \"minutes\": 1}\nmatches = books.find(condition, fields)\nfor book in matches.sort([(\"minutes\", -1), (\"_id\", 1)]):\n    print(book[\"title\"], book[\"minutes\"])",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 47,
+        "title": "find_one()で1件、配列の要素でも検索できる",
+        "body": [
+          {
+            "type": "text",
+            "text": "出力は「海辺の散歩 ['随筆']」、None、R01です。該当する文書がないときは、項目に触れる前にNoneを処理します。\ntagsが配列であれば、条件 {\"tags\": \"随筆\"} はその中に「随筆」を含む文書に一致します。"
+          }
+        ],
+        "intro": "mongo_lab.pyの続きです。同じデータを、一意のIDで探したり、「随筆」のタグが付いた記録から探したりできます。",
+        "code": "one = books.find_one({\"_id\": \"R01\"})\nprint(one[\"title\"], one[\"tags\"])\nprint(books.find_one({\"_id\": \"R99\"}))\nfor book in books.find({\"tags\": \"随筆\"}):\n    print(book[\"_id\"])",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 48,
+        "title": "$incで加算し、$setで値を設定する",
+        "body": [
+          {
+            "type": "text",
+            "text": "出力は「1 1」と「35 True」です。matched_countは条件に一致した件数、modified_countは実際に変わった件数です。\nこの1文書の更新は原子的に行われます。$incをもう一度実行すると、さらに10分加算されます。"
+          }
+        ],
+        "intro": "mongo_lab.pyの続きです。R01の時間を更新すると同時に、同じ文書に確認済みの印を付けます。",
+        "code": "change = {\"$inc\": {\"minutes\": 10}, \"$set\": {\"checked\": True}}\nupdated = books.update_one({\"_id\": \"R01\"}, change)\nprint(updated.matched_count, updated.modified_count)\none = books.find_one({\"_id\": \"R01\"})\nprint(one[\"minutes\"], one[\"checked\"])",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 49,
+        "title": "同じ値を再度設定すると変更件数は？",
+        "body": [
+          {
+            "type": "text",
+            "text": "最初は「1 0」です。R01は見つかりましたが値は同じです。次は「0 0」で、R99が見つかりません。\n既定では見つからなくても追加しません。modified_countだけではこの2つを区別できません。"
+          }
+        ],
+        "intro": "mongo_lab.pyの続きです。R01のcheckedはすでにTrueです。実行前に2つの件数を予測してみましょう。",
+        "code": "again = books.update_one(\n    {\"_id\": \"R01\"}, {\"$set\": {\"checked\": True}}\n)\nprint(again.matched_count, again.modified_count)\nmissing = books.update_one({\"_id\": \"R99\"}, {\"$set\": {\"checked\": True}})\nprint(missing.matched_count, missing.modified_count)",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 50,
+        "title": "delete_one()で対象を指定して1件削除する",
+        "body": [
+          {
+            "type": "text",
+            "text": "順に『森の日記』、1、Noneを表示します。deleted_countは実際に削除された文書数です。\n一意の_idを条件にすれば、どの文書が削除対象かを確かめられます。"
+          }
+        ],
+        "intro": "mongo_lab.pyの続きです。まず書名を確認し、同じIDで削除して、もう一度検索します。",
+        "code": "target = {\"_id\": \"R03\"}\nprint(books.find_one(target)[\"title\"])\ndeleted = books.delete_one(target)\nprint(deleted.deleted_count)\nprint(books.find_one(target))",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 51,
+        "title": "aggregate()で集計し、接続を閉じる",
+        "body": [
+          {
+            "type": "text",
+            "text": "_id: Noneですべての文書を1グループにします。1ずつ足せば件数、$minutesを足せば合計分数です。\n出力は「2 75」です。client.close()で接続を解放した後も、データはMongoDBサービスに残ります。"
+          }
+        ],
+        "intro": "mongo_lab.pyの最後です。保存してpython mongo_lab.pyを実行し、SQLiteの集計結果と比較します。",
+        "code": "group = {\"_id\": None,\n         \"count\": {\"$sum\": 1},\n         \"total\": {\"$sum\": \"$minutes\"}}\nfor item in books.aggregate([{\"$group\": group}]):\n    print(item[\"count\"], item[\"total\"])\nclient.close()",
+        "codeLanguage": "python"
+      },
+      {
+        "number": 52,
+        "title": "同じ問いを2種類のクエリで表す",
+        "body": [
+          {
+            "type": "heading",
+            "text": "どの記録を選ぶ？"
+          },
+          {
+            "type": "text",
+            "text": "SQL　WHERE minutes >= ?　パラメーター (25,)\nPyMongo　{\"minutes\": {\"$gte\": 25}}"
+          },
+          {
+            "type": "heading",
+            "text": "どの項目を返す？"
+          },
+          {
+            "type": "text",
+            "text": "SQL　SELECT title, minutes\nPyMongo　{\"title\": 1, \"minutes\": 1, \"_id\": 0}"
+          },
+          {
+            "type": "heading",
+            "text": "どの順に並べる？"
+          },
+          {
+            "type": "text",
+            "text": "SQL　ORDER BY minutes DESC, code ASC\nPyMongo　.sort([(\"minutes\", -1), (\"_id\", 1)])"
+          }
+        ],
+        "intro": "検索を「どの記録を」「どのフィールドで」「どの順番で表示するか」の3つに分けます。"
+      },
+      {
+        "number": 53,
+        "title": "使い方からデータベースを選ぶ",
+        "body": [
+          {
+            "type": "heading",
+            "text": "自分のPCの記録帳"
+          },
+          {
+            "type": "text",
+            "text": "オフラインで使い、ファイルを簡単にバックアップしたい場合や、\n別サービスを管理する必要がない場合、SQLiteから始められます。"
+          },
+          {
+            "type": "heading",
+            "text": "複数種類のデータを関連付ける"
+          },
+          {
+            "type": "text",
+            "text": "読者、書籍、貸出を別の表で管理し、主キー・外部キーで頻繁に\nJOINするなら、SQLiteの関係モデルで表現できます。"
+          },
+          {
+            "type": "heading",
+            "text": "記録ごとに追加情報が異なる"
+          },
+          {
+            "type": "text",
+            "text": "複数のタグやメモ、出典を持ち、1件ずつまとめて取得するなら、\nMongoDBのドキュメントモデルとサービスの運用コストを評価します。"
+          }
+        ],
+        "intro": "読書記録を小さなアプリにする場合、運用方法と必要なクエリが選択に影響します。"
+      },
+      {
+        "number": 54,
+        "title": "SQLiteのエラーを切り分ける",
+        "body": [
+          {
+            "type": "heading",
+            "text": "no such table"
+          },
+          {
+            "type": "text",
+            "text": "同じ.dbファイルを開いているか、表の作成処理を先に実行したかを確認します。\n33ページで表示した絶対パスと照合します。"
+          },
+          {
+            "type": "heading",
+            "text": "IntegrityError"
+          },
+          {
+            "type": "text",
+            "text": "IDの重複や負の分数がないかを確かめます。最初から実行し直す場合は\nreading_01.dbを、まだ使っていないファイル名に変更します。"
+          },
+          {
+            "type": "heading",
+            "text": "database is locked"
+          },
+          {
+            "type": "text",
+            "text": "別のプログラムが書き込み中の可能性があります。その処理のコミットや\nロールバックを待って再試行します。書き込みトランザクションは短く保ちます。"
+          }
+        ],
+        "intro": "作業フォルダーとDBのパスを確認し、データ内容の問題か、ファイルへのアクセスの問題かを調べます。"
+      },
+      {
+        "number": 55,
+        "title": "MongoDB：サービス、パッケージ、重複を確認",
+        "body": [
+          {
+            "type": "heading",
+            "text": "pymongoが見つからない"
+          },
+          {
+            "type": "text",
+            "text": ".venvを有効にしてpython -m pip show pymongoを実行します。\n見つからない場合は、同じpythonで42ページの手順に従いインストールします。"
+          },
+          {
+            "type": "heading",
+            "text": "接続がタイムアウト"
+          },
+          {
+            "type": "text",
+            "text": "docker ps -aでコンテナを確認し、URIとローカルのポートを照合します。\n27017が使用中なら、ポート割り当ての左側とURIのポートを一緒に変更します。"
+          },
+          {
+            "type": "heading",
+            "text": "キーの重複"
+          },
+          {
+            "type": "text",
+            "text": "同じコレクション内で_idは一意です。insert_manyが重複で失敗しても、\n先に処理した文書は保存済みの場合があります。再試行前に現状を調べます。"
+          }
+        ],
+        "intro": "まずエラーが起きた行を見ます。インポート、接続、書き込みでは確認する箇所が異なります。"
+      },
+      {
+        "number": 56,
+        "title": "実行結果を予測する3問",
+        "body": [
+          {
+            "type": "heading",
+            "text": "01　条件を変える"
+          },
+          {
+            "type": "text",
+            "text": "36ページのパラメーターを (25,) から (26,) に変えると、どの本が表示されますか。"
+          },
+          {
+            "type": "heading",
+            "text": "02　トランザクション"
+          },
+          {
+            "type": "text",
+            "text": "39ページでR01を一度99にしたのに、最後に35を読み取れたのはなぜですか。"
+          },
+          {
+            "type": "heading",
+            "text": "03　更新結果を読む"
+          },
+          {
+            "type": "text",
+            "text": "49ページでは2回ともmodified_countが0です。「一致したが値が同じ」と\n「該当なし」は、どの属性で区別できますか。"
+          }
+        ],
+        "intro": "17ページの初期データで考えます。すべてコードを読むだけで答えられます。"
+      },
+      {
+        "number": 57,
+        "title": "答えと判断の根拠",
+        "body": [
+          {
+            "type": "heading",
+            "text": "01　『街の地図』だけ"
+          },
+          {
+            "type": "text",
+            "text": "40 ≥ 26は成立し、25と15は条件を満たしません。\n並べ替えても該当件数は変わりません。"
+          },
+          {
+            "type": "heading",
+            "text": "02　全体がロールバック"
+          },
+          {
+            "type": "text",
+            "text": "R02の負の値がCHECK制約に違反しました。例外がwithブロックを出たとき、\n同じトランザクション内で先に行ったR01の変更も取り消されました。"
+          },
+          {
+            "type": "heading",
+            "text": "03　matched_count"
+          },
+          {
+            "type": "text",
+            "text": "R01に同じ値を設定した場合は1、R99を探した場合は0です。\nどちらもmodified_countは0です。"
+          }
+        ],
+        "intro": "絞り込み条件、実際に行われた変更、返されたオブジェクトの値を順に確かめます。"
+      },
+      {
+        "number": 58,
+        "title": "公式ドキュメントとサンプル",
+        "body": [
+          {
+            "type": "heading",
+            "text": "Python標準ライブラリ"
+          },
+          {
+            "type": "text",
+            "text": "sqlite3：Connection、Cursor、パラメーターの束縛、トランザクション。\ndocs.python.org/3/library/sqlite3.html"
+          },
+          {
+            "type": "heading",
+            "text": "MongoDB Pythonドライバー"
+          },
+          {
+            "type": "text",
+            "text": "PyMongo CRUD Operations：検索、更新、削除の各メソッド。\nmongodb.com/docs/languages/python/pymongo-driver/current/crud/"
+          },
+          {
+            "type": "heading",
+            "text": "ローカルのMongoDB"
+          },
+          {
+            "type": "text",
+            "text": "Docker Hubのmongoイメージと起動方法。\nhub.docker.com/_/mongo"
+          }
+        ],
+        "intro": "関数やメソッドの名前でドキュメントを引くと、引数、戻り値、例外の種類を確認できます。"
+      }
+    ]
+  }
+}

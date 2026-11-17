@@ -1,5 +1,6 @@
 "use client";
 
+import {databaseInfo} from "../database-data";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { basePath, coursePath, languageNames, locales, ui, modernWeeks, unitInfo, weekLabel, guiInfo, djangoInfo, pygameInfo, memoryInfo, pypiInfo, djangoCaseInfo, type UnitId, type Language } from "../data";
@@ -28,6 +29,7 @@ export default function CourseShell({lang,week,children}:{lang:Language;week?:Un
         <Link className={`nav-week ${week==="pygame"?"active":""}`} href={coursePath(lang,"pygame")} aria-current={week==="pygame"?"page":undefined}><span className="nav-number">OOP</span><span><small>{pygameInfo[lang].tag}</small><b>{pygameInfo[lang].title}</b></span></Link>
         <Link className={`nav-week ${week==="memory"?"active":""}`} href={coursePath(lang,"memory")} aria-current={week==="memory"?"page":undefined}><span className="nav-number">PAIR</span><span><small>{memoryInfo[lang].tag}</small><b>{memoryInfo[lang].title}</b></span></Link>
         <Link className={`nav-week ${week==="pypi"?"active":""}`} href={coursePath(lang,"pypi")} aria-current={week==="pypi"?"page":undefined}><span className="nav-number">PyPI</span><span><small>{pypiInfo[lang].tag}</small><b>{pypiInfo[lang].title}</b></span></Link>
+        <Link className={`nav-week ${week==="databases"?"active":""}`} href={coursePath(lang,"databases")} aria-current={week==="databases"?"page":undefined}><span className="nav-number">SQL</span><span><small>{databaseInfo[lang].tag}</small><b>{databaseInfo[lang].title}</b></span></Link>
         <Link className="later-link" href={`${coursePath(lang)}#full-outline`}>{t.allWeeks}<span aria-hidden="true">↗</span></Link>
       </nav>
       <div className="sidebar-bottom"><span className="semester-dot"/>{t.term}<p>{t.school}<br/>{t.instructor}</p><a href="https://eclass.yuntech.edu.tw/" target="_blank" rel="noreferrer">eClass <span aria-hidden="true">↗</span></a></div>

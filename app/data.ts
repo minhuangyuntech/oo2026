@@ -1,3 +1,4 @@
+import {databaseInfo,databaseChapters,databaseRanges} from "./database-data";
 import {djangoCaseInfo,djangoCaseRanges,djangoCaseChapters} from "./django-case-data";
 export {djangoCaseInfo,djangoCaseRanges,djangoCaseChapters};
 import {week7Info,week7Ranges,week7Chapters} from "./week7-data";
@@ -14,11 +15,11 @@ import {memoryInfo,memoryRanges,memoryChapters} from "./memory-data";
 export {memoryInfo,memoryRanges,memoryChapters};
 import {pypiInfo,pypiRanges,pypiChapters} from "./pypi-data";
 export {pypiInfo,pypiRanges,pypiChapters};
-export type UnitId = number | "gui" | "django" | "pygame" | "memory" | "pypi" | "django-case";
+export type UnitId = number | "gui" | "django" | "pygame" | "memory" | "pypi" | "django-case" | "databases";
 export type Language = "zh" | "en" | "ja";
 export type BodyBlock = { type: string; text?: string; rows?: string[][] };
 export type Snippet = {code:string;language:string;label?:string|null};
-export type Slide = { number: number; title: string; body: BodyBlock[]; code?: string; output?: string; codeLanguage?: string; diagram?: string; image?: string; imageAlt?: string; imageLayout?: string; imageWidth?:number; imageHeight?:number; snippets?:Snippet[] };
+export type Slide = { number: number; title: string; intro?: string; body: BodyBlock[]; code?: string; output?: string; codeLanguage?: string; diagram?: string; image?: string; imageAlt?: string; imageLayout?: string; imageWidth?:number; imageHeight?:number; snippets?:Snippet[] };
 export type Lesson = { source: string; slides: Slide[]; download?: string; examples?: string; sourceLanguage?: Language };
 export const locales: Language[] = ["zh", "en", "ja"];
 export const languageNames = { zh: "繁體中文", en: "English", ja: "日本語" };
@@ -94,6 +95,7 @@ export const laterWeeks = {
   ja:["ライフサイクルとメモリモデル","クラス間の関係と UML クラス図","継承とクラス階層","多態性・抽象化・インターフェース","中間試験（筆記）","Python の高度なオブジェクト指向機構","データクラス・ジェネリクス・型設計","オブジェクト指向分析と設計","SOLID と設計原則","デザインパターンとリファクタリング","Python のウェブ・データベース応用（補足）","LLM 統合と Linux 配備（補足）","システム統合とプロジェクトレビュー","総復習と最終プロジェクトの要件"]
 };
 export function weekLabel(lang: Language, week: UnitId) {
+  if(week==="databases")return {zh:"資料庫",en:"Databases",ja:"データベース"}[lang];
   if(week==="django-case")return {zh:"Django 實作",en:"Django cases",ja:"Django 実装"}[lang];
   if(week==="pypi")return "PyPI";
   if(week==="gui")return "GUI";
@@ -105,6 +107,6 @@ export function weekLabel(lang: Language, week: UnitId) {
 
 for(const lang of locales){weekInfo[lang].push(...extraInfo[lang]);chapterNames[lang].push(...extraChapters[lang]);}
 chapterRanges.push(...extraRanges);
-export function unitInfo(lang:Language,unit:UnitId){return unit==="django-case"?djangoCaseInfo[lang]:unit==="pypi"?pypiInfo[lang]:unit===7?week7Info[lang]:unit===8?week8Info[lang]:unit==="memory"?memoryInfo[lang]:unit==="pygame"?pygameInfo[lang]:unit==="django"?djangoInfo[lang]:unit==="gui"?guiInfo[lang]:weekInfo[lang][unit-1];}
-export function unitRanges(unit:UnitId){return unit==="django-case"?djangoCaseRanges:unit==="pypi"?pypiRanges:unit===7?week7Ranges:unit===8?week8Ranges:unit==="memory"?memoryRanges:unit==="pygame"?pygameRanges:unit==="django"?djangoRanges:unit==="gui"?guiRanges:chapterRanges[unit-1];}
-export function unitChapters(lang:Language,unit:UnitId){return unit==="django-case"?djangoCaseChapters[lang]:unit==="pypi"?pypiChapters[lang]:unit===7?week7Chapters[lang]:unit===8?week8Chapters[lang]:unit==="memory"?memoryChapters[lang]:unit==="pygame"?pygameChapters[lang]:unit==="django"?djangoChapters[lang]:unit==="gui"?guiChapters[lang]:chapterNames[lang][unit-1];}
+export function unitInfo(lang:Language,unit:UnitId){return unit==="databases"?databaseInfo[lang]:unit==="django-case"?djangoCaseInfo[lang]:unit==="pypi"?pypiInfo[lang]:unit===7?week7Info[lang]:unit===8?week8Info[lang]:unit==="memory"?memoryInfo[lang]:unit==="pygame"?pygameInfo[lang]:unit==="django"?djangoInfo[lang]:unit==="gui"?guiInfo[lang]:weekInfo[lang][unit-1];}
+export function unitRanges(unit:UnitId){return unit==="databases"?databaseRanges:unit==="django-case"?djangoCaseRanges:unit==="pypi"?pypiRanges:unit===7?week7Ranges:unit===8?week8Ranges:unit==="memory"?memoryRanges:unit==="pygame"?pygameRanges:unit==="django"?djangoRanges:unit==="gui"?guiRanges:chapterRanges[unit-1];}
+export function unitChapters(lang:Language,unit:UnitId){return unit==="databases"?databaseChapters[lang]:unit==="django-case"?djangoCaseChapters[lang]:unit==="pypi"?pypiChapters[lang]:unit===7?week7Chapters[lang]:unit===8?week8Chapters[lang]:unit==="memory"?memoryChapters[lang]:unit==="pygame"?pygameChapters[lang]:unit==="django"?djangoChapters[lang]:unit==="gui"?guiChapters[lang]:chapterNames[lang][unit-1];}

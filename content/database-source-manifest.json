@@ -1,0 +1,26 @@
+[
+  {
+    "week": "databases",
+    "language": "zh",
+    "source": "databases-zh.pptx",
+    "download": "databases-zh.pptx",
+    "slides": 58,
+    "sha256": "3b77d7f67821823879352784111ced64abb40d577f358f1b9991b683996c1991"
+  },
+  {
+    "week": "databases",
+    "language": "en",
+    "source": "databases-en.pptx",
+    "download": "databases-en.pptx",
+    "slides": 58,
+    "sha256": "9d72e1c1f07829409da60b0e7394341a51f807a5455d1e3c46a6077614778052"
+  },
+  {
+    "week": "databases",
+    "language": "ja",
+    "source": "databases-ja.pptx",
+    "download": "databases-ja.pptx",
+    "slides": 58,
+    "sha256": "566a348601d901f1dc596a6668c0645c1ae580d4261b52461de1d54819f4ad27"
+  }
+]
