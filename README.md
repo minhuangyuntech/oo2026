@@ -2,9 +2,11 @@
 
 以 Python 為主要實作語言的 18 週物件導向程式設計教材網站。
 
-第 1–8 週與補充教材提供繁體中文、英文與日文完整網頁，共 15 個單元、651 個投影片主題、1953 個語言版本主題。第 9–18 週保留原有中文教材與網址。
+第 1–8 週與補充教材提供繁體中文、英文與日文完整網頁，共 16 個單元、664 個投影片主題、1992 個語言版本主題。第 9–18 週保留原有中文教材與網址。
 
 「用 Python 直接存取 SQLite 與 MongoDB」位於 `/databases/`、`/en/databases/` 與 `/ja/databases/`。各語言均有 58 頁線上教材、PowerPoint 和可執行的讀書紀錄範例。SQL 指令入門位於第 20–32 頁。教材內容位於 `content/database-lessons.json`，下載檔位於 `public/materials/`。
+
+「在校內 Ubuntu 部署自己的 Django 網站」位於 `/ubuntu-deploy/`、`/en/ubuntu-deploy/` 與 `/ja/ubuntu-deploy/`。各語言有 13 個主題與 4 張流程圖，保留個人 systemd / Gunicorn 服務、Unix socket、SSH 通道與 9000 加學號末三碼的本機連接埠規則。公開網頁以 `SERVER_IP`、`LOGIN`、`STUDENT_UID` 取代實際連線資訊，使用 `localhost` 示範本機瀏覽。內容位於 `content/ubuntu-lessons.json`，此單元提供 mblog ZIP 與列印 PDF。
 
 兩種遊戲另有獨立的三語「變數與物件屬性」網頁補充教材，位於各語言 `/pygame/#variables` 與 `/memory/#variables`。內容涵蓋設定值、物件屬性、參數、區域變數、參照關係與單步狀態，附變數搜尋及檔案／類別索引；教材上方、閱讀目錄、遊戲頁皆有入口。
 

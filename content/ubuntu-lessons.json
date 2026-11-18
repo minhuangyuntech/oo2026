@@ -1,0 +1,1178 @@
+{
+  "zh": {
+    "source": "在校內 Ubuntu 部署自己的 Django 網站 · 公開網頁版",
+    "download": null,
+    "examples": "mblog-complete.zip",
+    "slides": [
+      {
+        "number": 1,
+        "title": "在校內 Ubuntu 部署自己的 Django 網站",
+        "intro": "用自己的課程帳號部署 mblog，透過 SSH 通道開啟網站，再從管理後台發表文章。",
+        "body": [
+          {
+            "type": "paragraph",
+            "text": "先取得教師個別提供的伺服器位址、帳號、初始密碼與主機指紋，並完成校內 VPN 連線。"
+          },
+          {
+            "type": "paragraph",
+            "text": "本教材使用課程帳號已準備好的部署工具與個人 systemd 服務。帳號內應有 ~/bin/deploy-django、~/bin/course-env、~/bin/course-tunnel 與 ~/COURSE-DJANGO.txt。若檔案缺少，請教師確認帳號初始化。"
+          },
+          {
+            "type": "paragraph",
+            "text": "公開教材以 SERVER_IP 表示教師提供的伺服器位址。LOCAL_PORT 是自己電腦上的連接埠。localhost 代表目前這台電腦。"
+          },
+          {
+            "type": "table",
+            "rows": [
+              [
+                "位置",
+                "工作"
+              ],
+              [
+                "本機終端機 A",
+                "用 SSH 登入後，在 Ubuntu 執行部署與管理指令"
+              ],
+              [
+                "本機終端機 B",
+                "建立並維持 SSH 通道"
+              ],
+              [
+                "本機瀏覽器",
+                "透過 localhost 與個人連接埠開啟網站"
+              ]
+            ]
+          }
+        ],
+        "diagram": "ubuntu-overview"
+      },
+      {
+        "number": 2,
+        "title": "連上校內 VPN，用小寫學號登入",
+        "intro": "Windows 開啟 PowerShell，macOS 或 Linux 開啟終端機。將 LOGIN 換成自己的小寫學號，SERVER_IP 換成教師提供的位址。",
+        "body": [
+          {
+            "type": "paragraph",
+            "text": "首次連線時，將顯示的主機指紋與課程提供的指紋核對，確認後再接受。"
+          },
+          {
+            "type": "paragraph",
+            "text": "密碼提示出現時，輸入教師個別提供的初始密碼。LOGIN 與 SERVER_IP 都是需要替換的佔位文字。"
+          }
+        ],
+        "snippets": [
+          {
+            "code": "ssh LOGIN@SERVER_IP",
+            "language": "shell",
+            "label": "自己的電腦 · 終端機 A"
+          }
+        ]
+      },
+      {
+        "number": 3,
+        "title": "首次登入先變更 Ubuntu 密碼",
+        "intro": "依序輸入目前密碼、新密碼，再輸入一次新密碼。輸入密碼時畫面通常不顯示字元。",
+        "body": [
+          {
+            "type": "paragraph",
+            "text": "每次輸入完按 Enter。若更改密碼後連線結束，重新執行 SSH 指令，使用新密碼登入。"
+          },
+          {
+            "type": "paragraph",
+            "text": "Ubuntu 密碼用於 SSH 登入。稍後的 Django 後台帳號需在網站中另外建立。"
+          },
+          {
+            "type": "table",
+            "rows": [
+              [
+                "畫面提示",
+                "輸入內容"
+              ],
+              [
+                "Current password",
+                "教師提供的初始密碼"
+              ],
+              [
+                "New password",
+                "自己設定的新密碼"
+              ],
+              [
+                "Retype new password",
+                "再次輸入相同的新密碼"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "number": 4,
+        "title": "確認帳號與操作位置",
+        "intro": "登入成功後，終端機 A 的指令會在 Ubuntu 伺服器執行。先確認自己的帳號並閱讀家目錄中的操作說明。",
+        "body": [
+          {
+            "type": "paragraph",
+            "text": "whoami 應顯示自己的小寫學號。~ 代表目前登入帳號的家目錄。"
+          },
+          {
+            "type": "paragraph",
+            "text": "接下來的下載、部署、manage.py 指令都在 Ubuntu 的終端機 A 執行。SSH 通道指令則在自己電腦另開的終端機 B 執行。"
+          }
+        ],
+        "snippets": [
+          {
+            "code": "whoami\ncat ~/COURSE-DJANGO.txt",
+            "language": "bash",
+            "label": "Ubuntu 伺服器 · 終端機 A"
+          }
+        ]
+      },
+      {
+        "number": 5,
+        "title": "下載 mblog 到自己的網站目錄",
+        "intro": "第一次部署時下載課程專案，解壓縮後複製到 ~/www/site/。",
+        "body": [
+          {
+            "type": "paragraph",
+            "text": "最後應列出 manage.py 與 requirements.txt，兩者都位於 site/ 第一層。下載包內有中英日三語 README。"
+          },
+          {
+            "type": "paragraph",
+            "text": "unzip -n 與 cp -rn 會保留目的地已存在的檔案。這組指令適合首次匯入，後續更新請修改自己專案中的檔案並重新部署。"
+          }
+        ],
+        "snippets": [
+          {
+            "code": "url=https://minhuangyuntech.github.io/oo2026/materials/mblog-complete.zip\ncurl -fL \"$url\" -o ~/mblog-complete.zip\nmkdir -p ~/www/import ~/www/site\nunzip -n ~/mblog-complete.zip -d ~/www/import\ncp -rn ~/www/import/mblog/. ~/www/site/\ncd ~/www/site\nls manage.py requirements.txt",
+            "language": "bash",
+            "label": "Ubuntu 伺服器 · 終端機 A"
+          }
+        ]
+      },
+      {
+        "number": 6,
+        "title": "建立 .venv、啟用環境並部署",
+        "intro": "在 manage.py 所在目錄建立專案專用的虛擬環境，再執行課程部署工具。",
+        "body": [
+          {
+            "type": "paragraph",
+            "text": "部署工具會安裝 requirements.txt、Gunicorn 與 WhiteNoise，檢查設定、套用資料庫遷移、收集靜態檔案，最後啟動個人的 systemd 服務。"
+          },
+          {
+            "type": "paragraph",
+            "text": "看到「Gunicorn 已回應 HTTP」後，繼續開啟通道並檢查網頁。這個訊息表示已收到 HTTP 回應，首頁與後台是否正常仍需在瀏覽器確認。"
+          },
+          {
+            "type": "paragraph",
+            "text": "下次登入要執行管理指令時，回到 ~/www/site 並再次執行 source .venv/bin/activate。"
+          }
+        ],
+        "snippets": [
+          {
+            "code": "cd ~/www/site\npython -m venv .venv\nsource .venv/bin/activate\n~/bin/deploy-django",
+            "language": "bash",
+            "label": "Ubuntu 伺服器 · 終端機 A"
+          }
+        ],
+        "diagram": "ubuntu-deploy"
+      },
+      {
+        "number": 7,
+        "title": "加入示範文章並建立管理員",
+        "intro": "先啟用 .venv，再載入課程網站設定。接著直接使用 python manage.py 執行管理指令。",
+        "body": [
+          {
+            "type": "paragraph",
+            "text": "course-env 會載入 COURSE_PROJECT、DJANGO_SETTINGS_MODULE 與課程設定路徑，讓管理指令和網站服務使用相同設定。"
+          },
+          {
+            "type": "paragraph",
+            "text": "seed_demo 是 mblog 專用指令，會建立五篇示範文章。createsuperuser 會詢問後台使用者名稱與密碼，請建立自己的管理帳號。"
+          }
+        ],
+        "snippets": [
+          {
+            "code": "cd ~/www/site\nsource .venv/bin/activate\nsource ~/bin/course-env\npython manage.py check\npython manage.py seed_demo\npython manage.py createsuperuser",
+            "language": "bash",
+            "label": "Ubuntu 伺服器 · 終端機 A"
+          }
+        ]
+      },
+      {
+        "number": 8,
+        "title": "用學號末三碼選擇本機連接埠",
+        "intro": "本機連接埠 = 9000 + 學號末三碼的數值。假設末三碼為 123，使用 9123。末三碼 008 的數值為 8，使用 9008。",
+        "body": [
+          {
+            "type": "paragraph",
+            "text": "course-tunnel 會依登入帳號計算連接埠，並印出 SSH 指令、首頁與管理後台網址。"
+          },
+          {
+            "type": "paragraph",
+            "text": "這個工具是在 Ubuntu 產生指令，因此無法事先檢查自己電腦的埠是否被占用。請在本機檢查，並以終端機 B 能否成功建立通道為準。"
+          },
+          {
+            "type": "paragraph",
+            "text": "輸出中的 /run/user/ 後面是系統分配的 UID。使用自己帳號產生的完整路徑。"
+          }
+        ],
+        "snippets": [
+          {
+            "code": "~/bin/course-tunnel",
+            "language": "bash",
+            "label": "Ubuntu 伺服器 · 終端機 A"
+          }
+        ]
+      },
+      {
+        "number": 9,
+        "title": "在終端機 B 開通道，再用瀏覽器進站",
+        "intro": "保持 VPN 連線，在自己的電腦另開終端機 B，執行 course-tunnel 產生的 ssh -NT 指令。輸入 Ubuntu 密碼後，保持這個視窗開啟。",
+        "body": [
+          {
+            "type": "paragraph",
+            "text": "指令範本中的 LOGIN、SERVER_IP、LOCAL_PORT、STUDENT_UID 均須替換為自己的值，或直接使用 course-tunnel 產生的完整指令。localhost 將通道限定供自己電腦使用。"
+          },
+          {
+            "type": "paragraph",
+            "text": "開啟 http://localhost:LOCAL_PORT/ 查看首頁，開啟 http://localhost:LOCAL_PORT/admin/ 進入後台。以 9123 為例，網址是 http://localhost:9123/。請使用自己實際成功開啟的埠。"
+          },
+          {
+            "type": "paragraph",
+            "text": "SSH 將本機的瀏覽器請求轉送到個人的 Unix socket，再由 Gunicorn 執行 Django。-N 表示只建立通道，-T 關閉互動式終端，ExitOnForwardFailure=yes 會在初始轉送建立失敗時結束連線。"
+          }
+        ],
+        "snippets": [
+          {
+            "code": "ssh -NT -o ExitOnForwardFailure=yes -L localhost:LOCAL_PORT:/run/user/STUDENT_UID/course-django/site.sock LOGIN@SERVER_IP",
+            "language": "shell",
+            "label": "自己的電腦 · 終端機 B · 替換佔位文字後執行"
+          }
+        ],
+        "diagram": "ubuntu-request"
+      },
+      {
+        "number": 10,
+        "title": "發表第一篇文章",
+        "intro": "用自己建立的 Django 管理員帳號登入後台，在 Posts 選擇新增文章。",
+        "body": [
+          {
+            "type": "paragraph",
+            "text": "儲存後回到首頁重新整理，點開剛新增的文章。網址應以 /post/my-first-post/ 結尾，Markdown 的標題會轉成網頁標題。"
+          },
+          {
+            "type": "table",
+            "rows": [
+              [
+                "欄位",
+                "範例內容"
+              ],
+              [
+                "Title",
+                "我的第一篇部署筆記"
+              ],
+              [
+                "Slug",
+                "my-first-post"
+              ],
+              [
+                "Body",
+                "## 我的筆記\n今天完成了部署、SSH 通道與發文。"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "number": 11,
+        "title": "更新程式與部署自己的專案",
+        "intro": "修改 ~/www/site/ 中的程式後，再執行 ~/bin/deploy-django。若使用自己的專案，先確認 manage.py 與 requirements.txt 位於 site/ 第一層。",
+        "body": [
+          {
+            "type": "paragraph",
+            "text": "若 settings.py 位於 schoolweb/，請將 app.env 的 COURSE_PROJECT 設為 schoolweb，並保留 DJANGO_SETTINGS_MODULE=course_settings。用 Ctrl+O、Enter 儲存，Ctrl+X 離開 nano。"
+          },
+          {
+            "type": "paragraph",
+            "text": "編輯設定檔後重新部署，並在瀏覽器確認變更。若更改 Django model，先在專案開發階段用 makemigrations 產生遷移檔，連同程式一起上傳，部署工具再執行 migrate。"
+          },
+          {
+            "type": "paragraph",
+            "text": "個人服務由 systemd 管理。可以用 systemctl --user status 查看狀態，或用 journalctl --user 查看最新日誌。"
+          }
+        ],
+        "snippets": [
+          {
+            "code": "nano ~/.config/course-django/app.env",
+            "language": "bash",
+            "label": "Ubuntu 伺服器 · 終端機 A"
+          },
+          {
+            "code": "COURSE_PROJECT=schoolweb\nDJANGO_SETTINGS_MODULE=course_settings",
+            "language": "text",
+            "label": "app.env · 自有專案範例"
+          },
+          {
+            "code": "~/bin/deploy-django\nsystemctl --user status course-django --no-pager\njournalctl --user -u course-django -n 40 --no-pager",
+            "language": "bash",
+            "label": "Ubuntu 伺服器 · 終端機 A"
+          }
+        ]
+      },
+      {
+        "number": 12,
+        "title": "避開已使用的本機連接埠",
+        "intro": "以預計使用 9123 為例，先在自己的電腦檢查。若有監聽結果，將埠號加 1，再檢查新埠。",
+        "body": [
+          {
+            "type": "paragraph",
+            "text": "Windows、macOS、Linux 的查詢指令擇一執行，並將範例埠號換成自己的值。沒有顯示監聽結果表示查詢當下未發現占用，建立 SSH 通道時仍可能遇到競爭。"
+          },
+          {
+            "type": "paragraph",
+            "text": "例如 9123 已被占用，回到 Ubuntu 的終端機 A 執行 ~/bin/course-tunnel 9124，將新的 ssh 指令貼到本機終端機 B，再以新網址 http://localhost:9124/ 開站。"
+          },
+          {
+            "type": "paragraph",
+            "text": "若 SSH 顯示 Address already in use，將埠號繼續加 1，重做查詢與通道建立。保留原有程式繼續執行，埠號須在 9000–65535 內。"
+          },
+          {
+            "type": "paragraph",
+            "text": "若通道成功但網站無回應，先確認 VPN 與終端機 B，再於 Ubuntu 查閱服務狀態及日誌。DisallowedHost 可請教師核對課程的 ALLOWED_HOSTS 是否包含 localhost。"
+          }
+        ],
+        "snippets": [
+          {
+            "code": "Get-NetTCPConnection -State Listen -LocalPort 9123 -ErrorAction SilentlyContinue",
+            "language": "powershell",
+            "label": "自己的電腦 · Windows PowerShell"
+          },
+          {
+            "code": "lsof -nP -iTCP:9123 -sTCP:LISTEN",
+            "language": "bash",
+            "label": "自己的電腦 · macOS"
+          },
+          {
+            "code": "ss -ltn \"sport = :9123\"",
+            "language": "bash",
+            "label": "自己的電腦 · Linux"
+          },
+          {
+            "code": "~/bin/course-tunnel 9124",
+            "language": "bash",
+            "label": "Ubuntu 伺服器 · 終端機 A"
+          }
+        ],
+        "diagram": "ubuntu-port"
+      },
+      {
+        "number": 13,
+        "title": "離開與下次重新連線",
+        "intro": "使用完畢後，在終端機 B 按 Ctrl+C 關閉通道，在終端機 A 輸入 exit 登出。",
+        "body": [
+          {
+            "type": "paragraph",
+            "text": "課程已啟用個人的 systemd 常駐設定，網站服務可在登出後持續執行。下次先連 VPN，再開啟上次成功的 SSH 通道與網址，確認文章仍在。"
+          },
+          {
+            "type": "paragraph",
+            "text": "若忘了網址，可重新登入 Ubuntu 執行 ~/bin/course-tunnel。曾經換埠就指定上次的埠號，並再次檢查本機是否被占用。"
+          },
+          {
+            "type": "paragraph",
+            "text": "若需要執行管理指令，先切換目錄、啟用 .venv 並載入 course-env。瀏覽網站只需要有效的 VPN、SSH 通道與正在運作的網站服務。"
+          }
+        ],
+        "snippets": [
+          {
+            "code": "cd ~/www/site\nsource .venv/bin/activate\nsource ~/bin/course-env\npython manage.py check",
+            "language": "bash",
+            "label": "Ubuntu 伺服器 · 終端機 A"
+          }
+        ]
+      }
+    ]
+  },
+  "en": {
+    "source": "Deploying your Django website on campus Ubuntu · Public web edition",
+    "download": null,
+    "examples": "mblog-complete.zip",
+    "slides": [
+      {
+        "number": 1,
+        "title": "Deploying your Django website on campus Ubuntu",
+        "intro": "Deploy mblog under your course account, open it through an SSH tunnel, and publish a post from the admin interface.",
+        "body": [
+          {
+            "type": "paragraph",
+            "text": "Obtain the server address, account, initial password and host fingerprint privately from your instructor, and connect to the campus VPN."
+          },
+          {
+            "type": "paragraph",
+            "text": "This lesson uses the deployment tools and personal systemd service already prepared for your course account. Your account should contain ~/bin/deploy-django, ~/bin/course-env, ~/bin/course-tunnel and ~/COURSE-DJANGO.txt. Ask your instructor to check account setup if any are missing."
+          },
+          {
+            "type": "paragraph",
+            "text": "SERVER_IP represents the server address supplied by your instructor. LOCAL_PORT is a port on your own computer. localhost refers to the computer running the browser."
+          },
+          {
+            "type": "table",
+            "rows": [
+              [
+                "Location",
+                "Task"
+              ],
+              [
+                "Local terminal A",
+                "Log in with SSH, then run deployment and management commands on Ubuntu"
+              ],
+              [
+                "Local terminal B",
+                "Open and maintain the SSH tunnel"
+              ],
+              [
+                "Local browser",
+                "Open the website using localhost and your local port"
+              ]
+            ]
+          }
+        ],
+        "diagram": "ubuntu-overview"
+      },
+      {
+        "number": 2,
+        "title": "Connect to the VPN and log in with your lowercase student ID",
+        "intro": "Open PowerShell on Windows or a terminal on macOS or Linux. Replace LOGIN with your lowercase student ID and SERVER_IP with the address supplied by your instructor.",
+        "body": [
+          {
+            "type": "paragraph",
+            "text": "On your first connection, compare the displayed host fingerprint with the course fingerprint before accepting it."
+          },
+          {
+            "type": "paragraph",
+            "text": "At the password prompt, enter the initial password provided privately by your instructor. Replace both LOGIN and SERVER_IP before running the command."
+          }
+        ],
+        "snippets": [
+          {
+            "code": "ssh LOGIN@SERVER_IP",
+            "language": "shell",
+            "label": "Your computer · Terminal A"
+          }
+        ]
+      },
+      {
+        "number": 3,
+        "title": "Change your Ubuntu password at first login",
+        "intro": "Enter the current password, a new password, and the new password again. Password input usually displays no characters.",
+        "body": [
+          {
+            "type": "paragraph",
+            "text": "Press Enter after each entry. If the connection closes after the change, reconnect with SSH using your new password."
+          },
+          {
+            "type": "paragraph",
+            "text": "Your Ubuntu password signs you in through SSH. You will create a separate Django admin account later."
+          },
+          {
+            "type": "table",
+            "rows": [
+              [
+                "Prompt",
+                "What to enter"
+              ],
+              [
+                "Current password",
+                "The initial password supplied by your instructor"
+              ],
+              [
+                "New password",
+                "Your new password"
+              ],
+              [
+                "Retype new password",
+                "The same new password again"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "number": 4,
+        "title": "Check your account and working location",
+        "intro": "After login, commands in terminal A run on the Ubuntu server. Check your account and read the instructions in your home directory.",
+        "body": [
+          {
+            "type": "paragraph",
+            "text": "whoami should show your lowercase student ID. ~ refers to the home directory of the signed-in account."
+          },
+          {
+            "type": "paragraph",
+            "text": "Run the following download, deployment and manage.py commands in Ubuntu terminal A. Run the SSH tunnel command in a separate terminal B on your own computer."
+          }
+        ],
+        "snippets": [
+          {
+            "code": "whoami\ncat ~/COURSE-DJANGO.txt",
+            "language": "bash",
+            "label": "Ubuntu server · Terminal A"
+          }
+        ]
+      },
+      {
+        "number": 5,
+        "title": "Download mblog into your website directory",
+        "intro": "For the first deployment, download the course project, extract it, and copy it into ~/www/site/.",
+        "body": [
+          {
+            "type": "paragraph",
+            "text": "The final command should list manage.py and requirements.txt directly inside site/. The download includes Chinese, English and Japanese README files."
+          },
+          {
+            "type": "paragraph",
+            "text": "unzip -n and cp -rn preserve existing destination files. Use these commands for the first import. For later updates, edit the files in your project and redeploy."
+          }
+        ],
+        "snippets": [
+          {
+            "code": "url=https://minhuangyuntech.github.io/oo2026/materials/mblog-complete.zip\ncurl -fL \"$url\" -o ~/mblog-complete.zip\nmkdir -p ~/www/import ~/www/site\nunzip -n ~/mblog-complete.zip -d ~/www/import\ncp -rn ~/www/import/mblog/. ~/www/site/\ncd ~/www/site\nls manage.py requirements.txt",
+            "language": "bash",
+            "label": "Ubuntu server · Terminal A"
+          }
+        ]
+      },
+      {
+        "number": 6,
+        "title": "Create .venv, activate it and deploy",
+        "intro": "Create the project virtual environment in the directory containing manage.py, activate it, then run the course deployment tool.",
+        "body": [
+          {
+            "type": "paragraph",
+            "text": "The deployment tool installs requirements.txt, Gunicorn and WhiteNoise, checks settings, applies migrations, collects static files, and starts your personal systemd service."
+          },
+          {
+            "type": "paragraph",
+            "text": "When the tool reports that Gunicorn has responded over HTTP, open the tunnel and check the website. This message confirms an HTTP response. Check the home page and admin interface in your browser as well."
+          },
+          {
+            "type": "paragraph",
+            "text": "On later logins, return to ~/www/site and run source .venv/bin/activate before using management commands."
+          }
+        ],
+        "snippets": [
+          {
+            "code": "cd ~/www/site\npython -m venv .venv\nsource .venv/bin/activate\n~/bin/deploy-django",
+            "language": "bash",
+            "label": "Ubuntu server · Terminal A"
+          }
+        ],
+        "diagram": "ubuntu-deploy"
+      },
+      {
+        "number": 7,
+        "title": "Add sample posts and create an administrator",
+        "intro": "Activate .venv and load the course settings. Then run management commands directly with python manage.py.",
+        "body": [
+          {
+            "type": "paragraph",
+            "text": "course-env loads COURSE_PROJECT, DJANGO_SETTINGS_MODULE and the course configuration path so management commands use the same settings as the website service."
+          },
+          {
+            "type": "paragraph",
+            "text": "seed_demo is specific to mblog and creates five sample posts. createsuperuser asks for a username and password for your own admin account."
+          }
+        ],
+        "snippets": [
+          {
+            "code": "cd ~/www/site\nsource .venv/bin/activate\nsource ~/bin/course-env\npython manage.py check\npython manage.py seed_demo\npython manage.py createsuperuser",
+            "language": "bash",
+            "label": "Ubuntu server · Terminal A"
+          }
+        ]
+      },
+      {
+        "number": 8,
+        "title": "Choose a local port using the last three digits of your ID",
+        "intro": "Local port = 9000 + the numeric value of the last three digits of your student ID. For example, 123 gives 9123. The suffix 008 has the value 8 and gives 9008.",
+        "body": [
+          {
+            "type": "paragraph",
+            "text": "course-tunnel calculates the port from the signed-in account and prints an SSH command, a home-page URL and an admin URL."
+          },
+          {
+            "type": "paragraph",
+            "text": "The tool generates commands on Ubuntu, so it cannot check whether a port on your own computer is occupied. Check locally and confirm that terminal B successfully opens the tunnel."
+          },
+          {
+            "type": "paragraph",
+            "text": "The number after /run/user/ in the generated path is your system-assigned UID. Use the complete path generated for your account."
+          }
+        ],
+        "snippets": [
+          {
+            "code": "~/bin/course-tunnel",
+            "language": "bash",
+            "label": "Ubuntu server · Terminal A"
+          }
+        ]
+      },
+      {
+        "number": 9,
+        "title": "Open the tunnel in terminal B, then visit the site",
+        "intro": "Keep the VPN connected. Open terminal B on your computer and run the ssh -NT command generated by course-tunnel. Enter your Ubuntu password and keep this terminal open.",
+        "body": [
+          {
+            "type": "paragraph",
+            "text": "The public command template uses LOGIN, SERVER_IP, LOCAL_PORT and STUDENT_UID. Replace all four with your values, or use the complete command generated by course-tunnel. localhost restricts the tunnel listener to your computer."
+          },
+          {
+            "type": "paragraph",
+            "text": "Open http://localhost:LOCAL_PORT/ for the home page and http://localhost:LOCAL_PORT/admin/ for the admin interface. For example, port 9123 gives http://localhost:9123/. Use the port your tunnel actually opened."
+          },
+          {
+            "type": "paragraph",
+            "text": "SSH forwards the browser request to your personal Unix socket, where Gunicorn runs Django. -N opens the tunnel without a remote command, -T disables a terminal, and ExitOnForwardFailure=yes closes the connection if initial forwarding setup fails."
+          }
+        ],
+        "snippets": [
+          {
+            "code": "ssh -NT -o ExitOnForwardFailure=yes -L localhost:LOCAL_PORT:/run/user/STUDENT_UID/course-django/site.sock LOGIN@SERVER_IP",
+            "language": "shell",
+            "label": "Your computer · Terminal B · Replace placeholders before running"
+          }
+        ],
+        "diagram": "ubuntu-request"
+      },
+      {
+        "number": 10,
+        "title": "Publish your first post",
+        "intro": "Sign in with the Django administrator account you created, open Posts, and add a post.",
+        "body": [
+          {
+            "type": "paragraph",
+            "text": "Save, refresh the home page, and open your new post. The URL should end in /post/my-first-post/, and the Markdown heading should render as a heading on the page."
+          },
+          {
+            "type": "table",
+            "rows": [
+              [
+                "Field",
+                "Example"
+              ],
+              [
+                "Title",
+                "My first deployment notes"
+              ],
+              [
+                "Slug",
+                "my-first-post"
+              ],
+              [
+                "Body",
+                "## My notes\nToday I deployed the site, opened an SSH tunnel and published a post."
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "number": 11,
+        "title": "Update the code or deploy your own project",
+        "intro": "After editing files in ~/www/site/, run ~/bin/deploy-django again. For your own project, place manage.py and requirements.txt directly inside site/.",
+        "body": [
+          {
+            "type": "paragraph",
+            "text": "If settings.py is inside schoolweb/, set COURSE_PROJECT to schoolweb in app.env and keep DJANGO_SETTINGS_MODULE=course_settings. Save in nano with Ctrl+O, Enter, then exit with Ctrl+X."
+          },
+          {
+            "type": "paragraph",
+            "text": "Redeploy after editing the configuration, then verify the change in your browser. For model changes, create migration files with makemigrations during project development and upload them with your code. The deployment tool applies them with migrate."
+          },
+          {
+            "type": "paragraph",
+            "text": "systemd manages your personal service. Inspect its status with systemctl --user status and its recent logs with journalctl --user."
+          }
+        ],
+        "snippets": [
+          {
+            "code": "nano ~/.config/course-django/app.env",
+            "language": "bash",
+            "label": "Ubuntu server · Terminal A"
+          },
+          {
+            "code": "COURSE_PROJECT=schoolweb\nDJANGO_SETTINGS_MODULE=course_settings",
+            "language": "text",
+            "label": "app.env · Example for your own project"
+          },
+          {
+            "code": "~/bin/deploy-django\nsystemctl --user status course-django --no-pager\njournalctl --user -u course-django -n 40 --no-pager",
+            "language": "bash",
+            "label": "Ubuntu server · Terminal A"
+          }
+        ]
+      },
+      {
+        "number": 12,
+        "title": "Avoid occupied local ports",
+        "intro": "Suppose you plan to use port 9123. Check it on your own computer first. If a listener appears, increase the port by one and check the new port.",
+        "body": [
+          {
+            "type": "paragraph",
+            "text": "Run the command for your operating system and replace the example port with your own. No listening result means none was found at that moment. Another process may still claim the port before SSH starts."
+          },
+          {
+            "type": "paragraph",
+            "text": "If 9123 is occupied, run ~/bin/course-tunnel 9124 in Ubuntu terminal A. Paste the new SSH command into local terminal B, then visit the new URL http://localhost:9124/."
+          },
+          {
+            "type": "paragraph",
+            "text": "If SSH reports Address already in use, increase the port again and repeat the check and tunnel setup. Leave the existing program running. Use ports within 9000–65535."
+          },
+          {
+            "type": "paragraph",
+            "text": "If the tunnel opens but the website does not respond, check the VPN and terminal B, then inspect the service status and logs on Ubuntu. For DisallowedHost, ask your instructor to check that the course ALLOWED_HOSTS includes localhost."
+          }
+        ],
+        "snippets": [
+          {
+            "code": "Get-NetTCPConnection -State Listen -LocalPort 9123 -ErrorAction SilentlyContinue",
+            "language": "powershell",
+            "label": "Your computer · Windows PowerShell"
+          },
+          {
+            "code": "lsof -nP -iTCP:9123 -sTCP:LISTEN",
+            "language": "bash",
+            "label": "Your computer · macOS"
+          },
+          {
+            "code": "ss -ltn \"sport = :9123\"",
+            "language": "bash",
+            "label": "Your computer · Linux"
+          },
+          {
+            "code": "~/bin/course-tunnel 9124",
+            "language": "bash",
+            "label": "Ubuntu server · Terminal A"
+          }
+        ],
+        "diagram": "ubuntu-port"
+      },
+      {
+        "number": 13,
+        "title": "Disconnect and reconnect next time",
+        "intro": "When finished, press Ctrl+C in terminal B to close the tunnel and type exit in terminal A to log out.",
+        "body": [
+          {
+            "type": "paragraph",
+            "text": "The course enables your personal systemd service to keep running after logout. Next time, connect to the VPN, reopen the successful SSH tunnel and URL, and confirm that your posts remain."
+          },
+          {
+            "type": "paragraph",
+            "text": "If you forget the URL, log back into Ubuntu and run ~/bin/course-tunnel. If you changed ports, specify the port you used and check local availability again."
+          },
+          {
+            "type": "paragraph",
+            "text": "Before running management commands, change directory, activate .venv and load course-env. Browsing requires the VPN, an open SSH tunnel and a running website service."
+          }
+        ],
+        "snippets": [
+          {
+            "code": "cd ~/www/site\nsource .venv/bin/activate\nsource ~/bin/course-env\npython manage.py check",
+            "language": "bash",
+            "label": "Ubuntu server · Terminal A"
+          }
+        ]
+      }
+    ]
+  },
+  "ja": {
+    "source": "学内 Ubuntu で自分の Django サイトを公開する · 公開ウェブ版",
+    "download": null,
+    "examples": "mblog-complete.zip",
+    "slides": [
+      {
+        "number": 1,
+        "title": "学内 Ubuntu で自分の Django サイトを公開する",
+        "intro": "自分の授業用アカウントで mblog を配置し、SSH トンネルを通じてサイトを開き、管理画面から記事を投稿します。",
+        "body": [
+          {
+            "type": "paragraph",
+            "text": "教員からサーバーのアドレス、アカウント、初期パスワード、ホストのフィンガープリントを個別に受け取り、学内 VPN に接続します。"
+          },
+          {
+            "type": "paragraph",
+            "text": "この教材では、授業用アカウントに準備されたデプロイツールとユーザー用 systemd サービスを使います。~/bin/deploy-django、~/bin/course-env、~/bin/course-tunnel、~/COURSE-DJANGO.txt の存在を確認してください。ファイルがない場合は教員にアカウントの初期設定を確認してください。"
+          },
+          {
+            "type": "paragraph",
+            "text": "SERVER_IP は教員から受け取るサーバーのアドレスを表します。LOCAL_PORT は自分のパソコンのポート番号です。localhost はブラウザーを実行しているパソコン自身を指します。"
+          },
+          {
+            "type": "table",
+            "rows": [
+              [
+                "操作場所",
+                "作業"
+              ],
+              [
+                "ローカルのターミナル A",
+                "SSH ログイン後、Ubuntu で配置・管理コマンドを実行"
+              ],
+              [
+                "ローカルのターミナル B",
+                "SSH トンネルを開いて維持"
+              ],
+              [
+                "ローカルのブラウザー",
+                "localhost と自分のポートでサイトを開く"
+              ]
+            ]
+          }
+        ],
+        "diagram": "ubuntu-overview"
+      },
+      {
+        "number": 2,
+        "title": "学内 VPN に接続し、小文字の学籍番号でログインする",
+        "intro": "Windows では PowerShell、macOS または Linux ではターミナルを開きます。LOGIN を小文字の学籍番号に、SERVER_IP を教員から受け取ったアドレスに置き換えます。",
+        "body": [
+          {
+            "type": "paragraph",
+            "text": "初回接続時は、表示されたホストのフィンガープリントを授業で案内された値と照合してから承認します。"
+          },
+          {
+            "type": "paragraph",
+            "text": "パスワードを求められたら、教員から個別に受け取った初期パスワードを入力します。LOGIN と SERVER_IP は実際の値に置き換えてください。"
+          }
+        ],
+        "snippets": [
+          {
+            "code": "ssh LOGIN@SERVER_IP",
+            "language": "shell",
+            "label": "自分のパソコン · ターミナル A"
+          }
+        ]
+      },
+      {
+        "number": 3,
+        "title": "初回ログインで Ubuntu のパスワードを変更する",
+        "intro": "現在のパスワード、新しいパスワード、確認用の新しいパスワードの順に入力します。入力中は通常、画面に文字が表示されません。",
+        "body": [
+          {
+            "type": "paragraph",
+            "text": "各入力の後で Enter を押します。変更後に接続が終了した場合は、SSH コマンドを再実行して新しいパスワードで接続します。"
+          },
+          {
+            "type": "paragraph",
+            "text": "Ubuntu のパスワードは SSH ログインに使います。Django 管理画面のアカウントは後で別途作成します。"
+          },
+          {
+            "type": "table",
+            "rows": [
+              [
+                "表示",
+                "入力内容"
+              ],
+              [
+                "Current password",
+                "教員から受け取った初期パスワード"
+              ],
+              [
+                "New password",
+                "自分で決めた新しいパスワード"
+              ],
+              [
+                "Retype new password",
+                "同じ新しいパスワードをもう一度入力"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "number": 4,
+        "title": "アカウントと操作場所を確認する",
+        "intro": "ログイン後、ターミナル A のコマンドは Ubuntu サーバーで実行されます。自分のアカウントを確認し、ホームディレクトリの説明を読みます。",
+        "body": [
+          {
+            "type": "paragraph",
+            "text": "whoami に自分の小文字の学籍番号が表示されることを確認します。~ はログイン中のユーザーのホームディレクトリです。"
+          },
+          {
+            "type": "paragraph",
+            "text": "以降のダウンロード、配置、manage.py のコマンドは Ubuntu 側のターミナル A で実行します。SSH トンネルのコマンドは、自分のパソコンで別に開くターミナル B で実行します。"
+          }
+        ],
+        "snippets": [
+          {
+            "code": "whoami\ncat ~/COURSE-DJANGO.txt",
+            "language": "bash",
+            "label": "Ubuntu サーバー · ターミナル A"
+          }
+        ]
+      },
+      {
+        "number": 5,
+        "title": "mblog を自分のサイト用ディレクトリに配置する",
+        "intro": "初回の配置では、授業のプロジェクトをダウンロードして展開し、~/www/site/ にコピーします。",
+        "body": [
+          {
+            "type": "paragraph",
+            "text": "最後のコマンドで、site/ の直下にある manage.py と requirements.txt が表示されます。ダウンロードには中国語・英語・日本語の README が含まれます。"
+          },
+          {
+            "type": "paragraph",
+            "text": "unzip -n と cp -rn は配置先の既存ファイルを保持します。初回の取り込みに使い、その後は自分のプロジェクトを編集して再配置してください。"
+          }
+        ],
+        "snippets": [
+          {
+            "code": "url=https://minhuangyuntech.github.io/oo2026/materials/mblog-complete.zip\ncurl -fL \"$url\" -o ~/mblog-complete.zip\nmkdir -p ~/www/import ~/www/site\nunzip -n ~/mblog-complete.zip -d ~/www/import\ncp -rn ~/www/import/mblog/. ~/www/site/\ncd ~/www/site\nls manage.py requirements.txt",
+            "language": "bash",
+            "label": "Ubuntu サーバー · ターミナル A"
+          }
+        ]
+      },
+      {
+        "number": 6,
+        "title": ".venv を作成・有効化して配置する",
+        "intro": "manage.py があるディレクトリで仮想環境を作成して有効化し、授業用デプロイツールを実行します。",
+        "body": [
+          {
+            "type": "paragraph",
+            "text": "ツールは requirements.txt の依存関係、Gunicorn、WhiteNoise をインストールし、設定確認、マイグレーション、静的ファイルの収集、ユーザー用 systemd サービスの起動を行います。"
+          },
+          {
+            "type": "paragraph",
+            "text": "Gunicorn が HTTP に応答したという表示が出たら、トンネルを開いてサイトを確認します。この表示は HTTP 応答の受信を示します。トップページと管理画面もブラウザーで確認してください。"
+          },
+          {
+            "type": "paragraph",
+            "text": "次回ログイン時に管理コマンドを使う場合は、~/www/site に移動して source .venv/bin/activate を再実行します。"
+          }
+        ],
+        "snippets": [
+          {
+            "code": "cd ~/www/site\npython -m venv .venv\nsource .venv/bin/activate\n~/bin/deploy-django",
+            "language": "bash",
+            "label": "Ubuntu サーバー · ターミナル A"
+          }
+        ],
+        "diagram": "ubuntu-deploy"
+      },
+      {
+        "number": 7,
+        "title": "サンプル記事を追加して管理者を作成する",
+        "intro": ".venv を有効化して授業用の設定を読み込み、python manage.py で管理コマンドを実行します。",
+        "body": [
+          {
+            "type": "paragraph",
+            "text": "course-env は COURSE_PROJECT、DJANGO_SETTINGS_MODULE、授業用設定のパスを読み込み、管理コマンドとサイトのサービスで同じ設定を使えるようにします。"
+          },
+          {
+            "type": "paragraph",
+            "text": "seed_demo は mblog 専用のコマンドで、5 件のサンプル記事を作成します。createsuperuser で自分の管理者ユーザー名とパスワードを設定します。"
+          }
+        ],
+        "snippets": [
+          {
+            "code": "cd ~/www/site\nsource .venv/bin/activate\nsource ~/bin/course-env\npython manage.py check\npython manage.py seed_demo\npython manage.py createsuperuser",
+            "language": "bash",
+            "label": "Ubuntu サーバー · ターミナル A"
+          }
+        ]
+      },
+      {
+        "number": 8,
+        "title": "学籍番号の末尾 3 桁でローカルポートを決める",
+        "intro": "ローカルポート = 9000 + 学籍番号の末尾 3 桁の数値です。例として 123 は 9123、008 は数値の 8 として扱うため 9008 になります。",
+        "body": [
+          {
+            "type": "paragraph",
+            "text": "course-tunnel はログイン中のアカウントからポート番号を計算し、SSH コマンド、トップページと管理画面の URL を表示します。"
+          },
+          {
+            "type": "paragraph",
+            "text": "このツールは Ubuntu 上でコマンドを生成するため、自分のパソコンのポート使用状況は確認できません。ローカルで確認し、ターミナル B でトンネルを正常に開けることを確かめます。"
+          },
+          {
+            "type": "paragraph",
+            "text": "生成されたパスの /run/user/ の後にある番号は、システムが割り当てた UID です。自分のアカウントで生成したパスを使います。"
+          }
+        ],
+        "snippets": [
+          {
+            "code": "~/bin/course-tunnel",
+            "language": "bash",
+            "label": "Ubuntu サーバー · ターミナル A"
+          }
+        ]
+      },
+      {
+        "number": 9,
+        "title": "ターミナル B でトンネルを開き、サイトへアクセスする",
+        "intro": "VPN 接続を維持し、自分のパソコンでターミナル B を別に開きます。course-tunnel が生成した ssh -NT コマンドを実行し、Ubuntu のパスワードを入力したら、その画面を開いたままにします。",
+        "body": [
+          {
+            "type": "paragraph",
+            "text": "公開用のコマンド書式では、LOGIN、SERVER_IP、LOCAL_PORT、STUDENT_UID をすべて自分の値に置き換えるか、course-tunnel が生成したコマンドを使います。localhost は接続の待ち受けを自分のパソコンに限定します。"
+          },
+          {
+            "type": "paragraph",
+            "text": "トップページは http://localhost:LOCAL_PORT/、管理画面は http://localhost:LOCAL_PORT/admin/ で開きます。例えば 9123 番なら http://localhost:9123/ です。実際にトンネルを開けたポートを使います。"
+          },
+          {
+            "type": "paragraph",
+            "text": "SSH はブラウザーの要求を個人用 Unix ソケットに転送し、Gunicorn が Django を実行します。-N はリモートコマンドを実行せずにトンネルを開き、-T は端末の割り当てを無効にします。ExitOnForwardFailure=yes は初期の転送設定に失敗した場合に接続を終了します。"
+          }
+        ],
+        "snippets": [
+          {
+            "code": "ssh -NT -o ExitOnForwardFailure=yes -L localhost:LOCAL_PORT:/run/user/STUDENT_UID/course-django/site.sock LOGIN@SERVER_IP",
+            "language": "shell",
+            "label": "自分のパソコン · ターミナル B · プレースホルダーを置換して実行"
+          }
+        ],
+        "diagram": "ubuntu-request"
+      },
+      {
+        "number": 10,
+        "title": "最初の記事を投稿する",
+        "intro": "作成した Django 管理者アカウントでログインし、Posts から記事を追加します。",
+        "body": [
+          {
+            "type": "paragraph",
+            "text": "保存してトップページを更新し、新しい記事を開きます。URL の末尾が /post/my-first-post/ となり、Markdown の見出しがページの見出しとして表示されます。"
+          },
+          {
+            "type": "table",
+            "rows": [
+              [
+                "フィールド",
+                "入力例"
+              ],
+              [
+                "Title",
+                "初めてのデプロイ記録"
+              ],
+              [
+                "Slug",
+                "my-first-post"
+              ],
+              [
+                "Body",
+                "## 今日の記録\nサイトの配置、SSH トンネルの接続、記事の投稿を行いました。"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "number": 11,
+        "title": "コードを更新し、自分のプロジェクトを配置する",
+        "intro": "~/www/site/ 内のコードを変更したら、~/bin/deploy-django を再実行します。自分のプロジェクトを使う場合も、manage.py と requirements.txt を site/ 直下に配置します。",
+        "body": [
+          {
+            "type": "paragraph",
+            "text": "settings.py が schoolweb/ 内にある場合は、app.env の COURSE_PROJECT を schoolweb に変更し、DJANGO_SETTINGS_MODULE=course_settings を維持します。nano では Ctrl+O、Enter で保存し、Ctrl+X で終了します。"
+          },
+          {
+            "type": "paragraph",
+            "text": "設定を変更したら再配置し、ブラウザーで確認します。モデルを変更した場合は、開発時に makemigrations で遷移ファイルを作り、コードと一緒にアップロードします。配置ツールが migrate で適用します。"
+          },
+          {
+            "type": "paragraph",
+            "text": "個人用サービスは systemd が管理します。systemctl --user status で状態を、journalctl --user で最近のログを確認できます。"
+          }
+        ],
+        "snippets": [
+          {
+            "code": "nano ~/.config/course-django/app.env",
+            "language": "bash",
+            "label": "Ubuntu サーバー · ターミナル A"
+          },
+          {
+            "code": "COURSE_PROJECT=schoolweb\nDJANGO_SETTINGS_MODULE=course_settings",
+            "language": "text",
+            "label": "app.env · 自作プロジェクトの設定例"
+          },
+          {
+            "code": "~/bin/deploy-django\nsystemctl --user status course-django --no-pager\njournalctl --user -u course-django -n 40 --no-pager",
+            "language": "bash",
+            "label": "Ubuntu サーバー · ターミナル A"
+          }
+        ]
+      },
+      {
+        "number": 12,
+        "title": "使用中のローカルポートを避ける",
+        "intro": "9123 番を使う場合を例に、自分のパソコンで使用状況を確認します。待ち受け中の結果が表示されたら、番号を 1 増やして再確認します。",
+        "body": [
+          {
+            "type": "paragraph",
+            "text": "自分の OS に対応するコマンドを選び、例のポート番号を自分の値に変更します。待ち受け結果がなければ、確認時点での使用は検出されていません。ただし、SSH の起動前に別のプログラムが使い始める場合があります。"
+          },
+          {
+            "type": "paragraph",
+            "text": "9123 番が使用中なら、Ubuntu のターミナル A で ~/bin/course-tunnel 9124 を実行します。新しい SSH コマンドをローカルのターミナル B に貼り付け、http://localhost:9124/ を開きます。"
+          },
+          {
+            "type": "paragraph",
+            "text": "SSH に Address already in use と表示されたら、さらに 1 増やして確認と接続をやり直します。既存のプログラムは動かしたまま、9000–65535 の範囲のポートを使います。"
+          },
+          {
+            "type": "paragraph",
+            "text": "トンネルを開けてもサイトが応答しない場合は、VPN とターミナル B を確認し、Ubuntu でサービスの状態とログを調べます。DisallowedHost の場合は、授業用 ALLOWED_HOSTS に localhost が含まれるか教員に確認してください。"
+          }
+        ],
+        "snippets": [
+          {
+            "code": "Get-NetTCPConnection -State Listen -LocalPort 9123 -ErrorAction SilentlyContinue",
+            "language": "powershell",
+            "label": "自分のパソコン · Windows PowerShell"
+          },
+          {
+            "code": "lsof -nP -iTCP:9123 -sTCP:LISTEN",
+            "language": "bash",
+            "label": "自分のパソコン · macOS"
+          },
+          {
+            "code": "ss -ltn \"sport = :9123\"",
+            "language": "bash",
+            "label": "自分のパソコン · Linux"
+          },
+          {
+            "code": "~/bin/course-tunnel 9124",
+            "language": "bash",
+            "label": "Ubuntu サーバー · ターミナル A"
+          }
+        ],
+        "diagram": "ubuntu-port"
+      },
+      {
+        "number": 13,
+        "title": "終了と次回の再接続",
+        "intro": "終了時はターミナル B で Ctrl+C を押してトンネルを閉じ、ターミナル A で exit を入力してログアウトします。",
+        "body": [
+          {
+            "type": "paragraph",
+            "text": "授業環境では、ログアウト後もユーザー用 systemd サービスが動く設定になっています。次回は VPN に接続し、前回成功した SSH トンネルと URL を開いて、記事が残っていることを確認します。"
+          },
+          {
+            "type": "paragraph",
+            "text": "URL を忘れたら Ubuntu に再ログインし、~/bin/course-tunnel を実行します。ポートを変更していた場合は前回の番号を指定し、ローカルの使用状況を再確認します。"
+          },
+          {
+            "type": "paragraph",
+            "text": "管理コマンドを実行する場合は、ディレクトリ移動、.venv の有効化、course-env の読み込みを行います。閲覧には VPN、SSH トンネル、稼働中のサイトサービスが必要です。"
+          }
+        ],
+        "snippets": [
+          {
+            "code": "cd ~/www/site\nsource .venv/bin/activate\nsource ~/bin/course-env\npython manage.py check",
+            "language": "bash",
+            "label": "Ubuntu サーバー · ターミナル A"
+          }
+        ]
+      }
+    ]
+  }
+}

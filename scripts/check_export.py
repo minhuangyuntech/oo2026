@@ -37,7 +37,9 @@ pages = {('/'+str(file.relative_to(OUT)).replace('\\','/').removesuffix('index.h
 lessons=json.loads((ROOT/"content/lessons.json").read_text(encoding="utf-8"))
 database_lessons=json.loads((ROOT/"content/database-lessons.json").read_text(encoding="utf-8"))
 lessons.update({f"{lang}-databases": lesson for lang,lesson in database_lessons.items()})
-units=[1,2,3,4,5,6,7,8,"gui","django","pygame","memory","pypi","django-case","databases"]
+ubuntu_lessons=json.loads((ROOT/"content/ubuntu-lessons.json").read_text(encoding="utf-8"))
+lessons.update({f"{lang}-ubuntu-deploy": lesson for lang,lesson in ubuntu_lessons.items()})
+units=[1,2,3,4,5,6,7,8,"gui","django","pygame","memory","pypi","django-case","databases","ubuntu-deploy"]
 for locale, prefix, html_lang in [('zh','','zh-Hant'),('en','/en','en'),('ja','/ja','ja')]:
     home=pages[prefix+'/']
     assert home.lang == html_lang
@@ -61,6 +63,27 @@ for locale, prefix, html_lang in [('zh','','zh-Hant'),('en','/en','en'),('ja','/
             if parsed.fragment and target.suffix=='.html':
                 assert unquote(parsed.fragment) in Page(target).ids,(route,'missing target anchor',url)
 for week in range(7,19):assert f'/week/{week}/' in pages
+
+# Public Ubuntu lessons must keep the connection details as placeholders.
+for lang, prefix in [('zh', ''), ('en', '/en'), ('ja', '/ja')]:
+    route = prefix + '/ubuntu-deploy/'
+    page = pages[route]
+    lesson = ubuntu_lessons[lang]
+    public_text = json.dumps(lesson, ensure_ascii=False)
+    assert len(lesson['slides']) == 13
+    assert not re.search(r'\b(?:\d{1,3}\.){3}\d{1,3}\b', public_text), 'Literal IP in public Ubuntu lesson'
+    assert not re.search(r'\b[BbXx]\d{8}\b', public_text), 'Student ID in public Ubuntu lesson'
+    assert {'ubuntu-overview-caption', 'ubuntu-deploy-caption', 'ubuntu-request-caption', 'ubuntu-port-caption'} <= page.ids
+    assert BASE + route in pages[prefix + '/'].links
+    assert all(BASE + other + '/ubuntu-deploy/' in page.links for other in ['', '/en', '/ja'])
+    assert BASE + '/materials/mblog-complete.zip' in page.links
+    assert not any(url.endswith('.pptx') for url in page.links), 'Public lesson links to an unsanitized source deck'
+    code = '\n'.join(snippet['code'] for slide in lesson['slides'] for snippet in slide.get('snippets', []))
+    assert 'ssh LOGIN@SERVER_IP' in code
+    assert 'python -m venv .venv\nsource .venv/bin/activate\n~/bin/deploy-django' in code
+    assert 'source ~/bin/course-env\npython manage.py check' in code
+    assert 'ExitOnForwardFailure=yes' in code and 'localhost:LOCAL_PORT' in code
+    assert '~/bin/course-tunnel 9124' in code
 
 for locale, prefix, html_lang in [('zh','','zh-Hant'),('en','/en','en'),('ja','/ja','ja')]:
     route = prefix + '/pygame/play/'

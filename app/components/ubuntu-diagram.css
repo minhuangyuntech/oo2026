@@ -1,0 +1,73 @@
+.ubuntu-flow {
+  margin: 24px 0;
+  padding: 24px;
+  border: 1px solid #cddedb;
+  border-radius: 16px;
+  background: #f5faf9;
+  color: #183c39;
+  break-inside: avoid;
+}
+.ubuntu-flow figcaption {
+  margin-bottom: 20px;
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.7;
+}
+.ubuntu-flow-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 22px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.ubuntu-flow-steps li {
+  position: relative;
+  padding: 16px 12px;
+  border: 1px solid #b9d1cd;
+  border-radius: 10px;
+  background: white;
+  text-align: center;
+}
+.ubuntu-flow-steps li:not(:last-child)::after {
+  content: "→";
+  position: absolute;
+  right: -19px;
+  top: 40%;
+  color: #356c64;
+  font-size: 18px;
+}
+.ubuntu-flow-steps strong { display: block; font-size: 14px; line-height: 1.5; }
+.ubuntu-flow-steps span { display: block; margin-top: 10px; font-size: 12px; line-height: 1.7; overflow-wrap: anywhere; white-space: pre-line; }
+.ubuntu-flow-down { text-align: center; font-size: 23px; color: #356c64; }
+.ubuntu-port-start, .ubuntu-port-check, .ubuntu-port-question {
+  margin: auto;
+  padding: 14px 18px;
+  max-width: 400px;
+  border: 1px solid #b9d1cd;
+  border-radius: 8px;
+  background: white;
+  text-align: center;
+  font-size: 14px;
+}
+.ubuntu-port-start { border-radius: 32px; }
+.ubuntu-port-question { background: #173f3a; color: white; font-weight: 650; }
+.ubuntu-port-branches { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding-top: 18px; }
+.ubuntu-port-branches > div { border-top: 2px solid #9dbbb5; text-align: center; padding-top: 10px; }
+.ubuntu-branch-label { font-size: 14px; font-weight: 700; }
+.ubuntu-port-branches p { margin: 0; padding: 13px; border: 1px solid #b9d1cd; border-radius: 8px; background: white; font-size: 13px; line-height: 1.8; }
+.ubuntu-port-branches .ubuntu-port-race { margin-top: 12px; border-color: #d1c09a; background: #fbf6eb; font-size: 12px; }
+.ubuntu-port-branches .ubuntu-port-finish { background: #e1efeb; }
+.ubuntu-loop-arrow { display: block; font-size: 32px; margin-top: 10px; }
+@media (max-width: 760px) {
+  .ubuntu-flow { padding: 18px; }
+  .ubuntu-flow-steps { grid-template-columns: 1fr; gap: 28px; }
+  .ubuntu-flow-steps li:not(:last-child)::after { content: "↓"; top: auto; bottom: -27px; left: 0; right: 0; }
+  .ubuntu-flow-steps span { margin-top: 5px; }
+  .ubuntu-port-branches { gap: 10px; }
+  .ubuntu-port-branches p { padding: 10px; overflow-wrap: anywhere; }
+}
+@media print {
+  .ubuntu-flow { background: white; border-color: #888; }
+  .ubuntu-port-question { background: white; color: #111; }
+}
