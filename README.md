@@ -6,7 +6,7 @@
 
 「用 Python 直接存取 SQLite 與 MongoDB」位於 `/databases/`、`/en/databases/` 與 `/ja/databases/`。各語言均有 58 頁線上教材、PowerPoint 和可執行的讀書紀錄範例。SQL 指令入門位於第 20–32 頁。教材內容位於 `content/database-lessons.json`，下載檔位於 `public/materials/`。
 
-「在校內 Ubuntu 部署自己的 Django 網站」位於 `/ubuntu-deploy/`、`/en/ubuntu-deploy/` 與 `/ja/ubuntu-deploy/`。各語言有 13 個主題與 4 張流程圖，保留個人 systemd / Gunicorn 服務、Unix socket、SSH 通道與 9000 加學號末三碼的本機連接埠規則。公開網頁以 `SERVER_IP`、`LOGIN`、`STUDENT_UID` 取代實際連線資訊，使用 `localhost` 示範本機瀏覽。內容位於 `content/ubuntu-lessons.json`，此單元提供 mblog ZIP 與列印 PDF。
+「在校內 Ubuntu 部署自己的 Django 網站」位於 `/ubuntu-deploy/`、`/en/ubuntu-deploy/` 與 `/ja/ubuntu-deploy/`。各語言有 13 個主題與 4 張流程圖，保留個人 systemd / Gunicorn 服務、Unix socket、SSH 通道與 9000 加學號末三碼的本機連接埠規則。公開網頁以 `SERVER_IP`、`LOGIN`、`STUDENT_UID` 取代實際連線資訊，使用 `localhost` 示範本機瀏覽。內容位於 `content/ubuntu-lessons.json`，此單元提供三語 PowerPoint（各 19 頁，含 4 張可編輯流程圖）、mblog ZIP 與列印 PDF。PowerPoint 位於 `public/materials/ubuntu-deploy-{zh,en,ja}.pptx`，雜湊與頁數記錄於 `content/ubuntu-source-manifest.json`。程式碼片段為單一文字方塊，可整段複製；檔案不含實際 IP、學生名單與預設密碼。
 
 兩種遊戲另有獨立的三語「變數與物件屬性」網頁補充教材，位於各語言 `/pygame/#variables` 與 `/memory/#variables`。內容涵蓋設定值、物件屬性、參數、區域變數、參照關係與單步狀態，附變數搜尋及檔案／類別索引；教材上方、閱讀目錄、遊戲頁皆有入口。
 

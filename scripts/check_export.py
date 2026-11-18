@@ -77,7 +77,13 @@ for lang, prefix in [('zh', ''), ('en', '/en'), ('ja', '/ja')]:
     assert BASE + route in pages[prefix + '/'].links
     assert all(BASE + other + '/ubuntu-deploy/' in page.links for other in ['', '/en', '/ja'])
     assert BASE + '/materials/mblog-complete.zip' in page.links
-    assert not any(url.endswith('.pptx') for url in page.links), 'Public lesson links to an unsanitized source deck'
+    assert lesson['download'] == f'ubuntu-deploy-{lang}.pptx'
+    assert BASE + '/materials/' + lesson['download'] in page.links
+    with zipfile.ZipFile(ROOT/'public/materials'/lesson['download']) as deck:
+        assert len([n for n in deck.namelist() if re.fullmatch(r'ppt/slides/slide\d+\.xml',n)]) == 19
+        xml = '\n'.join(deck.read(n).decode('utf-8') for n in deck.namelist() if n.endswith(('.xml','.rels')))
+        assert not re.search(r'\b(?:\d{1,3}\.){3}\d{1,3}\b|\b[BbXx]\d{8}\b', xml)
+        assert 'SERVER_IP' in xml and 'LOCAL_PORT' in xml
     code = '\n'.join(snippet['code'] for slide in lesson['slides'] for snippet in slide.get('snippets', []))
     assert 'ssh LOGIN@SERVER_IP' in code
     assert 'python -m venv .venv\nsource .venv/bin/activate\n~/bin/deploy-django' in code
@@ -129,7 +135,7 @@ for locale, prefix, html_lang in [('zh','','zh-Hant'),('en','/en','en'),('ja','/
     html=(OUT/route.lstrip('/')/'index.html').read_text(encoding='utf-8')
     assert 'rel="canonical" href="https://minhuangyuntech.github.io'+BASE+route+'"' in html
 
-manifest=[source for name in ['source-manifest.json','additional-source-manifest.json','django-source-manifest.json','pygame-source-manifest.json','memory-source-manifest.json','week8-source-manifest.json','week7-source-manifest.json','pypi-source-manifest.json','django-case-source-manifest.json','database-source-manifest.json'] for source in json.loads((ROOT/'content'/name).read_text(encoding='utf-8'))]
+manifest=[source for name in ['source-manifest.json','additional-source-manifest.json','django-source-manifest.json','pygame-source-manifest.json','memory-source-manifest.json','week8-source-manifest.json','week7-source-manifest.json','pypi-source-manifest.json','django-case-source-manifest.json','database-source-manifest.json','ubuntu-source-manifest.json'] for source in json.loads((ROOT/'content'/name).read_text(encoding='utf-8'))]
 for source in manifest:
     file=ROOT/'public/materials'/source['download']
     assert hashlib.sha256(file.read_bytes()).hexdigest()==source['sha256'],source['source']

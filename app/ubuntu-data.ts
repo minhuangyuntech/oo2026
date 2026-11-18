@@ -28,9 +28,9 @@ export const ubuntuChapters = {
   ja: ["接続とアカウント", "mblog の配置", "トンネルと投稿", "保守・トラブル対応・再接続"],
 };
 export const ubuntuResourceNote = {
-  zh: "下載 mblog 完整專案，內含中英日三語 README。請依本頁的校內部署步驟操作，並向教師取得實際連線資訊。本頁可使用上方列印按鈕另存 PDF。",
-  en: "Download the complete mblog project with Chinese, English and Japanese README files. Follow this page for campus deployment and obtain connection details from your instructor. Use the print button above to save this lesson as a PDF.",
-  ja: "中国語・英語・日本語の README を含む mblog 完全版をダウンロードできます。学内への配置は本ページに沿って行い、接続情報は教員から受け取ってください。上部の印刷ボタンで PDF として保存できます。",
+  zh: "本單元提供 19 頁 PowerPoint，涵蓋 13 個主題與 4 張可編輯流程圖，指令可整段複製。簡報使用連線代稱，不含實際 IP 或預設密碼。另可下載 mblog 完整專案，內含中英日三語 README。請依本頁的校內部署步驟操作，並向教師取得實際連線資訊。本頁可使用上方列印按鈕另存 PDF。",
+  en: "Download the 19-slide PowerPoint covering 13 topics and 4 editable flowcharts. Command blocks can be copied in full. Slides use connection placeholders and contain no actual IP address or default password. Also download the complete mblog project with Chinese, English and Japanese README files. Follow this page for campus deployment and obtain connection details from your instructor. Use the print button above to save this lesson as a PDF.",
+  ja: "13 のトピックと 4 つの編集可能なフローチャートをまとめた全 19 枚の PowerPoint です。コマンドはブロック全体をコピーできます。実際の IP アドレスや初期パスワードは含まず、接続情報はプレースホルダーで示しています。中国語・英語・日本語の README を含む mblog 完全版をダウンロードできます。学内への配置は本ページに沿って行い、接続情報は教員から受け取ってください。上部の印刷ボタンで PDF として保存できます。",
 };
 
 type FlowStep = { title: string; detail: string };

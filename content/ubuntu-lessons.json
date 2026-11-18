@@ -1,7 +1,7 @@
 {
   "zh": {
-    "source": "在校內 Ubuntu 部署自己的 Django 網站 · 公開網頁版",
-    "download": null,
+    "source": "ubuntu-deploy-zh.pptx",
+    "download": "ubuntu-deploy-zh.pptx",
     "examples": "mblog-complete.zip",
     "slides": [
       {
@@ -392,8 +392,8 @@
     ]
   },
   "en": {
-    "source": "Deploying your Django website on campus Ubuntu · Public web edition",
-    "download": null,
+    "source": "ubuntu-deploy-en.pptx",
+    "download": "ubuntu-deploy-en.pptx",
     "examples": "mblog-complete.zip",
     "slides": [
       {
@@ -784,8 +784,8 @@
     ]
   },
   "ja": {
-    "source": "学内 Ubuntu で自分の Django サイトを公開する · 公開ウェブ版",
-    "download": null,
+    "source": "ubuntu-deploy-ja.pptx",
+    "download": "ubuntu-deploy-ja.pptx",
     "examples": "mblog-complete.zip",
     "slides": [
       {

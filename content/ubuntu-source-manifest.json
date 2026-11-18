@@ -1,0 +1,26 @@
+[
+  {
+    "week": "ubuntu-deploy",
+    "language": "zh",
+    "source": "ubuntu-deploy-zh.pptx",
+    "download": "ubuntu-deploy-zh.pptx",
+    "slides": 19,
+    "sha256": "52dae74782a2d95ca8f7d68247e637b8e77eca1e8eee2634cf22d2d302a3ba2b"
+  },
+  {
+    "week": "ubuntu-deploy",
+    "language": "en",
+    "source": "ubuntu-deploy-en.pptx",
+    "download": "ubuntu-deploy-en.pptx",
+    "slides": 19,
+    "sha256": "c2b514e6b18243ccbc2233933d90df582504bc4f9bdf42c3ca7465107304bd12"
+  },
+  {
+    "week": "ubuntu-deploy",
+    "language": "ja",
+    "source": "ubuntu-deploy-ja.pptx",
+    "download": "ubuntu-deploy-ja.pptx",
+    "slides": 19,
+    "sha256": "3f45914706f8060543376e6b3ed4bde945d639e31a4028eefa726fcb333be006"
+  }
+]
