@@ -1,0 +1,3578 @@
+{
+ "zh": [
+  {
+   "number": 1,
+   "title": "Python 程式測試：原理與方法",
+   "body": [
+    {
+     "type": "text",
+     "text": "補充教材 · 單元測試 · unittest · pytest"
+    },
+    {
+     "type": "text",
+     "text": "01　說明測試框架如何收集、執行與回報測試，並用 AAA 結構寫出測試"
+    },
+    {
+     "type": "text",
+     "text": "02　用 unittest 的 TestCase、setUp 與 assert 方法測試類別"
+    },
+    {
+     "type": "text",
+     "text": "03　用 pytest 的 assert、fixture、parametrize 與 pytest.raises 寫出精簡的測試"
+    },
+    {
+     "type": "text",
+     "text": "Python 3.12+ · 案例：成績簿類別 GradeBook（新增分數、平均、及格名單、CSV 存取）"
+    }
+   ],
+   "intro": "從「怎麼證明程式是對的」出發，理解 assert、測試結構與測試框架的運作，再用 unittest 與 pytest 為成績簿類別寫出可以重複執行的測試。"
+  },
+  {
+   "number": 2,
+   "title": "為什麼要寫測試",
+   "body": [
+    {
+     "type": "heading",
+     "text": "本章內容"
+    },
+    {
+     "type": "text",
+     "text": "Python 程式測試：原理與方法"
+    },
+    {
+     "type": "text",
+     "text": "本單元學習內容"
+    },
+    {
+     "type": "text",
+     "text": "範例類別：GradeBook"
+    },
+    {
+     "type": "text",
+     "text": "你現在怎麼確認程式是對的？"
+    }
+   ]
+  },
+  {
+   "number": 3,
+   "title": "本單元學習內容",
+   "body": [
+    {
+     "type": "table",
+     "rows": [
+      [
+       "主題",
+       "你會做的事"
+      ],
+      [
+       "為什麼要寫測試",
+       "比較手動檢查與自動測試"
+      ],
+      [
+       "測試的原理",
+       "看懂 assert、AAA 與迷你測試執行器"
+      ],
+      [
+       "unittest",
+       "用 TestCase 測試 GradeBook"
+      ],
+      [
+       "pytest",
+       "fixture、parametrize、pytest.raises"
+      ],
+      [
+       "練習與總結",
+       "用邊界值找出隱藏的錯誤"
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "text": "範例專案 gradebook_testing.zip：解壓縮後執行 pip install pytest，其餘只用標準函式庫。"
+    }
+   ]
+  },
+  {
+   "number": 4,
+   "title": "範例類別：GradeBook",
+   "body": [
+    {
+     "type": "code",
+     "text": "class GradeBook:\n    def add(self, student_id: str, score: int) -> None: ...  # 0～100，學號不可重複\n    def score_of(self, student_id: str) -> int: ...\n    def __len__(self) -> int: ...\n    def average(self) -> float: ...                          # 沒有成績時 ValueError\n    def passed(self) -> list[str]: ...                       # 60 分以上，依學號排序\n    def save_csv(self, path: Path) -> None: ...\n    @classmethod\n    def load_csv(cls, path: Path) -> \"GradeBook\": ...\n\ndef letter_grade(score: int) -> str: ...                     # 90 以上 A，……，未滿 60 為 F",
+     "language": "python"
+    },
+    {
+     "type": "text",
+     "text": "完整程式在範例專案的 gradebook.py。"
+    }
+   ]
+  },
+  {
+   "number": 5,
+   "title": "你現在怎麼確認程式是對的？",
+   "body": [
+    {
+     "type": "code",
+     "text": "book = GradeBook()\nbook.add(\"A001\", 80)\nbook.add(\"A002\", 90)\nprint(book.average())   # 用眼睛看：是 85 嗎？",
+     "language": "python"
+    },
+    {
+     "type": "table",
+     "rows": [
+      [
+       "手動 print",
+       "自動測試"
+      ],
+      [
+       "每次都要用眼睛看",
+       "由電腦比對預期結果"
+      ],
+      [
+       "改了程式要重看一遍",
+       "一個指令重跑全部"
+      ],
+      [
+       "只有寫的人知道「對」是什麼",
+       "預期結果寫在程式裡，誰都能檢查"
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "text": "測試是可以重複執行的證據：找錯、改程式時的安全網，也是寫成程式的規格。"
+    },
+    {
+     "type": "text",
+     "text": "教師提示：可以問學生：第 4 週的 BankAccount 改過幾次？每次改完怎麼確定沒弄壞其他功能？引出「回歸錯誤」與「安全網」。也提醒：測試只能證明有錯，不能證明沒有錯，沒測到的情況仍可能出錯。"
+    }
+   ]
+  },
+  {
+   "number": 6,
+   "title": "測試的原理",
+   "body": [
+    {
+     "type": "heading",
+     "text": "本章內容"
+    },
+    {
+     "type": "text",
+     "text": "assert：測試的最小單位"
+    },
+    {
+     "type": "text",
+     "text": "一個測試的三段：AAA"
+    },
+    {
+     "type": "text",
+     "text": "測試框架做的三件事"
+    },
+    {
+     "type": "text",
+     "text": "自己寫一個迷你測試執行器"
+    },
+    {
+     "type": "text",
+     "text": "測試的層級：測試金字塔"
+    },
+    {
+     "type": "text",
+     "text": "好測試的五個特性：FIRST"
+    },
+    {
+     "type": "text",
+     "text": "該測哪些值：等價類別與邊界值"
+    }
+   ]
+  },
+  {
+   "number": 7,
+   "title": "assert：測試的最小單位",
+   "body": [
+    {
+     "type": "text",
+     "text": "assert 條件, 訊息：條件為真就繼續；為假就拋出 AssertionError。"
+    },
+    {
+     "type": "code",
+     "text": "book = GradeBook()\nbook.add(\"A001\", 59)\nbook.add(\"A002\", 60)\nassert book.passed() == [\"A001\", \"A002\"]",
+     "language": "python"
+    },
+    {
+     "type": "text",
+     "text": "直接用 python 執行，錯誤訊息的最後只有："
+    },
+    {
+     "type": "code",
+     "text": "    assert book.passed() == [\"A001\", \"A002\"]\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError",
+     "language": "text",
+     "label": "輸出"
+    },
+    {
+     "type": "text",
+     "text": "只知道「錯了」，不知道 passed() 實際回傳什麼；測試框架會補上這些資訊"
+    },
+    {
+     "type": "text",
+     "text": "用 python -O 執行時，所有 assert 都會被略過"
+    },
+    {
+     "type": "text",
+     "text": "所以 assert 只用在測試；檢查輸入要用 if 加 raise（如 GradeBook.add）"
+    }
+   ]
+  },
+  {
+   "number": 8,
+   "title": "一個測試的三段：AAA",
+   "body": [
+    {
+     "type": "code",
+     "text": "def test_average_of_two_scores():\n    book = GradeBook()          # Arrange 準備：建立物件與資料\n    book.add(\"A001\", 80)\n    book.add(\"A002\", 90)\n    result = book.average()     # Act 執行：呼叫要測的方法\n    assert result == 85         # Assert 驗證：比對預期結果",
+     "language": "python"
+    },
+    {
+     "type": "table",
+     "rows": [
+      [
+       "AAA",
+       "第 12 週的驗收條件"
+      ],
+      [
+       "Arrange 準備",
+       "Given"
+      ],
+      [
+       "Act 執行",
+       "When"
+      ],
+      [
+       "Assert 驗證",
+       "Then"
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "text": "一個測試只驗證一件事，測試名稱說明這件事。"
+    }
+   ]
+  },
+  {
+   "number": 9,
+   "title": "測試框架做的三件事",
+   "body": [
+    {
+     "type": "table",
+     "rows": [
+      [
+       "步驟",
+       "框架做的事",
+       "你要遵守的約定"
+      ],
+      [
+       "收集",
+       "搜尋測試檔與測試函式",
+       "檔名與函式名稱以 test 開頭"
+      ],
+      [
+       "執行",
+       "一個測試出錯，仍繼續跑下一個",
+       "測試之間不共用狀態"
+      ],
+      [
+       "回報",
+       "統計結果、顯示失敗原因",
+       "用 assert 寫出預期結果"
+      ]
+     ]
+    }
+   ],
+   "image": "/materials/testing-zh-slide-9.png",
+   "imageAlt": "測試框架做的三件事",
+   "imageLayout": "wide",
+   "imageWidth": 801,
+   "imageHeight": 123
+  },
+  {
+   "number": 10,
+   "title": "自己寫一個迷你測試執行器",
+   "body": [
+    {
+     "type": "text",
+     "text": "demo/mini_runner.py（節錄，省略計數）："
+    },
+    {
+     "type": "code",
+     "text": "def collect(module):\n    return [(name, func) for name, func in inspect.getmembers(module, inspect.isfunction)\n            if name.startswith(\"test_\")]\n\ndef run(tests):\n    for name, func in tests:\n        try:\n            func()\n        except AssertionError as exc:\n            print(f\"FAIL  {name}：{exc}\")\n        except Exception as exc:\n            print(f\"ERROR {name}：{type(exc).__name__} {exc}\")\n        else:\n            print(f\"PASS  {name}\")",
+     "language": "python"
+    },
+    {
+     "type": "text",
+     "text": "教師提示：請學生先猜三個測試的結果。第二個測試失敗是因為「預期寫錯」：規格是 60 分才及格。強調失敗（assert 不成立）與錯誤（途中拋出其他例外）的差別，以及測試失敗時要先回頭看規格，不一定是程式錯（呼應第 12 週「是測試錯了，還是程式錯了？」）。"
+    }
+   ]
+  },
+  {
+   "number": 11,
+   "title": "自己寫一個迷你測試執行器（續）",
+   "body": [
+    {
+     "type": "text",
+     "text": "執行 python -m demo.mini_runner："
+    },
+    {
+     "type": "code",
+     "text": "PASS  test_average_of_two_scores\nFAIL  test_passed_list：預期 59 分也及格\nERROR test_score_of_unknown_student：KeyError 'Z999'\n1 passed, 1 failed, 1 error",
+     "language": "text",
+     "label": "輸出"
+    },
+    {
+     "type": "text",
+     "text": "unittest 與 pytest 的核心也是這個迴圈，再加上清楚的訊息、共用的準備工作與各種選項。"
+    }
+   ]
+  },
+  {
+   "number": 12,
+   "title": "測試的層級：測試金字塔",
+   "body": [
+    {
+     "type": "table",
+     "rows": [
+      [
+       "層級",
+       "測什麼",
+       "例子",
+       "速度與數量"
+      ],
+      [
+       "單元測試",
+       "一個函式或類別",
+       "GradeBook.average()",
+       "最快、最多"
+      ],
+      [
+       "整合測試",
+       "幾個元件一起運作",
+       "存成 CSV 再讀回",
+       "較慢、較少"
+      ],
+      [
+       "端對端測試",
+       "從使用者角度走完流程",
+       "從網頁輸入成績到看到報表",
+       "最慢、最少"
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "text": "底層的單元測試多而快，上層的測試少而慢，形狀像金字塔。本單元聚焦在單元測試。"
+    }
+   ]
+  },
+  {
+   "number": 13,
+   "title": "好測試的五個特性：FIRST",
+   "body": [
+    {
+     "type": "table",
+     "rows": [
+      [
+       "特性",
+       "意思",
+       "違反的例子"
+      ],
+      [
+       "Fast 快速",
+       "幾秒內跑完，才會常常跑",
+       "每個測試都等 time.sleep(10)"
+      ],
+      [
+       "Independent 獨立",
+       "不依賴其他測試的結果或順序",
+       "測試 B 用到測試 A 新增的學生"
+      ],
+      [
+       "Repeatable 可重複",
+       "每次、每台電腦結果都一樣",
+       "依賴 datetime.now()、亂數、網路"
+      ],
+      [
+       "Self-validating 自動判定",
+       "由 assert 判斷，不必用眼睛看",
+       "只有 print，沒有 assert"
+      ],
+      [
+       "Timely 及時",
+       "和程式一起寫，甚至先寫",
+       "期末前才補測試"
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "number": 14,
+   "title": "該測哪些值：等價類別與邊界值",
+   "body": [
+    {
+     "type": "table",
+     "rows": [
+      [
+       "等價類別",
+       "代表值",
+       "邊界值"
+      ],
+      [
+       "不合法（太小）",
+       "-5",
+       "-1"
+      ],
+      [
+       "F",
+       "30",
+       "0、59"
+      ],
+      [
+       "D",
+       "65",
+       "60、69"
+      ],
+      [
+       "C",
+       "75",
+       "70、79"
+      ],
+      [
+       "B",
+       "85",
+       "80、89"
+      ],
+      [
+       "A",
+       "95",
+       "90、100"
+      ],
+      [
+       "不合法（太大）",
+       "150",
+       "101"
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "text": "同一類別的值行為相同，測一個代表值即可；錯誤最常出現在邊界（> 與 >=）。"
+    }
+   ],
+   "intro": "letter_grade(score)：90 以上 A、80 以上 B、70 以上 C、60 以上 D，其餘 F；0～100 以外拋出 ValueError。"
+  },
+  {
+   "number": 15,
+   "title": "unittest：標準函式庫的測試框架",
+   "body": [
+    {
+     "type": "heading",
+     "text": "本章內容"
+    },
+    {
+     "type": "text",
+     "text": "unittest 的寫法"
+    },
+    {
+     "type": "text",
+     "text": "setUp：每個測試都拿到新的物件"
+    },
+    {
+     "type": "text",
+     "text": "常用的 assert 方法"
+    },
+    {
+     "type": "text",
+     "text": "測試例外與多組資料"
+    },
+    {
+     "type": "text",
+     "text": "執行 unittest 與讀懂結果"
+    }
+   ]
+  },
+  {
+   "number": 16,
+   "title": "unittest 的寫法",
+   "body": [
+    {
+     "type": "code",
+     "text": "import unittest\nfrom gradebook import GradeBook\n\nclass TestGradeBook(unittest.TestCase):\n    def setUp(self) -> None:\n        self.book = GradeBook()\n        self.book.add(\"A001\", 80)\n        self.book.add(\"A002\", 90)\n\n    def test_average(self) -> None:\n        self.assertEqual(self.book.average(), 85)\n\n    def test_add_increases_count(self) -> None:\n        self.book.add(\"A003\", 70)\n        self.assertEqual(len(self.book), 3)",
+     "language": "python"
+    },
+    {
+     "type": "text",
+     "text": "測試類別繼承 unittest.TestCase"
+    },
+    {
+     "type": "text",
+     "text": "名稱以 test 開頭的方法才是測試"
+    },
+    {
+     "type": "text",
+     "text": "用 self.assertXxx() 驗證，失敗時會顯示兩邊的值"
+    }
+   ]
+  },
+  {
+   "number": 17,
+   "title": "setUp：每個測試都拿到新的物件",
+   "body": [
+    {
+     "type": "table",
+     "rows": [
+      [
+       "順序",
+       "呼叫",
+       "self.book 的學生數"
+      ],
+      [
+       "1",
+       "setUp() → test_add_increases_count()",
+       "2 → 3"
+      ],
+      [
+       "2",
+       "setUp() → test_average()",
+       "2"
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "text": "unittest 替每個測試方法建立新的 TestCase 實體，並先呼叫 setUp()"
+    },
+    {
+     "type": "text",
+     "text": "第一個測試加入的 A003，不會出現在第二個測試"
+    },
+    {
+     "type": "text",
+     "text": "需要清理（關閉檔案、刪除暫存檔）時，寫在 tearDown()"
+    },
+    {
+     "type": "text",
+     "text": "這就是 FIRST 的 Independent：測試的順序不影響結果。"
+    }
+   ]
+  },
+  {
+   "number": 18,
+   "title": "常用的 assert 方法",
+   "body": [
+    {
+     "type": "table",
+     "rows": [
+      [
+       "方法",
+       "檢查"
+      ],
+      [
+       "assertEqual(a, b)",
+       "a == b"
+      ],
+      [
+       "assertTrue(x)／assertFalse(x)",
+       "bool(x) 為真／假"
+      ],
+      [
+       "assertIn(a, b)",
+       "a in b"
+      ],
+      [
+       "assertIsNone(x)",
+       "x is None"
+      ],
+      [
+       "assertAlmostEqual(a, b)",
+       "浮點數相差四捨五入到小數第 7 位為 0"
+      ],
+      [
+       "assertRaises(例外)",
+       "區塊中拋出指定例外"
+      ],
+      [
+       "assertRaisesRegex(例外, 規則)",
+       "例外訊息符合正規表示式"
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "text": "unittest 仿照 Java 的 JUnit 設計，沒有改寫 assert 的機制，所以用方法取得兩邊的值來顯示訊息。"
+    }
+   ]
+  },
+  {
+   "number": 19,
+   "title": "測試例外與多組資料",
+   "body": [
+    {
+     "type": "code",
+     "text": "def test_score_out_of_range(self) -> None:\n    with self.assertRaises(ValueError):\n        self.book.add(\"A003\", 101)\n\ndef test_duplicate_student(self) -> None:\n    with self.assertRaisesRegex(ValueError, \"已經有成績\"):\n        self.book.add(\"A001\", 70)",
+     "language": "python"
+    },
+    {
+     "type": "code",
+     "text": "def test_boundaries(self) -> None:\n    cases = [(100, \"A\"), (90, \"A\"), (89, \"B\"), (80, \"B\"), (60, \"D\"), (59, \"F\"), (0, \"F\")]\n    for score, expected in cases:\n        with self.subTest(score=score):\n            self.assertEqual(letter_grade(score), expected)",
+     "language": "python"
+    },
+    {
+     "type": "text",
+     "text": "subTest 讓迴圈中某一組失敗時，其他組仍繼續檢查，並在訊息中標出是哪一組。"
+    }
+   ]
+  },
+  {
+   "number": 20,
+   "title": "執行 unittest 與讀懂結果",
+   "body": [
+    {
+     "type": "code",
+     "text": "python -m unittest discover -s tests_unittest -v",
+     "language": "shell"
+    },
+    {
+     "type": "text",
+     "text": "把 test_average 的預期值改成 80，再加一個查詢不存在學號的測試（輸出節錄）："
+    },
+    {
+     "type": "code",
+     "text": ".F...E.\nERROR: test_unknown_student (test_gradebook_unittest.TestGradeBook.test_unknown_student)\nKeyError: 'Z999'\nFAIL: test_average (test_gradebook_unittest.TestGradeBook.test_average)\nAssertionError: 85.0 != 80\nRan 7 tests in 0.001s\nFAILED (failures=1, errors=1)",
+     "language": "text",
+     "label": "輸出"
+    },
+    {
+     "type": "table",
+     "rows": [
+      [
+       "符號",
+       "意思"
+      ],
+      [
+       ".",
+       "通過"
+      ],
+      [
+       "F",
+       "失敗：assert 方法不成立"
+      ],
+      [
+       "E",
+       "錯誤：測試中拋出其他例外"
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "number": 21,
+   "title": "pytest：更簡潔的測試框架",
+   "body": [
+    {
+     "type": "heading",
+     "text": "本章內容"
+    },
+    {
+     "type": "text",
+     "text": "第一個 pytest 測試"
+    },
+    {
+     "type": "text",
+     "text": "pytest 怎麼找到測試"
+    },
+    {
+     "type": "text",
+     "text": "assert 改寫：失敗時看到實際值"
+    },
+    {
+     "type": "text",
+     "text": "fixture：共用的準備工作"
+    },
+    {
+     "type": "text",
+     "text": "內建 fixture 與清理"
+    },
+    {
+     "type": "text",
+     "text": "parametrize：一個測試，多組資料"
+    },
+    {
+     "type": "text",
+     "text": "測試例外與浮點數"
+    },
+    {
+     "type": "text",
+     "text": "常用的執行方式"
+    },
+    {
+     "type": "text",
+     "text": "unittest 與 pytest 對照"
+    }
+   ]
+  },
+  {
+   "number": 22,
+   "title": "第一個 pytest 測試",
+   "body": [
+    {
+     "type": "code",
+     "text": "pip install pytest\npytest -v",
+     "language": "shell"
+    },
+    {
+     "type": "code",
+     "text": "from gradebook import GradeBook\n\ndef test_average() -> None:\n    book = GradeBook()\n    book.add(\"A001\", 80)\n    book.add(\"A002\", 90)\n    assert book.average() == 85",
+     "language": "python"
+    },
+    {
+     "type": "text",
+     "text": "不必繼承類別，一般函式就是測試"
+    },
+    {
+     "type": "text",
+     "text": "直接使用 Python 的 assert"
+    },
+    {
+     "type": "text",
+     "text": "pytest 也能執行 unittest 寫的測試：pytest tests_unittest"
+    }
+   ]
+  },
+  {
+   "number": 23,
+   "title": "pytest 怎麼找到測試",
+   "body": [
+    {
+     "type": "table",
+     "rows": [
+      [
+       "層級",
+       "規則"
+      ],
+      [
+       "起點",
+       "設定檔的 testpaths；沒有設定時從目前資料夾開始"
+      ],
+      [
+       "檔案",
+       "test_*.py 或 *_test.py"
+      ],
+      [
+       "函式",
+       "類別外、名稱以 test 開頭的函式"
+      ],
+      [
+       "類別",
+       "名稱以 Test 開頭、沒有 __init__ 的類別中，以 test 開頭的方法"
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "text": "範例專案的 pyproject.toml："
+    },
+    {
+     "type": "code",
+     "text": "[tool.pytest.ini_options]\npythonpath = [\".\"]\ntestpaths = [\"tests\"]",
+     "language": "text",
+     "label": "pyproject.toml"
+    },
+    {
+     "type": "text",
+     "text": "pythonpath 讓測試能 import gradebook；testpaths 讓 pytest 只到 tests/ 收集。"
+    }
+   ]
+  },
+  {
+   "number": 24,
+   "title": "assert 改寫：失敗時看到實際值",
+   "body": [
+    {
+     "type": "text",
+     "text": "同一行 assert，交給 pytest 執行（輸出節錄）："
+    },
+    {
+     "type": "code",
+     "text": ">       assert book.passed() == [\"A001\", \"A002\"]\nE       AssertionError: assert ['A002'] == ['A001', 'A002']\nE         At index 0 diff: 'A002' != 'A001'\nE         Right contains one more item: 'A002'",
+     "language": "text",
+     "label": "輸出"
+    },
+    {
+     "type": "text",
+     "text": "pytest 在匯入測試模組時改寫其中的 assert，記下兩邊運算式的值"
+    },
+    {
+     "type": "text",
+     "text": "只改寫它收集到的測試模組；被測的程式（gradebook.py）不受影響"
+    },
+    {
+     "type": "text",
+     "text": "所以 pytest 能用一般的 assert，unittest 則需要 assertEqual 這類方法"
+    }
+   ]
+  },
+  {
+   "number": 25,
+   "title": "fixture：共用的準備工作",
+   "body": [
+    {
+     "type": "code",
+     "text": "# tests/conftest.py\n@pytest.fixture\ndef book() -> GradeBook:\n    gradebook = GradeBook()\n    gradebook.add(\"A001\", 80)\n    gradebook.add(\"A002\", 90)\n    return gradebook",
+     "language": "python"
+    },
+    {
+     "type": "code",
+     "text": "# tests/test_gradebook.py\ndef test_add_increases_count(book: GradeBook) -> None:\n    book.add(\"A003\", 70)\n    assert len(book) == 3\n\ndef test_each_test_gets_a_new_book(book: GradeBook) -> None:\n    assert len(book) == 2  # 上一個測試加的 A003 不會留下來",
+     "language": "python"
+    },
+    {
+     "type": "text",
+     "text": "測試函式的參數名稱就是要用的 fixture，pytest 會自動建立並傳入"
+    },
+    {
+     "type": "text",
+     "text": "預設每個測試都重新建立一次，和 setUp 一樣保持獨立"
+    },
+    {
+     "type": "text",
+     "text": "寫在 conftest.py 的 fixture，同資料夾的測試檔不必 import 就能使用"
+    }
+   ]
+  },
+  {
+   "number": 26,
+   "title": "內建 fixture 與清理",
+   "body": [
+    {
+     "type": "code",
+     "text": "def test_csv_round_trip(book: GradeBook, tmp_path: Path) -> None:\n    path = tmp_path / \"scores.csv\"\n    book.save_csv(path)\n    loaded = GradeBook.load_csv(path)\n    assert loaded.score_of(\"A002\") == 90\n    assert len(loaded) == 2",
+     "language": "python"
+    },
+    {
+     "type": "table",
+     "rows": [
+      [
+       "內建 fixture",
+       "提供"
+      ],
+      [
+       "tmp_path",
+       "每個測試專用的暫存資料夾（pathlib.Path）"
+      ],
+      [
+       "capsys",
+       "讀取測試期間 print 的輸出"
+      ],
+      [
+       "monkeypatch",
+       "暫時替換屬性或環境變數，測試結束後還原"
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "text": "讀寫檔案的測試不要用固定路徑：會互相干擾，也會留下檔案"
+    },
+    {
+     "type": "text",
+     "text": "自己的 fixture 需要清理時，把 return 改成 yield，yield 之後的程式就是清理工作"
+    }
+   ]
+  },
+  {
+   "number": 27,
+   "title": "parametrize：一個測試，多組資料",
+   "body": [
+    {
+     "type": "code",
+     "text": "@pytest.mark.parametrize(\n    \"score, expected\",\n    [(100, \"A\"), (90, \"A\"), (89, \"B\"), (80, \"B\"), (79, \"C\"),\n     (70, \"C\"), (69, \"D\"), (60, \"D\"), (59, \"F\"), (0, \"F\")],\n)\ndef test_letter_grade(score: int, expected: str) -> None:\n    assert letter_grade(score) == expected",
+     "language": "python"
+    },
+    {
+     "type": "text",
+     "text": "pytest -v（輸出節錄）："
+    },
+    {
+     "type": "code",
+     "text": "tests/test_letter_grade.py::test_letter_grade[100-A] PASSED              [  8%]\ntests/test_letter_grade.py::test_letter_grade[90-A] PASSED               [ 16%]\ntests/test_letter_grade.py::test_letter_grade[89-B] PASSED               [ 25%]",
+     "language": "text",
+     "label": "輸出"
+    },
+    {
+     "type": "text",
+     "text": "每組資料是獨立的測試，有自己的名稱，某組失敗不影響其他組"
+    },
+    {
+     "type": "text",
+     "text": "等價類別與邊界值的表格，可以直接變成 parametrize 的資料"
+    }
+   ]
+  },
+  {
+   "number": 28,
+   "title": "測試例外與浮點數",
+   "body": [
+    {
+     "type": "code",
+     "text": "def test_empty_book_has_no_average() -> None:\n    with pytest.raises(ValueError, match=\"沒有任何成績\"):\n        GradeBook().average()\n\n@pytest.mark.parametrize(\"score\", [-1, 101])\ndef test_score_out_of_range(book: GradeBook, score: int) -> None:\n    with pytest.raises(ValueError, match=\"0 到 100\"):\n        book.add(\"A003\", score)",
+     "language": "python"
+    },
+    {
+     "type": "code",
+     "text": "def test_average_of_three(book: GradeBook) -> None:\n    book.add(\"A003\", 86)\n    assert book.average() == pytest.approx(85.33, abs=0.01)",
+     "language": "python"
+    },
+    {
+     "type": "text",
+     "text": "match 用正規表示式比對例外訊息，確認是因為「對的原因」出錯"
+    },
+    {
+     "type": "text",
+     "text": "浮點數有誤差（0.1 + 0.2 == 0.3 是 False），比較時用 pytest.approx 指定可接受的誤差"
+    }
+   ]
+  },
+  {
+   "number": 29,
+   "title": "常用的執行方式",
+   "body": [
+    {
+     "type": "table",
+     "rows": [
+      [
+       "指令",
+       "作用"
+      ],
+      [
+       "pytest",
+       "執行全部測試"
+      ],
+      [
+       "pytest -v／pytest -q",
+       "列出每個測試／精簡輸出"
+      ],
+      [
+       "pytest tests/test_gradebook.py",
+       "只跑一個檔案"
+      ],
+      [
+       "pytest -k average",
+       "只跑名稱含 average 的測試"
+      ],
+      [
+       "pytest -x",
+       "遇到第一個失敗就停止"
+      ],
+      [
+       "pytest --lf",
+       "只重跑上次失敗的測試"
+      ]
+     ]
+    },
+    {
+     "type": "code",
+     "text": "$ pytest -q\n.....................                                                    [100%]\n21 passed in 0.03s",
+     "language": "text",
+     "label": "輸出"
+    },
+    {
+     "type": "text",
+     "text": "pytest 的結果：測試函式中拋出例外算 failed；fixture 準備或清理時出錯算 error。"
+    }
+   ]
+  },
+  {
+   "number": 30,
+   "title": "unittest 與 pytest 對照",
+   "body": [
+    {
+     "type": "table",
+     "rows": [
+      [
+       "項目",
+       "unittest",
+       "pytest"
+      ],
+      [
+       "安裝",
+       "標準函式庫，不必安裝",
+       "pip install pytest"
+      ],
+      [
+       "測試寫法",
+       "繼承 TestCase 的方法",
+       "一般函式"
+      ],
+      [
+       "驗證",
+       "self.assertEqual(a, b) 等方法",
+       "assert a == b"
+      ],
+      [
+       "共用準備",
+       "setUp()／tearDown()",
+       "fixture（參數注入、yield 清理）"
+      ],
+      [
+       "多組資料",
+       "subTest",
+       "@pytest.mark.parametrize"
+      ],
+      [
+       "例外",
+       "assertRaises",
+       "pytest.raises"
+      ],
+      [
+       "執行",
+       "python -m unittest",
+       "pytest（也能跑 unittest 的測試）"
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "text": "兩者都值得認識：標準函式庫與許多既有專案用 unittest；第 12 週的範例專案與多數新專案用 pytest。"
+    }
+   ]
+  },
+  {
+   "number": 31,
+   "title": "練習與總結",
+   "body": [
+    {
+     "type": "heading",
+     "text": "本章內容"
+    },
+    {
+     "type": "text",
+     "text": "練習：用邊界值找出錯誤"
+    },
+    {
+     "type": "text",
+     "text": "總結"
+    },
+    {
+     "type": "text",
+     "text": "課後作業與延伸"
+    }
+   ]
+  },
+  {
+   "number": 32,
+   "title": "練習：用邊界值找出錯誤",
+   "body": [
+    {
+     "type": "text",
+     "text": "exercises/boundaries/grading.py 的 letter_grade 藏了一個錯誤，但現有測試全部通過："
+    },
+    {
+     "type": "code",
+     "text": "pytest exercises/boundaries -v",
+     "language": "shell"
+    },
+    {
+     "type": "text",
+     "text": "在 test_boundaries 的 parametrize 資料中，補上每個等第的上下界"
+    },
+    {
+     "type": "text",
+     "text": "另寫一個測試：-1 與 101 要拋出 ValueError"
+    },
+    {
+     "type": "text",
+     "text": "看到紅燈後，修正 grading.py，讓所有測試通過"
+    },
+    {
+     "type": "text",
+     "text": "提示：回到「等價類別與邊界值」那張表。"
+    }
+   ]
+  },
+  {
+   "number": 33,
+   "title": "練習：用邊界值找出錯誤",
+   "body": [
+    {
+     "type": "heading",
+     "text": "參考答案"
+    },
+    {
+     "type": "code",
+     "text": "@pytest.mark.parametrize(\n    \"score, expected\",\n    [(100, \"A\"), (90, \"A\"), (89, \"B\"), (80, \"B\"), (79, \"C\"),\n     (70, \"C\"), (69, \"D\"), (60, \"D\"), (59, \"F\"), (0, \"F\")],\n)\ndef test_boundaries(score: int, expected: str) -> None:\n    assert letter_grade(score) == expected\n\n@pytest.mark.parametrize(\"score\", [-1, 101])\ndef test_invalid_score(score: int) -> None:\n    with pytest.raises(ValueError):\n        letter_grade(score)",
+     "language": "python"
+    },
+    {
+     "type": "text",
+     "text": "(80, \"B\") 失敗：assert 'C' == 'B'。grading.py 把 score >= 80 寫成 score > 80，改回 >= 後 13 個測試全部通過。"
+    }
+   ]
+  },
+  {
+   "number": 34,
+   "title": "總結",
+   "body": [
+    {
+     "type": "table",
+     "rows": [
+      [
+       "原理",
+       "方法"
+      ],
+      [
+       "測試是可以重複執行的證據",
+       "把預期結果寫成 assert"
+      ],
+      [
+       "框架負責收集、執行、回報",
+       "遵守 test 開頭的命名約定"
+      ],
+      [
+       "一個測試驗證一件事（AAA）",
+       "準備 → 執行 → 驗證"
+      ],
+      [
+       "測試彼此獨立（FIRST）",
+       "setUp、fixture 每次重新建立"
+      ],
+      [
+       "錯誤常出在邊界",
+       "等價類別＋邊界值，用 parametrize 列出"
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "text": "測試失敗時先問：程式錯了，還是預期寫錯了？回頭看規格再決定改哪一邊。"
+    }
+   ]
+  },
+  {
+   "number": 35,
+   "title": "課後作業與延伸",
+   "body": [
+    {
+     "type": "heading",
+     "text": "必做"
+    },
+    {
+     "type": "text",
+     "text": "完成邊界值練習，pytest exercises/boundaries 全部通過"
+    },
+    {
+     "type": "text",
+     "text": "替自己期末專題的一個類別寫 3 個以上的 pytest 測試，其中至少 1 個測試例外"
+    },
+    {
+     "type": "heading",
+     "text": "參考資料"
+    },
+    {
+     "type": "text",
+     "text": "Python 官方文件：unittest — Unit testing framework"
+    },
+    {
+     "type": "text",
+     "text": "pytest 官方文件：Get Started、How to use fixtures、How to parametrize fixtures and test functions"
+    },
+    {
+     "type": "text",
+     "text": "下一步可以學：測試替身與 Mock、測試覆蓋率（coverage）、測試驅動開發（TDD）。"
+    }
+   ]
+  }
+ ],
+ "en": [
+  {
+   "number": 1,
+   "title": "Testing Python programs: principles and methods",
+   "body": [
+    {
+     "type": "text",
+     "text": "Supplement · Unit testing · unittest · pytest"
+    },
+    {
+     "type": "text",
+     "text": "01  Explain how a test framework collects, runs, and reports tests, and write tests in the AAA structure"
+    },
+    {
+     "type": "text",
+     "text": "02  Test a class with unittest's TestCase, setUp, and assert methods"
+    },
+    {
+     "type": "text",
+     "text": "03  Write concise tests with pytest's assert, fixtures, parametrize, and pytest.raises"
+    },
+    {
+     "type": "text",
+     "text": "Python 3.12+ · Case: the GradeBook class (add scores, average, passing list, CSV)"
+    }
+   ],
+   "intro": "Start from \"How do you show that a program is correct?\" Understand assert, how a test is structured, and how test frameworks work, then use unittest and pytest to write repeatable tests for a grade book class."
+  },
+  {
+   "number": 2,
+   "title": "Why write tests",
+   "body": [
+    {
+     "type": "heading",
+     "text": "In this chapter"
+    },
+    {
+     "type": "text",
+     "text": "Testing Python programs: principles and methods"
+    },
+    {
+     "type": "text",
+     "text": "What you will learn"
+    },
+    {
+     "type": "text",
+     "text": "The sample class: GradeBook"
+    },
+    {
+     "type": "text",
+     "text": "How do you check that your code is correct today?"
+    }
+   ]
+  },
+  {
+   "number": 3,
+   "title": "What you will learn",
+   "body": [
+    {
+     "type": "table",
+     "rows": [
+      [
+       "Topic",
+       "What you will do"
+      ],
+      [
+       "Why write tests",
+       "Compare manual checks with automated tests"
+      ],
+      [
+       "Principles of testing",
+       "Understand assert, AAA, and a mini test runner"
+      ],
+      [
+       "unittest",
+       "Test GradeBook with TestCase"
+      ],
+      [
+       "pytest",
+       "Fixtures, parametrize, pytest.raises"
+      ],
+      [
+       "Exercise and summary",
+       "Find a hidden bug with boundary values"
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "text": "Sample project gradebook_testing-en.zip: unzip it and run pip install pytest; everything else uses only the standard library."
+    }
+   ]
+  },
+  {
+   "number": 4,
+   "title": "The sample class: GradeBook",
+   "body": [
+    {
+     "type": "code",
+     "text": "class GradeBook:\n    def add(self, student_id: str, score: int) -> None: ...  # 0 to 100; each student ID only once\n    def score_of(self, student_id: str) -> int: ...\n    def __len__(self) -> int: ...\n    def average(self) -> float: ...                          # ValueError when there are no scores\n    def passed(self) -> list[str]: ...                       # 60 or more, sorted by student ID\n    def save_csv(self, path: Path) -> None: ...\n    @classmethod\n    def load_csv(cls, path: Path) -> \"GradeBook\": ...\n\ndef letter_grade(score: int) -> str: ...                     # 90+ A, ..., below 60 F",
+     "language": "python"
+    },
+    {
+     "type": "text",
+     "text": "The full code is in the sample project's gradebook.py."
+    }
+   ]
+  },
+  {
+   "number": 5,
+   "title": "How do you check that your code is correct today?",
+   "body": [
+    {
+     "type": "code",
+     "text": "book = GradeBook()\nbook.add(\"A001\", 80)\nbook.add(\"A002\", 90)\nprint(book.average())   # Check by eye: is it 85?",
+     "language": "python"
+    },
+    {
+     "type": "table",
+     "rows": [
+      [
+       "Manual print",
+       "Automated tests"
+      ],
+      [
+       "You check by eye every time",
+       "The computer compares with the expected result"
+      ],
+      [
+       "After each change you look again",
+       "One command reruns everything"
+      ],
+      [
+       "Only the author knows what \"correct\" is",
+       "The expected result is in the code; anyone can check it"
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "text": "A test is evidence you can run again: it finds bugs, is a safety net when you change code, and is a spec written as code."
+    },
+    {
+     "type": "text",
+     "text": "Instructor note: Ask students: how many times did the Week 4 BankAccount change? After each change, how did you know nothing else broke? Introduce regressions and the idea of a safety net. Also point out that tests can show that bugs exist, not that there are none; cases you did not test can still fail."
+    }
+   ]
+  },
+  {
+   "number": 6,
+   "title": "Principles of testing",
+   "body": [
+    {
+     "type": "heading",
+     "text": "In this chapter"
+    },
+    {
+     "type": "text",
+     "text": "assert: the smallest unit of a test"
+    },
+    {
+     "type": "text",
+     "text": "Three parts of a test: AAA"
+    },
+    {
+     "type": "text",
+     "text": "The three things a test framework does"
+    },
+    {
+     "type": "text",
+     "text": "Write your own mini test runner"
+    },
+    {
+     "type": "text",
+     "text": "Levels of testing: the test pyramid"
+    },
+    {
+     "type": "text",
+     "text": "Five properties of good tests: FIRST"
+    },
+    {
+     "type": "text",
+     "text": "Which values to test: equivalence classes and boundary values"
+    }
+   ]
+  },
+  {
+   "number": 7,
+   "title": "assert: the smallest unit of a test",
+   "body": [
+    {
+     "type": "text",
+     "text": "assert condition, message: if the condition is true, continue; if false, raise AssertionError."
+    },
+    {
+     "type": "code",
+     "text": "book = GradeBook()\nbook.add(\"A001\", 59)\nbook.add(\"A002\", 60)\nassert book.passed() == [\"A001\", \"A002\"]",
+     "language": "python"
+    },
+    {
+     "type": "text",
+     "text": "Run it directly with python, and the error ends with just this:"
+    },
+    {
+     "type": "code",
+     "text": "    assert book.passed() == [\"A001\", \"A002\"]\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError",
+     "language": "text",
+     "label": "Output"
+    },
+    {
+     "type": "text",
+     "text": "You only know it is wrong, not what passed() actually returned; a test framework adds that information"
+    },
+    {
+     "type": "text",
+     "text": "With python -O, every assert is skipped"
+    },
+    {
+     "type": "text",
+     "text": "So use assert only in tests; validate input with if and raise (as in GradeBook.add)"
+    }
+   ]
+  },
+  {
+   "number": 8,
+   "title": "Three parts of a test: AAA",
+   "body": [
+    {
+     "type": "code",
+     "text": "def test_average_of_two_scores():\n    book = GradeBook()          # Arrange: create the object and data\n    book.add(\"A001\", 80)\n    book.add(\"A002\", 90)\n    result = book.average()     # Act: call the method under test\n    assert result == 85         # Assert: compare with the expected result",
+     "language": "python"
+    },
+    {
+     "type": "table",
+     "rows": [
+      [
+       "AAA",
+       "Week 12 acceptance criteria"
+      ],
+      [
+       "Arrange",
+       "Given"
+      ],
+      [
+       "Act",
+       "When"
+      ],
+      [
+       "Assert",
+       "Then"
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "text": "A test checks one thing, and its name says what that thing is."
+    }
+   ]
+  },
+  {
+   "number": 9,
+   "title": "The three things a test framework does",
+   "body": [
+    {
+     "type": "table",
+     "rows": [
+      [
+       "Step",
+       "What the framework does",
+       "Conventions you follow"
+      ],
+      [
+       "Collect",
+       "Searches for test files and test functions",
+       "File and function names start with test"
+      ],
+      [
+       "Run",
+       "If one test breaks, it still runs the next one",
+       "Tests do not share state"
+      ],
+      [
+       "Report",
+       "Counts results and shows why tests failed",
+       "Write the expected result with assert"
+      ]
+     ]
+    }
+   ],
+   "image": "/materials/testing-en-slide-9.png",
+   "imageAlt": "The three things a test framework does",
+   "imageLayout": "wide",
+   "imageWidth": 842,
+   "imageHeight": 123
+  },
+  {
+   "number": 10,
+   "title": "Write your own mini test runner",
+   "body": [
+    {
+     "type": "text",
+     "text": "demo/mini_runner.py (excerpt, counting omitted):"
+    },
+    {
+     "type": "code",
+     "text": "def collect(module):\n    return [(name, func) for name, func in inspect.getmembers(module, inspect.isfunction)\n            if name.startswith(\"test_\")]\n\ndef run(tests):\n    for name, func in tests:\n        try:\n            func()\n        except AssertionError as exc:\n            print(f\"FAIL  {name}: {exc}\")\n        except Exception as exc:\n            print(f\"ERROR {name}: {type(exc).__name__} {exc}\")\n        else:\n            print(f\"PASS  {name}\")",
+     "language": "python"
+    },
+    {
+     "type": "text",
+     "text": "Instructor note: Ask students to guess the result of each test first. The second test fails because the expectation is wrong: the spec says 60 is the passing score. Stress the difference between a failure (an assert does not hold) and an error (another exception is raised along the way), and that when a test fails you go back to the spec first; the code is not always the one that is wrong (as in Week 12: \"Is the test wrong, or the code?\")."
+    }
+   ]
+  },
+  {
+   "number": 11,
+   "title": "Write your own mini test runner (cont.)",
+   "body": [
+    {
+     "type": "text",
+     "text": "Run python -m demo.mini_runner:"
+    },
+    {
+     "type": "code",
+     "text": "PASS  test_average_of_two_scores\nFAIL  test_passed_list: expected 59 to pass too\nERROR test_score_of_unknown_student: KeyError 'Z999'\n1 passed, 1 failed, 1 error",
+     "language": "text",
+     "label": "Output"
+    },
+    {
+     "type": "text",
+     "text": "At their core, unittest and pytest run this same loop, adding clear messages, shared setup, and many options."
+    }
+   ]
+  },
+  {
+   "number": 12,
+   "title": "Levels of testing: the test pyramid",
+   "body": [
+    {
+     "type": "table",
+     "rows": [
+      [
+       "Level",
+       "What it tests",
+       "Example",
+       "Speed and number"
+      ],
+      [
+       "Unit tests",
+       "One function or class",
+       "GradeBook.average()",
+       "Fastest, most"
+      ],
+      [
+       "Integration tests",
+       "Several components working together",
+       "Save to CSV, then load it back",
+       "Slower, fewer"
+      ],
+      [
+       "End-to-end tests",
+       "A whole flow from the user's point of view",
+       "From entering scores on a web page to seeing the report",
+       "Slowest, fewest"
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "text": "Many fast unit tests at the bottom, few slow tests at the top: the shape of a pyramid. This lesson focuses on unit tests."
+    }
+   ]
+  },
+  {
+   "number": 13,
+   "title": "Five properties of good tests: FIRST",
+   "body": [
+    {
+     "type": "table",
+     "rows": [
+      [
+       "Property",
+       "Meaning",
+       "Violating example"
+      ],
+      [
+       "Fast",
+       "Finishes in seconds, so you run it often",
+       "Every test waits on time.sleep(10)"
+      ],
+      [
+       "Independent",
+       "Does not depend on other tests' results or order",
+       "Test B uses a student added by test A"
+      ],
+      [
+       "Repeatable",
+       "Same result every run, on every computer",
+       "Depends on datetime.now(), random numbers, the network"
+      ],
+      [
+       "Self-validating",
+       "assert decides; no need to check by eye",
+       "Only print, no assert"
+      ],
+      [
+       "Timely",
+       "Written with the code, or even first",
+       "Tests added just before the final deadline"
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "number": 14,
+   "title": "Which values to test: equivalence classes and boundary values",
+   "body": [
+    {
+     "type": "table",
+     "rows": [
+      [
+       "Equivalence class",
+       "Representative value",
+       "Boundary values"
+      ],
+      [
+       "Invalid (too low)",
+       "-5",
+       "-1"
+      ],
+      [
+       "F",
+       "30",
+       "0, 59"
+      ],
+      [
+       "D",
+       "65",
+       "60, 69"
+      ],
+      [
+       "C",
+       "75",
+       "70, 79"
+      ],
+      [
+       "B",
+       "85",
+       "80, 89"
+      ],
+      [
+       "A",
+       "95",
+       "90, 100"
+      ],
+      [
+       "Invalid (too high)",
+       "150",
+       "101"
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "text": "Values in the same class behave the same, so one representative is enough; bugs most often appear at the boundaries (> vs. >=)."
+    }
+   ],
+   "intro": "letter_grade(score): 90+ A, 80+ B, 70+ C, 60+ D, otherwise F; outside 0 to 100 it raises ValueError."
+  },
+  {
+   "number": 15,
+   "title": "unittest: the standard library's test framework",
+   "body": [
+    {
+     "type": "heading",
+     "text": "In this chapter"
+    },
+    {
+     "type": "text",
+     "text": "Writing tests with unittest"
+    },
+    {
+     "type": "text",
+     "text": "setUp: every test gets a new object"
+    },
+    {
+     "type": "text",
+     "text": "Common assert methods"
+    },
+    {
+     "type": "text",
+     "text": "Testing exceptions and multiple cases"
+    },
+    {
+     "type": "text",
+     "text": "Running unittest and reading the results"
+    }
+   ]
+  },
+  {
+   "number": 16,
+   "title": "Writing tests with unittest",
+   "body": [
+    {
+     "type": "code",
+     "text": "import unittest\nfrom gradebook import GradeBook\n\nclass TestGradeBook(unittest.TestCase):\n    def setUp(self) -> None:\n        self.book = GradeBook()\n        self.book.add(\"A001\", 80)\n        self.book.add(\"A002\", 90)\n\n    def test_average(self) -> None:\n        self.assertEqual(self.book.average(), 85)\n\n    def test_add_increases_count(self) -> None:\n        self.book.add(\"A003\", 70)\n        self.assertEqual(len(self.book), 3)",
+     "language": "python"
+    },
+    {
+     "type": "text",
+     "text": "Test classes inherit from unittest.TestCase"
+    },
+    {
+     "type": "text",
+     "text": "Only methods whose names start with test are tests"
+    },
+    {
+     "type": "text",
+     "text": "Verify with self.assertXxx(); a failure shows both values"
+    }
+   ]
+  },
+  {
+   "number": 17,
+   "title": "setUp: every test gets a new object",
+   "body": [
+    {
+     "type": "table",
+     "rows": [
+      [
+       "Order",
+       "Calls",
+       "Students in self.book"
+      ],
+      [
+       "1",
+       "setUp() → test_add_increases_count()",
+       "2 → 3"
+      ],
+      [
+       "2",
+       "setUp() → test_average()",
+       "2"
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "text": "unittest creates a new TestCase instance for each test method and calls setUp() first"
+    },
+    {
+     "type": "text",
+     "text": "A003, added by the first test, does not appear in the second test"
+    },
+    {
+     "type": "text",
+     "text": "For cleanup (closing files, deleting temporary files), use tearDown()"
+    },
+    {
+     "type": "text",
+     "text": "This is the I in FIRST, Independent: the order of tests does not change the results."
+    }
+   ]
+  },
+  {
+   "number": 18,
+   "title": "Common assert methods",
+   "body": [
+    {
+     "type": "table",
+     "rows": [
+      [
+       "Method",
+       "Checks"
+      ],
+      [
+       "assertEqual(a, b)",
+       "a == b"
+      ],
+      [
+       "assertTrue(x) / assertFalse(x)",
+       "bool(x) is true / false"
+      ],
+      [
+       "assertIn(a, b)",
+       "a in b"
+      ],
+      [
+       "assertIsNone(x)",
+       "x is None"
+      ],
+      [
+       "assertAlmostEqual(a, b)",
+       "Floats differ by 0 when rounded to 7 decimal places"
+      ],
+      [
+       "assertRaises(exception)",
+       "The block raises the given exception"
+      ],
+      [
+       "assertRaisesRegex(exception, pattern)",
+       "The exception message matches a regular expression"
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "text": "unittest follows Java's JUnit and has no way to rewrite assert, so it uses methods to get both values for the message."
+    }
+   ]
+  },
+  {
+   "number": 19,
+   "title": "Testing exceptions and multiple cases",
+   "body": [
+    {
+     "type": "code",
+     "text": "def test_score_out_of_range(self) -> None:\n    with self.assertRaises(ValueError):\n        self.book.add(\"A003\", 101)\n\ndef test_duplicate_student(self) -> None:\n    with self.assertRaisesRegex(ValueError, \"already has a score\"):\n        self.book.add(\"A001\", 70)",
+     "language": "python"
+    },
+    {
+     "type": "code",
+     "text": "def test_boundaries(self) -> None:\n    cases = [(100, \"A\"), (90, \"A\"), (89, \"B\"), (80, \"B\"), (60, \"D\"), (59, \"F\"), (0, \"F\")]\n    for score, expected in cases:\n        with self.subTest(score=score):\n            self.assertEqual(letter_grade(score), expected)",
+     "language": "python"
+    },
+    {
+     "type": "text",
+     "text": "subTest keeps checking the other cases when one case in the loop fails, and the message shows which case it was."
+    }
+   ]
+  },
+  {
+   "number": 20,
+   "title": "Running unittest and reading the results",
+   "body": [
+    {
+     "type": "code",
+     "text": "python -m unittest discover -s tests_unittest -v",
+     "language": "shell"
+    },
+    {
+     "type": "text",
+     "text": "Change the expected value in test_average to 80 and add a test that looks up a missing student ID (output excerpt):"
+    },
+    {
+     "type": "code",
+     "text": ".F...E.\nERROR: test_unknown_student (test_gradebook_unittest.TestGradeBook.test_unknown_student)\nKeyError: 'Z999'\nFAIL: test_average (test_gradebook_unittest.TestGradeBook.test_average)\nAssertionError: 85.0 != 80\nRan 7 tests in 0.001s\nFAILED (failures=1, errors=1)",
+     "language": "text",
+     "label": "Output"
+    },
+    {
+     "type": "table",
+     "rows": [
+      [
+       "Symbol",
+       "Meaning"
+      ],
+      [
+       ".",
+       "Passed"
+      ],
+      [
+       "F",
+       "Failure: an assert method did not hold"
+      ],
+      [
+       "E",
+       "Error: another exception was raised in the test"
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "number": 21,
+   "title": "pytest: a more concise test framework",
+   "body": [
+    {
+     "type": "heading",
+     "text": "In this chapter"
+    },
+    {
+     "type": "text",
+     "text": "Your first pytest test"
+    },
+    {
+     "type": "text",
+     "text": "How pytest finds tests"
+    },
+    {
+     "type": "text",
+     "text": "Assertion rewriting: see the actual values on failure"
+    },
+    {
+     "type": "text",
+     "text": "Fixtures: shared setup"
+    },
+    {
+     "type": "text",
+     "text": "Built-in fixtures and cleanup"
+    },
+    {
+     "type": "text",
+     "text": "parametrize: one test, many cases"
+    },
+    {
+     "type": "text",
+     "text": "Testing exceptions and floats"
+    },
+    {
+     "type": "text",
+     "text": "Common ways to run pytest"
+    },
+    {
+     "type": "text",
+     "text": "unittest and pytest compared"
+    }
+   ]
+  },
+  {
+   "number": 22,
+   "title": "Your first pytest test",
+   "body": [
+    {
+     "type": "code",
+     "text": "pip install pytest\npytest -v",
+     "language": "shell"
+    },
+    {
+     "type": "code",
+     "text": "from gradebook import GradeBook\n\ndef test_average() -> None:\n    book = GradeBook()\n    book.add(\"A001\", 80)\n    book.add(\"A002\", 90)\n    assert book.average() == 85",
+     "language": "python"
+    },
+    {
+     "type": "text",
+     "text": "No class to inherit from: a plain function is a test"
+    },
+    {
+     "type": "text",
+     "text": "Uses Python's plain assert"
+    },
+    {
+     "type": "text",
+     "text": "pytest can also run tests written with unittest: pytest tests_unittest"
+    }
+   ]
+  },
+  {
+   "number": 23,
+   "title": "How pytest finds tests",
+   "body": [
+    {
+     "type": "table",
+     "rows": [
+      [
+       "Level",
+       "Rule"
+      ],
+      [
+       "Start",
+       "The testpaths setting; otherwise the current folder"
+      ],
+      [
+       "Files",
+       "test_*.py or *_test.py"
+      ],
+      [
+       "Functions",
+       "Functions outside classes whose names start with test"
+      ],
+      [
+       "Classes",
+       "Methods starting with test in classes whose names start with Test and that have no __init__"
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "text": "The sample project's pyproject.toml:"
+    },
+    {
+     "type": "code",
+     "text": "[tool.pytest.ini_options]\npythonpath = [\".\"]\ntestpaths = [\"tests\"]",
+     "language": "text",
+     "label": "pyproject.toml"
+    },
+    {
+     "type": "text",
+     "text": "pythonpath lets tests import gradebook; testpaths makes pytest collect only from tests/."
+    }
+   ]
+  },
+  {
+   "number": 24,
+   "title": "Assertion rewriting: see the actual values on failure",
+   "body": [
+    {
+     "type": "text",
+     "text": "The same assert, run by pytest (output excerpt):"
+    },
+    {
+     "type": "code",
+     "text": ">       assert book.passed() == [\"A001\", \"A002\"]\nE       AssertionError: assert ['A002'] == ['A001', 'A002']\nE         At index 0 diff: 'A002' != 'A001'\nE         Right contains one more item: 'A002'",
+     "language": "text",
+     "label": "Output"
+    },
+    {
+     "type": "text",
+     "text": "pytest rewrites the assert statements in a test module when it imports the module, recording the values on both sides"
+    },
+    {
+     "type": "text",
+     "text": "It rewrites only the test modules it collects; the code under test (gradebook.py) is unaffected"
+    },
+    {
+     "type": "text",
+     "text": "That is why pytest can use a plain assert, while unittest needs methods such as assertEqual"
+    }
+   ]
+  },
+  {
+   "number": 25,
+   "title": "Fixtures: shared setup",
+   "body": [
+    {
+     "type": "code",
+     "text": "# tests/conftest.py\n@pytest.fixture\ndef book() -> GradeBook:\n    gradebook = GradeBook()\n    gradebook.add(\"A001\", 80)\n    gradebook.add(\"A002\", 90)\n    return gradebook",
+     "language": "python"
+    },
+    {
+     "type": "code",
+     "text": "# tests/test_gradebook.py\ndef test_add_increases_count(book: GradeBook) -> None:\n    book.add(\"A003\", 70)\n    assert len(book) == 3\n\ndef test_each_test_gets_a_new_book(book: GradeBook) -> None:\n    assert len(book) == 2  # A003 from the previous test is gone",
+     "language": "python"
+    },
+    {
+     "type": "text",
+     "text": "The parameter name of a test function is the fixture it uses; pytest creates it and passes it in"
+    },
+    {
+     "type": "text",
+     "text": "By default it is created anew for every test, keeping tests independent like setUp"
+    },
+    {
+     "type": "text",
+     "text": "Fixtures in conftest.py can be used by test files in the same folder without importing them"
+    }
+   ]
+  },
+  {
+   "number": 26,
+   "title": "Built-in fixtures and cleanup",
+   "body": [
+    {
+     "type": "code",
+     "text": "def test_csv_round_trip(book: GradeBook, tmp_path: Path) -> None:\n    path = tmp_path / \"scores.csv\"\n    book.save_csv(path)\n    loaded = GradeBook.load_csv(path)\n    assert loaded.score_of(\"A002\") == 90\n    assert len(loaded) == 2",
+     "language": "python"
+    },
+    {
+     "type": "table",
+     "rows": [
+      [
+       "Built-in fixture",
+       "Provides"
+      ],
+      [
+       "tmp_path",
+       "A temporary folder for each test (pathlib.Path)"
+      ],
+      [
+       "capsys",
+       "Reads what print outputs during the test"
+      ],
+      [
+       "monkeypatch",
+       "Temporarily replaces attributes or environment variables and restores them after the test"
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "text": "Tests that read or write files should not use fixed paths: they interfere with each other and leave files behind"
+    },
+    {
+     "type": "text",
+     "text": "When your own fixture needs cleanup, change return to yield; the code after yield is the cleanup"
+    }
+   ]
+  },
+  {
+   "number": 27,
+   "title": "parametrize: one test, many cases",
+   "body": [
+    {
+     "type": "code",
+     "text": "@pytest.mark.parametrize(\n    \"score, expected\",\n    [(100, \"A\"), (90, \"A\"), (89, \"B\"), (80, \"B\"), (79, \"C\"),\n     (70, \"C\"), (69, \"D\"), (60, \"D\"), (59, \"F\"), (0, \"F\")],\n)\ndef test_letter_grade(score: int, expected: str) -> None:\n    assert letter_grade(score) == expected",
+     "language": "python"
+    },
+    {
+     "type": "text",
+     "text": "pytest -v (output excerpt):"
+    },
+    {
+     "type": "code",
+     "text": "tests/test_letter_grade.py::test_letter_grade[100-A] PASSED              [  8%]\ntests/test_letter_grade.py::test_letter_grade[90-A] PASSED               [ 16%]\ntests/test_letter_grade.py::test_letter_grade[89-B] PASSED               [ 25%]",
+     "language": "text",
+     "label": "Output"
+    },
+    {
+     "type": "text",
+     "text": "Each case is a separate test with its own name; one failing case does not affect the others"
+    },
+    {
+     "type": "text",
+     "text": "A table of equivalence classes and boundary values can become the parametrize data as is"
+    }
+   ]
+  },
+  {
+   "number": 28,
+   "title": "Testing exceptions and floats",
+   "body": [
+    {
+     "type": "code",
+     "text": "def test_empty_book_has_no_average() -> None:\n    with pytest.raises(ValueError, match=\"has no scores\"):\n        GradeBook().average()\n\n@pytest.mark.parametrize(\"score\", [-1, 101])\ndef test_score_out_of_range(book: GradeBook, score: int) -> None:\n    with pytest.raises(ValueError, match=\"between 0 and 100\"):\n        book.add(\"A003\", score)",
+     "language": "python"
+    },
+    {
+     "type": "code",
+     "text": "def test_average_of_three(book: GradeBook) -> None:\n    book.add(\"A003\", 86)\n    assert book.average() == pytest.approx(85.33, abs=0.01)",
+     "language": "python"
+    },
+    {
+     "type": "text",
+     "text": "match checks the exception message with a regular expression, confirming it failed for the right reason"
+    },
+    {
+     "type": "text",
+     "text": "Floats have rounding errors (0.1 + 0.2 == 0.3 is False), so compare them with pytest.approx and an acceptable tolerance"
+    }
+   ]
+  },
+  {
+   "number": 29,
+   "title": "Common ways to run pytest",
+   "body": [
+    {
+     "type": "table",
+     "rows": [
+      [
+       "Command",
+       "Effect"
+      ],
+      [
+       "pytest",
+       "Run every test"
+      ],
+      [
+       "pytest -v / pytest -q",
+       "List each test / quiet output"
+      ],
+      [
+       "pytest tests/test_gradebook.py",
+       "Run one file only"
+      ],
+      [
+       "pytest -k average",
+       "Run only tests whose names contain average"
+      ],
+      [
+       "pytest -x",
+       "Stop at the first failure"
+      ],
+      [
+       "pytest --lf",
+       "Rerun only the tests that failed last time"
+      ]
+     ]
+    },
+    {
+     "type": "code",
+     "text": "$ pytest -q\n.....................                                                    [100%]\n21 passed in 0.03s",
+     "language": "text",
+     "label": "Output"
+    },
+    {
+     "type": "text",
+     "text": "pytest results: an exception raised in the test function counts as failed; an error while setting up or cleaning up a fixture counts as error."
+    }
+   ]
+  },
+  {
+   "number": 30,
+   "title": "unittest and pytest compared",
+   "body": [
+    {
+     "type": "table",
+     "rows": [
+      [
+       "Item",
+       "unittest",
+       "pytest"
+      ],
+      [
+       "Installation",
+       "Standard library, nothing to install",
+       "pip install pytest"
+      ],
+      [
+       "Test style",
+       "Methods of a TestCase subclass",
+       "Plain functions"
+      ],
+      [
+       "Checks",
+       "self.assertEqual(a, b) and other methods",
+       "assert a == b"
+      ],
+      [
+       "Shared setup",
+       "setUp() / tearDown()",
+       "Fixtures (injected as parameters, cleanup with yield)"
+      ],
+      [
+       "Multiple cases",
+       "subTest",
+       "@pytest.mark.parametrize"
+      ],
+      [
+       "Exceptions",
+       "assertRaises",
+       "pytest.raises"
+      ],
+      [
+       "Run",
+       "python -m unittest",
+       "pytest (also runs unittest tests)"
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "text": "Both are worth knowing: the standard library and many existing projects use unittest; the Week 12 sample project and most new projects use pytest."
+    }
+   ]
+  },
+  {
+   "number": 31,
+   "title": "Exercise and summary",
+   "body": [
+    {
+     "type": "heading",
+     "text": "In this chapter"
+    },
+    {
+     "type": "text",
+     "text": "Exercise: find a bug with boundary values"
+    },
+    {
+     "type": "text",
+     "text": "Summary"
+    },
+    {
+     "type": "text",
+     "text": "Homework and further study"
+    }
+   ]
+  },
+  {
+   "number": 32,
+   "title": "Exercise: find a bug with boundary values",
+   "body": [
+    {
+     "type": "text",
+     "text": "exercises/boundaries/grading.py: letter_grade hides a bug, but the existing tests all pass:"
+    },
+    {
+     "type": "code",
+     "text": "pytest exercises/boundaries -v",
+     "language": "shell"
+    },
+    {
+     "type": "text",
+     "text": "In the parametrize data of test_boundaries, add the upper and lower bound of each grade"
+    },
+    {
+     "type": "text",
+     "text": "Write another test: -1 and 101 must raise ValueError"
+    },
+    {
+     "type": "text",
+     "text": "When you see red, fix grading.py so that every test passes"
+    },
+    {
+     "type": "text",
+     "text": "Hint: go back to the table of equivalence classes and boundary values."
+    }
+   ]
+  },
+  {
+   "number": 33,
+   "title": "Exercise: find a bug with boundary values",
+   "body": [
+    {
+     "type": "heading",
+     "text": "Sample answer"
+    },
+    {
+     "type": "code",
+     "text": "@pytest.mark.parametrize(\n    \"score, expected\",\n    [(100, \"A\"), (90, \"A\"), (89, \"B\"), (80, \"B\"), (79, \"C\"),\n     (70, \"C\"), (69, \"D\"), (60, \"D\"), (59, \"F\"), (0, \"F\")],\n)\ndef test_boundaries(score: int, expected: str) -> None:\n    assert letter_grade(score) == expected\n\n@pytest.mark.parametrize(\"score\", [-1, 101])\ndef test_invalid_score(score: int) -> None:\n    with pytest.raises(ValueError):\n        letter_grade(score)",
+     "language": "python"
+    },
+    {
+     "type": "text",
+     "text": "(80, \"B\") fails: assert 'C' == 'B'. grading.py has score > 80 instead of score >= 80; after changing it back to >=, all 13 tests pass."
+    }
+   ]
+  },
+  {
+   "number": 34,
+   "title": "Summary",
+   "body": [
+    {
+     "type": "table",
+     "rows": [
+      [
+       "Principle",
+       "Method"
+      ],
+      [
+       "A test is repeatable evidence",
+       "Write the expected result as an assert"
+      ],
+      [
+       "The framework collects, runs, and reports",
+       "Follow the test naming convention"
+      ],
+      [
+       "One test checks one thing (AAA)",
+       "Arrange → Act → Assert"
+      ],
+      [
+       "Tests are independent (FIRST)",
+       "setUp and fixtures are recreated every time"
+      ],
+      [
+       "Bugs cluster at boundaries",
+       "Equivalence classes plus boundary values, listed with parametrize"
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "text": "When a test fails, first ask: is the code wrong, or the expectation? Check the spec before deciding which to change."
+    }
+   ]
+  },
+  {
+   "number": 35,
+   "title": "Homework and further study",
+   "body": [
+    {
+     "type": "heading",
+     "text": "Required"
+    },
+    {
+     "type": "text",
+     "text": "Finish the boundary-value exercise so that pytest exercises/boundaries passes"
+    },
+    {
+     "type": "text",
+     "text": "Write at least 3 pytest tests for one class in your final project, including at least 1 exception test"
+    },
+    {
+     "type": "heading",
+     "text": "References"
+    },
+    {
+     "type": "text",
+     "text": "Python documentation: unittest — Unit testing framework"
+    },
+    {
+     "type": "text",
+     "text": "pytest documentation: Get Started, How to use fixtures, How to parametrize fixtures and test functions"
+    },
+    {
+     "type": "text",
+     "text": "Next steps: test doubles and mocks, test coverage, and test-driven development (TDD)."
+    }
+   ]
+  }
+ ],
+ "ja": [
+  {
+   "number": 1,
+   "title": "Python プログラムのテスト：原理と方法",
+   "body": [
+    {
+     "type": "text",
+     "text": "補足教材 · 単体テスト · unittest · pytest"
+    },
+    {
+     "type": "text",
+     "text": "01　テストフレームワークがテストを収集・実行・報告する仕組みを説明し、AAA の構造でテストを書く"
+    },
+    {
+     "type": "text",
+     "text": "02　unittest の TestCase、setUp、assert メソッドでクラスをテストする"
+    },
+    {
+     "type": "text",
+     "text": "03　pytest の assert、fixture、parametrize、pytest.raises で簡潔なテストを書く"
+    },
+    {
+     "type": "text",
+     "text": "Python 3.12+ · 事例：成績簿クラス GradeBook（点数の追加、平均、合格者一覧、CSV の保存と読み込み）"
+    }
+   ],
+   "intro": "「プログラムが正しいことをどう示すか」から出発し、assert、テストの構造、テストフレームワークの仕組みを理解したうえで、unittest と pytest で成績簿クラスの繰り返し実行できるテストを書きます。"
+  },
+  {
+   "number": 2,
+   "title": "なぜテストを書くのか",
+   "body": [
+    {
+     "type": "heading",
+     "text": "この章の内容"
+    },
+    {
+     "type": "text",
+     "text": "Python プログラムのテスト：原理と方法"
+    },
+    {
+     "type": "text",
+     "text": "この単元の学習内容"
+    },
+    {
+     "type": "text",
+     "text": "サンプルクラス：GradeBook"
+    },
+    {
+     "type": "text",
+     "text": "今、プログラムが正しいことをどう確かめていますか？"
+    }
+   ]
+  },
+  {
+   "number": 3,
+   "title": "この単元の学習内容",
+   "body": [
+    {
+     "type": "table",
+     "rows": [
+      [
+       "テーマ",
+       "すること"
+      ],
+      [
+       "なぜテストを書くのか",
+       "手動の確認と自動テストを比べる"
+      ],
+      [
+       "テストの原理",
+       "assert、AAA、ミニテスト実行器を理解する"
+      ],
+      [
+       "unittest",
+       "TestCase で GradeBook をテストする"
+      ],
+      [
+       "pytest",
+       "fixture、parametrize、pytest.raises"
+      ],
+      [
+       "演習とまとめ",
+       "境界値で隠れたバグを見つける"
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "text": "サンプルプロジェクト gradebook_testing-ja.zip：展開して pip install pytest を実行します。ほかは標準ライブラリだけを使います。"
+    }
+   ]
+  },
+  {
+   "number": 4,
+   "title": "サンプルクラス：GradeBook",
+   "body": [
+    {
+     "type": "code",
+     "text": "class GradeBook:\n    def add(self, student_id: str, score: int) -> None: ...  # 0〜100、学籍番号の重複は不可\n    def score_of(self, student_id: str) -> int: ...\n    def __len__(self) -> int: ...\n    def average(self) -> float: ...                          # 点数がないときは ValueError\n    def passed(self) -> list[str]: ...                       # 60 点以上、学籍番号順\n    def save_csv(self, path: Path) -> None: ...\n    @classmethod\n    def load_csv(cls, path: Path) -> \"GradeBook\": ...\n\ndef letter_grade(score: int) -> str: ...                     # 90 以上 A、……、60 未満 F",
+     "language": "python"
+    },
+    {
+     "type": "text",
+     "text": "完全なコードはサンプルプロジェクトの gradebook.py にあります。"
+    }
+   ]
+  },
+  {
+   "number": 5,
+   "title": "今、プログラムが正しいことをどう確かめていますか？",
+   "body": [
+    {
+     "type": "code",
+     "text": "book = GradeBook()\nbook.add(\"A001\", 80)\nbook.add(\"A002\", 90)\nprint(book.average())   # 目で確認：85 になっている？",
+     "language": "python"
+    },
+    {
+     "type": "table",
+     "rows": [
+      [
+       "手動の print",
+       "自動テスト"
+      ],
+      [
+       "毎回目で確認する",
+       "コンピュータが期待する結果と比べる"
+      ],
+      [
+       "コードを変えるたびに見直す",
+       "1 つのコマンドですべて再実行"
+      ],
+      [
+       "「正しい」が何かを知っているのは書いた人だけ",
+       "期待する結果がコードに書かれ、誰でも確認できる"
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "text": "テストは繰り返し実行できる証拠です。バグを見つけ、コードを変えるときのセーフティネットになり、コードで書いた仕様にもなります。"
+    },
+    {
+     "type": "text",
+     "text": "教員向けメモ：学生に質問します：第4週の BankAccount は何回変更しましたか？変更のたびに、ほかの機能を壊していないとどう確かめましたか？ここから「回帰バグ」と「セーフティネット」を導きます。また、テストはバグがあることは示せても、ないことは証明できず、テストしていない場合はまだ失敗しうることも伝えます。"
+    }
+   ]
+  },
+  {
+   "number": 6,
+   "title": "テストの原理",
+   "body": [
+    {
+     "type": "heading",
+     "text": "この章の内容"
+    },
+    {
+     "type": "text",
+     "text": "assert：テストの最小単位"
+    },
+    {
+     "type": "text",
+     "text": "テストの 3 つの部分：AAA"
+    },
+    {
+     "type": "text",
+     "text": "テストフレームワークの 3 つの仕事"
+    },
+    {
+     "type": "text",
+     "text": "ミニテスト実行器を自分で書く"
+    },
+    {
+     "type": "text",
+     "text": "テストのレベル：テストピラミッド"
+    },
+    {
+     "type": "text",
+     "text": "良いテストの 5 つの性質：FIRST"
+    },
+    {
+     "type": "text",
+     "text": "何をテストするか：同値クラスと境界値"
+    }
+   ]
+  },
+  {
+   "number": 7,
+   "title": "assert：テストの最小単位",
+   "body": [
+    {
+     "type": "text",
+     "text": "assert 条件, メッセージ：条件が真なら続行し、偽なら AssertionError を送出します。"
+    },
+    {
+     "type": "code",
+     "text": "book = GradeBook()\nbook.add(\"A001\", 59)\nbook.add(\"A002\", 60)\nassert book.passed() == [\"A001\", \"A002\"]",
+     "language": "python"
+    },
+    {
+     "type": "text",
+     "text": "python で直接実行すると、エラーの最後はこれだけ："
+    },
+    {
+     "type": "code",
+     "text": "    assert book.passed() == [\"A001\", \"A002\"]\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError",
+     "language": "text",
+     "label": "出力"
+    },
+    {
+     "type": "text",
+     "text": "「間違っている」ことしか分からず、passed() が実際に何を返したかは分からない。テストフレームワークがその情報を補う"
+    },
+    {
+     "type": "text",
+     "text": "python -O で実行すると、すべての assert が省略される"
+    },
+    {
+     "type": "text",
+     "text": "そのため assert はテストだけで使い、入力の検証には if と raise を使う（GradeBook.add のように）"
+    }
+   ]
+  },
+  {
+   "number": 8,
+   "title": "テストの 3 つの部分：AAA",
+   "body": [
+    {
+     "type": "code",
+     "text": "def test_average_of_two_scores():\n    book = GradeBook()          # Arrange 準備：オブジェクトとデータを作る\n    book.add(\"A001\", 80)\n    book.add(\"A002\", 90)\n    result = book.average()     # Act 実行：テスト対象のメソッドを呼ぶ\n    assert result == 85         # Assert 検証：期待する結果と比べる",
+     "language": "python"
+    },
+    {
+     "type": "table",
+     "rows": [
+      [
+       "AAA",
+       "第12週の受け入れ条件"
+      ],
+      [
+       "Arrange 準備",
+       "Given"
+      ],
+      [
+       "Act 実行",
+       "When"
+      ],
+      [
+       "Assert 検証",
+       "Then"
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "text": "1 つのテストは 1 つのことだけを検証し、テスト名でそれを説明します。"
+    }
+   ]
+  },
+  {
+   "number": 9,
+   "title": "テストフレームワークの 3 つの仕事",
+   "body": [
+    {
+     "type": "table",
+     "rows": [
+      [
+       "ステップ",
+       "フレームワークがすること",
+       "守る約束"
+      ],
+      [
+       "収集",
+       "テストファイルとテスト関数を探す",
+       "ファイル名と関数名を test で始める"
+      ],
+      [
+       "実行",
+       "1 つのテストが失敗しても次のテストを実行する",
+       "テスト同士で状態を共有しない"
+      ],
+      [
+       "報告",
+       "結果を集計し、失敗の理由を表示する",
+       "期待する結果を assert で書く"
+      ]
+     ]
+    }
+   ],
+   "image": "/materials/testing-ja-slide-9.png",
+   "imageAlt": "テストフレームワークの 3 つの仕事",
+   "imageLayout": "wide",
+   "imageWidth": 897,
+   "imageHeight": 123
+  },
+  {
+   "number": 10,
+   "title": "ミニテスト実行器を自分で書く",
+   "body": [
+    {
+     "type": "text",
+     "text": "demo/mini_runner.py（抜粋、集計は省略）："
+    },
+    {
+     "type": "code",
+     "text": "def collect(module):\n    return [(name, func) for name, func in inspect.getmembers(module, inspect.isfunction)\n            if name.startswith(\"test_\")]\n\ndef run(tests):\n    for name, func in tests:\n        try:\n            func()\n        except AssertionError as exc:\n            print(f\"FAIL  {name}：{exc}\")\n        except Exception as exc:\n            print(f\"ERROR {name}：{type(exc).__name__} {exc}\")\n        else:\n            print(f\"PASS  {name}\")",
+     "language": "python"
+    },
+    {
+     "type": "text",
+     "text": "教員向けメモ：まず学生に 3 つのテストの結果を予想させます。2 つ目のテストが失敗するのは「期待値の書き間違い」が原因です。仕様では 60 点から合格です。失敗（assert が成り立たない）とエラー（途中でほかの例外が送出される）の違い、そしてテストが失敗したらまず仕様を見直すこと、間違っているのはコードとは限らないことを強調します（第12週の「テストが間違いか、コードが間違いか？」と対応）。"
+    }
+   ]
+  },
+  {
+   "number": 11,
+   "title": "ミニテスト実行器を自分で書く（続き）",
+   "body": [
+    {
+     "type": "text",
+     "text": "python -m demo.mini_runner を実行："
+    },
+    {
+     "type": "code",
+     "text": "PASS  test_average_of_two_scores\nFAIL  test_passed_list：59 点も合格のはず\nERROR test_score_of_unknown_student：KeyError 'Z999'\n1 passed, 1 failed, 1 error",
+     "language": "text",
+     "label": "出力"
+    },
+    {
+     "type": "text",
+     "text": "unittest と pytest の中心もこのループです。そこに分かりやすいメッセージ、共通の準備、さまざまなオプションが加わります。"
+    }
+   ]
+  },
+  {
+   "number": 12,
+   "title": "テストのレベル：テストピラミッド",
+   "body": [
+    {
+     "type": "table",
+     "rows": [
+      [
+       "レベル",
+       "テストする対象",
+       "例",
+       "速さと数"
+      ],
+      [
+       "単体テスト",
+       "1 つの関数またはクラス",
+       "GradeBook.average()",
+       "最も速く、最も多い"
+      ],
+      [
+       "結合テスト",
+       "いくつかの部品が一緒に動く",
+       "CSV に保存して読み戻す",
+       "遅め、少なめ"
+      ],
+      [
+       "エンドツーエンドテスト",
+       "利用者の立場で流れ全体をたどる",
+       "Web ページで点数を入力してから成績表を見るまで",
+       "最も遅く、最も少ない"
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "text": "下の単体テストは多くて速く、上のテストは少なくて遅い。形がピラミッドに似ています。この単元では単体テストを扱います。"
+    }
+   ]
+  },
+  {
+   "number": 13,
+   "title": "良いテストの 5 つの性質：FIRST",
+   "body": [
+    {
+     "type": "table",
+     "rows": [
+      [
+       "性質",
+       "意味",
+       "違反の例"
+      ],
+      [
+       "Fast 速い",
+       "数秒で終わるので、頻繁に実行できる",
+       "どのテストも time.sleep(10) で待つ"
+      ],
+      [
+       "Independent 独立",
+       "ほかのテストの結果や順序に依存しない",
+       "テスト B がテスト A で追加した学生を使う"
+      ],
+      [
+       "Repeatable 再現可能",
+       "毎回、どのコンピュータでも同じ結果",
+       "datetime.now()、乱数、ネットワークに依存"
+      ],
+      [
+       "Self-validating 自己検証",
+       "assert が判定し、目で確認する必要がない",
+       "print だけで、assert がない"
+      ],
+      [
+       "Timely タイムリー",
+       "コードと一緒に、あるいは先に書く",
+       "期末直前にテストを追加する"
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "number": 14,
+   "title": "何をテストするか：同値クラスと境界値",
+   "body": [
+    {
+     "type": "table",
+     "rows": [
+      [
+       "同値クラス",
+       "代表値",
+       "境界値"
+      ],
+      [
+       "不正（小さすぎる）",
+       "-5",
+       "-1"
+      ],
+      [
+       "F",
+       "30",
+       "0、59"
+      ],
+      [
+       "D",
+       "65",
+       "60、69"
+      ],
+      [
+       "C",
+       "75",
+       "70、79"
+      ],
+      [
+       "B",
+       "85",
+       "80、89"
+      ],
+      [
+       "A",
+       "95",
+       "90、100"
+      ],
+      [
+       "不正（大きすぎる）",
+       "150",
+       "101"
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "text": "同じクラスの値は同じように振る舞うので、代表値を 1 つテストすれば十分です。バグが最も多いのは境界（> と >=）です。"
+    }
+   ],
+   "intro": "letter_grade(score)：90 以上 A、80 以上 B、70 以上 C、60 以上 D、それ以外は F。0〜100 以外では ValueError を送出。"
+  },
+  {
+   "number": 15,
+   "title": "unittest：標準ライブラリのテストフレームワーク",
+   "body": [
+    {
+     "type": "heading",
+     "text": "この章の内容"
+    },
+    {
+     "type": "text",
+     "text": "unittest の書き方"
+    },
+    {
+     "type": "text",
+     "text": "setUp：テストごとに新しいオブジェクト"
+    },
+    {
+     "type": "text",
+     "text": "よく使う assert メソッド"
+    },
+    {
+     "type": "text",
+     "text": "例外と複数ケースのテスト"
+    },
+    {
+     "type": "text",
+     "text": "unittest の実行と結果の読み方"
+    }
+   ]
+  },
+  {
+   "number": 16,
+   "title": "unittest の書き方",
+   "body": [
+    {
+     "type": "code",
+     "text": "import unittest\nfrom gradebook import GradeBook\n\nclass TestGradeBook(unittest.TestCase):\n    def setUp(self) -> None:\n        self.book = GradeBook()\n        self.book.add(\"A001\", 80)\n        self.book.add(\"A002\", 90)\n\n    def test_average(self) -> None:\n        self.assertEqual(self.book.average(), 85)\n\n    def test_add_increases_count(self) -> None:\n        self.book.add(\"A003\", 70)\n        self.assertEqual(len(self.book), 3)",
+     "language": "python"
+    },
+    {
+     "type": "text",
+     "text": "テストクラスは unittest.TestCase を継承する"
+    },
+    {
+     "type": "text",
+     "text": "名前が test で始まるメソッドだけがテスト"
+    },
+    {
+     "type": "text",
+     "text": "self.assertXxx() で検証し、失敗すると両辺の値が表示される"
+    }
+   ]
+  },
+  {
+   "number": 17,
+   "title": "setUp：テストごとに新しいオブジェクト",
+   "body": [
+    {
+     "type": "table",
+     "rows": [
+      [
+       "順序",
+       "呼び出し",
+       "self.book の学生数"
+      ],
+      [
+       "1",
+       "setUp() → test_add_increases_count()",
+       "2 → 3"
+      ],
+      [
+       "2",
+       "setUp() → test_average()",
+       "2"
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "text": "unittest はテストメソッドごとに新しい TestCase インスタンスを作り、先に setUp() を呼ぶ"
+    },
+    {
+     "type": "text",
+     "text": "1 つ目のテストで追加した A003 は、2 つ目のテストには現れない"
+    },
+    {
+     "type": "text",
+     "text": "後片付け（ファイルを閉じる、一時ファイルを消す）は tearDown() に書く"
+    },
+    {
+     "type": "text",
+     "text": "これが FIRST の Independent です。テストの順序は結果に影響しません。"
+    }
+   ]
+  },
+  {
+   "number": 18,
+   "title": "よく使う assert メソッド",
+   "body": [
+    {
+     "type": "table",
+     "rows": [
+      [
+       "メソッド",
+       "確認する内容"
+      ],
+      [
+       "assertEqual(a, b)",
+       "a == b"
+      ],
+      [
+       "assertTrue(x)／assertFalse(x)",
+       "bool(x) が真／偽"
+      ],
+      [
+       "assertIn(a, b)",
+       "a in b"
+      ],
+      [
+       "assertIsNone(x)",
+       "x is None"
+      ],
+      [
+       "assertAlmostEqual(a, b)",
+       "浮動小数点数の差を小数第 7 位で丸めると 0"
+      ],
+      [
+       "assertRaises(例外)",
+       "ブロックで指定の例外が送出される"
+      ],
+      [
+       "assertRaisesRegex(例外, パターン)",
+       "例外メッセージが正規表現に一致する"
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "text": "unittest は Java の JUnit にならった設計で、assert を書き換える仕組みがないため、メソッドで両辺の値を受け取ってメッセージを表示します。"
+    }
+   ]
+  },
+  {
+   "number": 19,
+   "title": "例外と複数ケースのテスト",
+   "body": [
+    {
+     "type": "code",
+     "text": "def test_score_out_of_range(self) -> None:\n    with self.assertRaises(ValueError):\n        self.book.add(\"A003\", 101)\n\ndef test_duplicate_student(self) -> None:\n    with self.assertRaisesRegex(ValueError, \"すでに点数があります\"):\n        self.book.add(\"A001\", 70)",
+     "language": "python"
+    },
+    {
+     "type": "code",
+     "text": "def test_boundaries(self) -> None:\n    cases = [(100, \"A\"), (90, \"A\"), (89, \"B\"), (80, \"B\"), (60, \"D\"), (59, \"F\"), (0, \"F\")]\n    for score, expected in cases:\n        with self.subTest(score=score):\n            self.assertEqual(letter_grade(score), expected)",
+     "language": "python"
+    },
+    {
+     "type": "text",
+     "text": "subTest を使うと、ループ内のあるケースが失敗してもほかのケースの確認を続け、どのケースかをメッセージに示します。"
+    }
+   ]
+  },
+  {
+   "number": 20,
+   "title": "unittest の実行と結果の読み方",
+   "body": [
+    {
+     "type": "code",
+     "text": "python -m unittest discover -s tests_unittest -v",
+     "language": "shell"
+    },
+    {
+     "type": "text",
+     "text": "test_average の期待値を 80 に変え、存在しない学籍番号を照会するテストを追加した場合（出力の抜粋）："
+    },
+    {
+     "type": "code",
+     "text": ".F...E.\nERROR: test_unknown_student (test_gradebook_unittest.TestGradeBook.test_unknown_student)\nKeyError: 'Z999'\nFAIL: test_average (test_gradebook_unittest.TestGradeBook.test_average)\nAssertionError: 85.0 != 80\nRan 7 tests in 0.001s\nFAILED (failures=1, errors=1)",
+     "language": "text",
+     "label": "出力"
+    },
+    {
+     "type": "table",
+     "rows": [
+      [
+       "記号",
+       "意味"
+      ],
+      [
+       ".",
+       "成功"
+      ],
+      [
+       "F",
+       "失敗：assert メソッドが成り立たない"
+      ],
+      [
+       "E",
+       "エラー：テスト中にほかの例外が送出された"
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "number": 21,
+   "title": "pytest：より簡潔なテストフレームワーク",
+   "body": [
+    {
+     "type": "heading",
+     "text": "この章の内容"
+    },
+    {
+     "type": "text",
+     "text": "はじめての pytest テスト"
+    },
+    {
+     "type": "text",
+     "text": "pytest がテストを見つける仕組み"
+    },
+    {
+     "type": "text",
+     "text": "assert の書き換え：失敗時に実際の値が見える"
+    },
+    {
+     "type": "text",
+     "text": "fixture：共通の準備"
+    },
+    {
+     "type": "text",
+     "text": "組み込み fixture と後片付け"
+    },
+    {
+     "type": "text",
+     "text": "parametrize：1 つのテストで複数のデータ"
+    },
+    {
+     "type": "text",
+     "text": "例外と浮動小数点数のテスト"
+    },
+    {
+     "type": "text",
+     "text": "よく使う実行方法"
+    },
+    {
+     "type": "text",
+     "text": "unittest と pytest の比較"
+    }
+   ]
+  },
+  {
+   "number": 22,
+   "title": "はじめての pytest テスト",
+   "body": [
+    {
+     "type": "code",
+     "text": "pip install pytest\npytest -v",
+     "language": "shell"
+    },
+    {
+     "type": "code",
+     "text": "from gradebook import GradeBook\n\ndef test_average() -> None:\n    book = GradeBook()\n    book.add(\"A001\", 80)\n    book.add(\"A002\", 90)\n    assert book.average() == 85",
+     "language": "python"
+    },
+    {
+     "type": "text",
+     "text": "クラスを継承する必要はなく、普通の関数がテストになる"
+    },
+    {
+     "type": "text",
+     "text": "Python の assert をそのまま使う"
+    },
+    {
+     "type": "text",
+     "text": "pytest は unittest で書いたテストも実行できる：pytest tests_unittest"
+    }
+   ]
+  },
+  {
+   "number": 23,
+   "title": "pytest がテストを見つける仕組み",
+   "body": [
+    {
+     "type": "table",
+     "rows": [
+      [
+       "レベル",
+       "規則"
+      ],
+      [
+       "開始位置",
+       "設定ファイルの testpaths。設定がなければ現在のフォルダから"
+      ],
+      [
+       "ファイル",
+       "test_*.py または *_test.py"
+      ],
+      [
+       "関数",
+       "クラス外で、名前が test で始まる関数"
+      ],
+      [
+       "クラス",
+       "名前が Test で始まり、__init__ を持たないクラスの中で、test で始まるメソッド"
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "text": "サンプルプロジェクトの pyproject.toml："
+    },
+    {
+     "type": "code",
+     "text": "[tool.pytest.ini_options]\npythonpath = [\".\"]\ntestpaths = [\"tests\"]",
+     "language": "text",
+     "label": "pyproject.toml"
+    },
+    {
+     "type": "text",
+     "text": "pythonpath でテストから import gradebook でき、testpaths で pytest は tests/ だけから収集します。"
+    }
+   ]
+  },
+  {
+   "number": 24,
+   "title": "assert の書き換え：失敗時に実際の値が見える",
+   "body": [
+    {
+     "type": "text",
+     "text": "同じ assert を pytest で実行すると（出力の抜粋）："
+    },
+    {
+     "type": "code",
+     "text": ">       assert book.passed() == [\"A001\", \"A002\"]\nE       AssertionError: assert ['A002'] == ['A001', 'A002']\nE         At index 0 diff: 'A002' != 'A001'\nE         Right contains one more item: 'A002'",
+     "language": "text",
+     "label": "出力"
+    },
+    {
+     "type": "text",
+     "text": "pytest はテストモジュールをインポートするときに、その中の assert を書き換え、両辺の式の値を記録する"
+    },
+    {
+     "type": "text",
+     "text": "書き換えるのは収集したテストモジュールだけで、テスト対象のコード（gradebook.py）は影響を受けない"
+    },
+    {
+     "type": "text",
+     "text": "そのため pytest は普通の assert を使え、unittest には assertEqual のようなメソッドが必要"
+    }
+   ]
+  },
+  {
+   "number": 25,
+   "title": "fixture：共通の準備",
+   "body": [
+    {
+     "type": "code",
+     "text": "# tests/conftest.py\n@pytest.fixture\ndef book() -> GradeBook:\n    gradebook = GradeBook()\n    gradebook.add(\"A001\", 80)\n    gradebook.add(\"A002\", 90)\n    return gradebook",
+     "language": "python"
+    },
+    {
+     "type": "code",
+     "text": "# tests/test_gradebook.py\ndef test_add_increases_count(book: GradeBook) -> None:\n    book.add(\"A003\", 70)\n    assert len(book) == 3\n\ndef test_each_test_gets_a_new_book(book: GradeBook) -> None:\n    assert len(book) == 2  # 前のテストで追加した A003 は残らない",
+     "language": "python"
+    },
+    {
+     "type": "text",
+     "text": "テスト関数の引数名が使う fixture の名前で、pytest が自動的に作って渡す"
+    },
+    {
+     "type": "text",
+     "text": "既定ではテストごとに作り直されるので、setUp と同じく独立が保たれる"
+    },
+    {
+     "type": "text",
+     "text": "conftest.py に書いた fixture は、同じフォルダのテストファイルから import せずに使える"
+    }
+   ]
+  },
+  {
+   "number": 26,
+   "title": "組み込み fixture と後片付け",
+   "body": [
+    {
+     "type": "code",
+     "text": "def test_csv_round_trip(book: GradeBook, tmp_path: Path) -> None:\n    path = tmp_path / \"scores.csv\"\n    book.save_csv(path)\n    loaded = GradeBook.load_csv(path)\n    assert loaded.score_of(\"A002\") == 90\n    assert len(loaded) == 2",
+     "language": "python"
+    },
+    {
+     "type": "table",
+     "rows": [
+      [
+       "組み込み fixture",
+       "提供するもの"
+      ],
+      [
+       "tmp_path",
+       "テストごとの一時フォルダ（pathlib.Path）"
+      ],
+      [
+       "capsys",
+       "テスト中に print が出力した内容を読む"
+      ],
+      [
+       "monkeypatch",
+       "属性や環境変数を一時的に置き換え、テスト終了後に元に戻す"
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "text": "ファイルを読み書きするテストでは固定パスを使わない：互いに干渉し、ファイルも残ってしまう"
+    },
+    {
+     "type": "text",
+     "text": "自作の fixture で後片付けが必要なら、return を yield に変える。yield の後のコードが後片付けになる"
+    }
+   ]
+  },
+  {
+   "number": 27,
+   "title": "parametrize：1 つのテストで複数のデータ",
+   "body": [
+    {
+     "type": "code",
+     "text": "@pytest.mark.parametrize(\n    \"score, expected\",\n    [(100, \"A\"), (90, \"A\"), (89, \"B\"), (80, \"B\"), (79, \"C\"),\n     (70, \"C\"), (69, \"D\"), (60, \"D\"), (59, \"F\"), (0, \"F\")],\n)\ndef test_letter_grade(score: int, expected: str) -> None:\n    assert letter_grade(score) == expected",
+     "language": "python"
+    },
+    {
+     "type": "text",
+     "text": "pytest -v（出力の抜粋）："
+    },
+    {
+     "type": "code",
+     "text": "tests/test_letter_grade.py::test_letter_grade[100-A] PASSED              [  8%]\ntests/test_letter_grade.py::test_letter_grade[90-A] PASSED               [ 16%]\ntests/test_letter_grade.py::test_letter_grade[89-B] PASSED               [ 25%]",
+     "language": "text",
+     "label": "出力"
+    },
+    {
+     "type": "text",
+     "text": "データの組ごとに独立したテストになり、それぞれ名前を持つ。ある組が失敗してもほかの組には影響しない"
+    },
+    {
+     "type": "text",
+     "text": "同値クラスと境界値の表は、そのまま parametrize のデータにできる"
+    }
+   ]
+  },
+  {
+   "number": 28,
+   "title": "例外と浮動小数点数のテスト",
+   "body": [
+    {
+     "type": "code",
+     "text": "def test_empty_book_has_no_average() -> None:\n    with pytest.raises(ValueError, match=\"点数がありません\"):\n        GradeBook().average()\n\n@pytest.mark.parametrize(\"score\", [-1, 101])\ndef test_score_out_of_range(book: GradeBook, score: int) -> None:\n    with pytest.raises(ValueError, match=\"0 から 100\"):\n        book.add(\"A003\", score)",
+     "language": "python"
+    },
+    {
+     "type": "code",
+     "text": "def test_average_of_three(book: GradeBook) -> None:\n    book.add(\"A003\", 86)\n    assert book.average() == pytest.approx(85.33, abs=0.01)",
+     "language": "python"
+    },
+    {
+     "type": "text",
+     "text": "match は正規表現で例外メッセージを照合し、「正しい理由」で失敗したことを確かめる"
+    },
+    {
+     "type": "text",
+     "text": "浮動小数点数には誤差がある（0.1 + 0.2 == 0.3 は False）。比較には pytest.approx を使い、許容誤差を指定する"
+    }
+   ]
+  },
+  {
+   "number": 29,
+   "title": "よく使う実行方法",
+   "body": [
+    {
+     "type": "table",
+     "rows": [
+      [
+       "コマンド",
+       "働き"
+      ],
+      [
+       "pytest",
+       "すべてのテストを実行"
+      ],
+      [
+       "pytest -v／pytest -q",
+       "テストごとに表示／簡潔な出力"
+      ],
+      [
+       "pytest tests/test_gradebook.py",
+       "1 つのファイルだけ実行"
+      ],
+      [
+       "pytest -k average",
+       "名前に average を含むテストだけ実行"
+      ],
+      [
+       "pytest -x",
+       "最初の失敗で止める"
+      ],
+      [
+       "pytest --lf",
+       "前回失敗したテストだけ再実行"
+      ]
+     ]
+    },
+    {
+     "type": "code",
+     "text": "$ pytest -q\n.....................                                                    [100%]\n21 passed in 0.03s",
+     "language": "text",
+     "label": "出力"
+    },
+    {
+     "type": "text",
+     "text": "pytest の結果：テスト関数の中で送出された例外は failed、fixture の準備や後片付けでのエラーは error になる。"
+    }
+   ]
+  },
+  {
+   "number": 30,
+   "title": "unittest と pytest の比較",
+   "body": [
+    {
+     "type": "table",
+     "rows": [
+      [
+       "項目",
+       "unittest",
+       "pytest"
+      ],
+      [
+       "インストール",
+       "標準ライブラリなのでインストール不要",
+       "pip install pytest"
+      ],
+      [
+       "テストの書き方",
+       "TestCase を継承したクラスのメソッド",
+       "普通の関数"
+      ],
+      [
+       "検証",
+       "self.assertEqual(a, b) などのメソッド",
+       "assert a == b"
+      ],
+      [
+       "共通の準備",
+       "setUp()／tearDown()",
+       "fixture（引数で注入、yield で後片付け）"
+      ],
+      [
+       "複数のデータ",
+       "subTest",
+       "@pytest.mark.parametrize"
+      ],
+      [
+       "例外",
+       "assertRaises",
+       "pytest.raises"
+      ],
+      [
+       "実行",
+       "python -m unittest",
+       "pytest（unittest のテストも実行できる）"
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "text": "どちらも知っておく価値があります。標準ライブラリや多くの既存プロジェクトは unittest を、第12週のサンプルプロジェクトや多くの新しいプロジェクトは pytest を使っています。"
+    }
+   ]
+  },
+  {
+   "number": 31,
+   "title": "演習とまとめ",
+   "body": [
+    {
+     "type": "heading",
+     "text": "この章の内容"
+    },
+    {
+     "type": "text",
+     "text": "演習：境界値でバグを見つける"
+    },
+    {
+     "type": "text",
+     "text": "まとめ"
+    },
+    {
+     "type": "text",
+     "text": "課題と発展"
+    }
+   ]
+  },
+  {
+   "number": 32,
+   "title": "演習：境界値でバグを見つける",
+   "body": [
+    {
+     "type": "text",
+     "text": "exercises/boundaries/grading.py の letter_grade にはバグが隠れていますが、今のテストはすべて通ります："
+    },
+    {
+     "type": "code",
+     "text": "pytest exercises/boundaries -v",
+     "language": "shell"
+    },
+    {
+     "type": "text",
+     "text": "test_boundaries の parametrize のデータに、各評価の上限と下限を追加する"
+    },
+    {
+     "type": "text",
+     "text": "もう 1 つテストを書く：-1 と 101 は ValueError を送出すること"
+    },
+    {
+     "type": "text",
+     "text": "レッドになったら grading.py を修正し、すべてのテストを通す"
+    },
+    {
+     "type": "text",
+     "text": "ヒント：「同値クラスと境界値」の表に戻りましょう。"
+    }
+   ]
+  },
+  {
+   "number": 33,
+   "title": "演習：境界値でバグを見つける",
+   "body": [
+    {
+     "type": "heading",
+     "text": "解答例"
+    },
+    {
+     "type": "code",
+     "text": "@pytest.mark.parametrize(\n    \"score, expected\",\n    [(100, \"A\"), (90, \"A\"), (89, \"B\"), (80, \"B\"), (79, \"C\"),\n     (70, \"C\"), (69, \"D\"), (60, \"D\"), (59, \"F\"), (0, \"F\")],\n)\ndef test_boundaries(score: int, expected: str) -> None:\n    assert letter_grade(score) == expected\n\n@pytest.mark.parametrize(\"score\", [-1, 101])\ndef test_invalid_score(score: int) -> None:\n    with pytest.raises(ValueError):\n        letter_grade(score)",
+     "language": "python"
+    },
+    {
+     "type": "text",
+     "text": "(80, \"B\") が失敗：assert 'C' == 'B'。grading.py が score >= 80 を score > 80 と書いています。>= に戻すと 13 個のテストがすべて通ります。"
+    }
+   ]
+  },
+  {
+   "number": 34,
+   "title": "まとめ",
+   "body": [
+    {
+     "type": "table",
+     "rows": [
+      [
+       "原理",
+       "メソッド"
+      ],
+      [
+       "テストは繰り返し実行できる証拠",
+       "期待する結果を assert で書く"
+      ],
+      [
+       "フレームワークが収集・実行・報告する",
+       "test で始まる命名規則に従う"
+      ],
+      [
+       "1 つのテストは 1 つのことを検証（AAA）",
+       "準備 → 実行 → 検証"
+      ],
+      [
+       "テストは互いに独立（FIRST）",
+       "setUp、fixture を毎回作り直す"
+      ],
+      [
+       "バグは境界に集まる",
+       "同値クラス＋境界値を parametrize で並べる"
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "text": "テストが失敗したら、まず問う：コードが間違いか、期待値の書き間違いか？仕様を確認してから、どちらを直すか決めます。"
+    }
+   ]
+  },
+  {
+   "number": 35,
+   "title": "課題と発展",
+   "body": [
+    {
+     "type": "heading",
+     "text": "必修"
+    },
+    {
+     "type": "text",
+     "text": "境界値の演習を終え、pytest exercises/boundaries をすべて通す"
+    },
+    {
+     "type": "text",
+     "text": "期末プロジェクトのクラスを 1 つ選び、pytest のテストを 3 つ以上書く。そのうち少なくとも 1 つは例外のテストにする"
+    },
+    {
+     "type": "heading",
+     "text": "参考資料"
+    },
+    {
+     "type": "text",
+     "text": "Python 公式ドキュメント：unittest — ユニットテストフレームワーク"
+    },
+    {
+     "type": "text",
+     "text": "pytest 公式ドキュメント：Get Started、How to use fixtures、How to parametrize fixtures and test functions"
+    },
+    {
+     "type": "text",
+     "text": "次に学べること：テストダブルとモック、テストカバレッジ（coverage）、テスト駆動開発（TDD）。"
+    }
+   ]
+  }
+ ]
+}

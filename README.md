@@ -2,7 +2,7 @@
 
 以 Python 為主要實作語言的 18 週物件導向程式設計教材網站。
 
-第 1–8 週、第 12 週與補充教材提供繁體中文、英文與日文完整網頁，共 17 個單元、753 個投影片主題、2259 個語言版本主題。其他週次保留原有中文教材與網址。
+第 1–8 週、第 12 週與補充教材提供繁體中文、英文與日文完整網頁，共 18 個單元、788 個投影片主題、2364 個語言版本主題。其他週次保留原有中文教材與網址。
 
 「用 Python 直接存取 SQLite 與 MongoDB」位於 `/databases/`、`/en/databases/` 與 `/ja/databases/`。各語言均有 58 頁線上教材、PowerPoint 和可執行的讀書紀錄範例。SQL 指令入門位於第 20–32 頁。教材內容位於 `content/database-lessons.json`，下載檔位於 `public/materials/`。
 
@@ -30,6 +30,7 @@
 | 7 | 繼承與類別階層；射擊遊戲延伸 | 中、英、日各 24 頁，含初始化、覆寫、super()、可替換性、MRO 與可執行範例 |
 | 8 | 多型、抽象化與介面；射擊遊戲延伸 | 中、英、日各 32 頁，含 ABC、Protocol、移動策略與可執行下載包 |
 | 12 | 物件導向分析與設計 × AI 輔助開發；教師修正版 | 中、英、日各 89 頁，含參考答案頁、教師備忘稿與 lab_monitor 範例專案 |
+| 測試 | Python 程式測試：原理與方法（補充教材） | 中、英、日各 35 頁，含參考答案頁、教師備忘稿與三語成績簿範例專案 |
 | GUI | 五種常見做法・學生版 v2 | 中文 32 頁；五個工具家族與六個可執行範例 |
 | Django | 網站建立與專案檔案解析；中文 v3、英文 v2、日文 v3 | 各語言 53 頁，含對應語言的商品目錄專案 |
 | Pygame | 射擊遊戲、類別與物件觀察 | 中、英、日各 33 頁；第 31–33 頁為線上版連結、操作與暫停範例 |
@@ -71,6 +72,21 @@ python scripts/sync_week12.py <來源資料夾>
 腳本會重新擷取 `content/week12-slides.json`（標題、段落、表格、程式碼與教師提示依原投影片順序排列）與 18 張三語圖片 `public/materials/week-12-{zh,en,ja}-slide-N.png`，複製 `week-12-{zh,en,ja}.pptx`，在 `lab_monitor.zip` 加入 `README-en.md`、`README-ja.md`（來源 `content/week12-readme-{en,ja}.md`），並寫入 `content/week12-source-manifest.json`。不加資料夾時只更新 `content/lessons.json`；主同步腳本也會保留這個單元。
 
 `python scripts/check_week12_package.py` 從實際下載 ZIP 解壓縮，執行 27 項測試、`mypy --strict`、示範程式（輸出須與第 8 頁節錄一致），確認練習 A／B 起始檔分別有 13、10 項失敗，再把第 88、89 頁的參考解答放入練習檔，驗證 50 項測試全數通過。需要 pytest==9.2.0 與 mypy==2.4.0；GitHub Actions 也會執行。
+
+## Python 程式測試（補充教材）
+
+三語路徑為 `/testing/`、`/en/testing/`、`/ja/testing/`，每種語言 35 頁、5 章：測試的原理（assert、AAA、迷你測試執行器、測試金字塔、FIRST、等價類別與邊界值）、unittest、pytest（收集規則、assert 改寫、fixture、parametrize、pytest.raises／approx）與邊界值練習。導覽位置在第 12 週之後、GUI 之前。投影片與網頁不標示時間；參考答案頁不隱藏。
+
+來源是 `python-testing.pptx`、`python-testing-en.pptx`、`python-testing-ja.pptx`（與第 12 週相同的產生工具；英日文為中文版的原位翻譯，頁碼一致）及三種語言的範例專案 `gradebook_testing.zip`、`gradebook_testing-en.zip`、`gradebook_testing-ja.zip`（程式註解、訊息與 README 依語言翻譯）。把六個檔案放在同一資料夾後執行：
+
+```bash
+pip install python-pptx pillow
+python scripts/sync_testing.py <來源資料夾>
+```
+
+腳本沿用第 12 週的擷取規則，產生 `content/testing-slides.json` 與三語圖片 `public/materials/testing-{zh,en,ja}-slide-9.png`，複製 `testing-{zh,en,ja}.pptx` 與三個範例 ZIP，並寫入 `content/testing-source-manifest.json`。不加資料夾時只更新 `content/lessons.json`；主同步腳本也會保留這個單元。
+
+`python scripts/check_testing_package.py` 逐一解壓縮三個語言的下載檔，確認 python 與 pytest 的 assert 訊息、迷你測試執行器與 unittest 的失敗輸出和投影片完全一致，unittest 6 項、pytest 21 項通過，第 33 頁的參考答案能找出 80 分的邊界錯誤，修正後 13 項通過。需要 pytest==9.2.0；GitHub Actions 也會執行。
 
 ## 本機預覽
 

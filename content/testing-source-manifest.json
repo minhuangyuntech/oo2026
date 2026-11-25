@@ -1,0 +1,26 @@
+[
+  {
+    "unit": "testing",
+    "language": "zh",
+    "source": "python-testing.pptx",
+    "download": "testing-zh.pptx",
+    "slides": 35,
+    "sha256": "7b4f87d10ecddacbcb3d1bcd128b7722538978737560333ecb212bb78040476c"
+  },
+  {
+    "unit": "testing",
+    "language": "en",
+    "source": "python-testing-en.pptx",
+    "download": "testing-en.pptx",
+    "slides": 35,
+    "sha256": "6c326d11833c62b39157fa5f3b60470389694a689246320991c75e182a79f2c9"
+  },
+  {
+    "unit": "testing",
+    "language": "ja",
+    "source": "python-testing-ja.pptx",
+    "download": "testing-ja.pptx",
+    "slides": 35,
+    "sha256": "5a7faf134621801e43db3453fff4c2536d07a6a5700afcc19d6aa4d90708a7c9"
+  }
+]

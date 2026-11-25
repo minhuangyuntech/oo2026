@@ -39,7 +39,7 @@ database_lessons=json.loads((ROOT/"content/database-lessons.json").read_text(enc
 lessons.update({f"{lang}-databases": lesson for lang,lesson in database_lessons.items()})
 ubuntu_lessons=json.loads((ROOT/"content/ubuntu-lessons.json").read_text(encoding="utf-8"))
 lessons.update({f"{lang}-ubuntu-deploy": lesson for lang,lesson in ubuntu_lessons.items()})
-units=[1,2,3,4,5,6,7,8,12,"gui","django","pygame","memory","pypi","django-case","databases","ubuntu-deploy"]
+units=[1,2,3,4,5,6,7,8,12,"testing","gui","django","pygame","memory","pypi","django-case","databases","ubuntu-deploy"]
 for locale, prefix, html_lang in [('zh','','zh-Hant'),('en','/en','en'),('ja','/ja','ja')]:
     home=pages[prefix+'/']
     assert home.lang == html_lang
@@ -135,7 +135,7 @@ for locale, prefix, html_lang in [('zh','','zh-Hant'),('en','/en','en'),('ja','/
     html=(OUT/route.lstrip('/')/'index.html').read_text(encoding='utf-8')
     assert 'rel="canonical" href="https://minhuangyuntech.github.io'+BASE+route+'"' in html
 
-manifest=[source for name in ['source-manifest.json','additional-source-manifest.json','django-source-manifest.json','pygame-source-manifest.json','memory-source-manifest.json','week8-source-manifest.json','week12-source-manifest.json','week7-source-manifest.json','pypi-source-manifest.json','django-case-source-manifest.json','database-source-manifest.json','ubuntu-source-manifest.json'] for source in json.loads((ROOT/'content'/name).read_text(encoding='utf-8'))]
+manifest=[source for name in ['source-manifest.json','additional-source-manifest.json','django-source-manifest.json','pygame-source-manifest.json','memory-source-manifest.json','week8-source-manifest.json','week12-source-manifest.json','testing-source-manifest.json','week7-source-manifest.json','pypi-source-manifest.json','django-case-source-manifest.json','database-source-manifest.json','ubuntu-source-manifest.json'] for source in json.loads((ROOT/'content'/name).read_text(encoding='utf-8'))]
 for source in manifest:
     file=ROOT/'public/materials'/source['download']
     assert hashlib.sha256(file.read_bytes()).hexdigest()==source['sha256'],source['source']
@@ -285,6 +285,33 @@ for lang,deck in week12_raw.items():
             if block['type']!='code':continue
             assert block['text'] in text,(route,slide['number'])
             if block['language']=='python' and slide['number']!=80:ast.parse(block['text']);codes+=1
+testing_raw=json.loads((ROOT/'content/testing-slides.json').read_text(encoding='utf-8'))
+testing_layout=None
+for lang,deck in testing_raw.items():
+    lesson=lessons[f'{lang}-testing']
+    prefix='' if lang=='zh' else '/'+lang
+    route=prefix+'/testing/'
+    page=pages[route]
+    assert lesson['slides']==deck and len(deck)==35
+    # The English and Japanese decks are in-place translations: every slide keeps the same blocks.
+    layout=[([(b['type'],b.get('language')) for b in s['body']],'intro' in s,s.get('image','').replace(f'-{lang}-','-')) for s in deck]
+    testing_layout=testing_layout or layout
+    assert layout==testing_layout,lang
+    assert BASE+route in pages[prefix+'/'].links and BASE+route in pages[prefix+'/week/12/'].links
+    for locale in ['','/en','/ja']:assert BASE+locale+'/testing/' in page.links
+    assert BASE+'/materials/'+lesson['download'] in page.links and BASE+'/materials/'+lesson['examples'] in page.links
+    images=[s['image'] for s in deck if s.get('image')]
+    assert len(images)==1 and all(BASE+image in page.assets and (ROOT/'public'/image.lstrip('/')).exists() for image in images)
+    with zipfile.ZipFile(ROOT/'public/materials'/lesson['download']) as pptx:
+        assert len([n for n in pptx.namelist() if re.fullmatch(r'ppt/slides/slide\d+\.xml',n)])==35
+        assert not any(b'show="0"' in pptx.read(n) for n in pptx.namelist() if re.fullmatch(r'ppt/slides/slide\d+\.xml',n))
+    from html import unescape
+    text=unescape((OUT/route.lstrip('/')/'index.html').read_text(encoding='utf-8'))
+    for slide in deck:
+        for block in slide['body']:
+            if block['type']!='code':continue
+            assert block['text'] in text,(route,slide['number'])
+            if block['language']=='python':ast.parse(block['text']);codes+=1
 week7_raw=json.loads((ROOT/'content/week7-slides.json').read_text(encoding='utf-8'))
 for lang,deck in week7_raw.items():
     lesson=lessons[f'{lang}-7']

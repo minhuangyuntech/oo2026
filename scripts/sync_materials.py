@@ -55,6 +55,7 @@ from sync_pypi import sync_pypi
 from sync_week7 import sync_week7
 from sync_week8 import sync_week8
 from sync_week12 import sync_week12
+from sync_testing import sync_testing
 from sync_memory import sync_memory
 from sync_pygame import sync_pygame
 from sync_django import sync_django
@@ -66,6 +67,7 @@ sync_memory(lessons, Path(sys.argv[1]) if len(sys.argv)>1 else None)
 sync_week7(lessons, Path(sys.argv[1]) if len(sys.argv)>1 else None)
 sync_week8(lessons, Path(sys.argv[1]) if len(sys.argv)>1 else None)
 sync_week12(lessons, Path(sys.argv[1]) if len(sys.argv)>1 else None)
+sync_testing(lessons, Path(sys.argv[1]) if len(sys.argv)>1 else None)
 sync_pypi(lessons)
 sync_django_case(lessons)
 (ROOT/'content/lessons.json').write_text(json.dumps(lessons,ensure_ascii=False,separators=(',',':')),encoding='utf-8')

@@ -5,6 +5,8 @@ export {djangoCaseInfo,djangoCaseRanges,djangoCaseChapters};
 import {week7Info,week7Ranges,week7Chapters} from "./week7-data";
 import {week8Info,week8Ranges,week8Chapters} from "./week8-data";
 import {week12Info,week12Ranges,week12Chapters} from "./week12-data";
+import {testingInfo,testingRanges,testingChapters} from "./testing-data";
+export {testingInfo,testingRanges,testingChapters};
 export const modernWeeks = [1,2,3,4,5,6,7,8,12];
 export const weekSlideCounts:Record<number,number> = {1:23,2:67,3:40,4:56,5:11,6:19,7:24,8:32,12:89};
 import {djangoInfo,djangoRanges,djangoChapters} from "./django-data";
@@ -17,7 +19,7 @@ import {memoryInfo,memoryRanges,memoryChapters} from "./memory-data";
 export {memoryInfo,memoryRanges,memoryChapters};
 import {pypiInfo,pypiRanges,pypiChapters} from "./pypi-data";
 export {pypiInfo,pypiRanges,pypiChapters};
-export type UnitId = number | "gui" | "django" | "pygame" | "memory" | "pypi" | "django-case" | "databases" | "ubuntu-deploy";
+export type UnitId = number | "gui" | "django" | "pygame" | "memory" | "pypi" | "django-case" | "databases" | "ubuntu-deploy" | "testing";
 export type Language = "zh" | "en" | "ja";
 export type BodyBlock = { type: string; text?: string; rows?: string[][]; language?: string; label?: string|null };
 export type Snippet = {code:string;language:string;label?:string|null};
@@ -97,6 +99,7 @@ export const laterWeeks = {
   ja:["ライフサイクルとメモリモデル","クラス間の関係と UML クラス図","継承とクラス階層","多態性・抽象化・インターフェース","中間試験（筆記）","Python の高度なオブジェクト指向機構","データクラス・ジェネリクス・型設計","オブジェクト指向分析と設計","SOLID と設計原則","デザインパターンとリファクタリング","Python のウェブ・データベース応用（補足）","LLM 統合と Linux 配備（補足）","システム統合とプロジェクトレビュー","総復習と最終プロジェクトの要件"]
 };
 export function weekLabel(lang: Language, week: UnitId) {
+  if(week==="testing")return {zh:"測試",en:"Testing",ja:"テスト"}[lang];
   if(week==="databases")return {zh:"資料庫",en:"Databases",ja:"データベース"}[lang];
   if(week==="django-case")return {zh:"Django 實作",en:"Django cases",ja:"Django 実装"}[lang];
   if(week==="pypi")return "PyPI";
@@ -110,6 +113,6 @@ export function weekLabel(lang: Language, week: UnitId) {
 
 for(const lang of locales){weekInfo[lang].push(...extraInfo[lang]);chapterNames[lang].push(...extraChapters[lang]);}
 chapterRanges.push(...extraRanges);
-export function unitInfo(lang:Language,unit:UnitId){return unit==="ubuntu-deploy"?ubuntuInfo[lang]:unit==="databases"?databaseInfo[lang]:unit==="django-case"?djangoCaseInfo[lang]:unit==="pypi"?pypiInfo[lang]:unit===7?week7Info[lang]:unit===8?week8Info[lang]:unit===12?week12Info[lang]:unit==="memory"?memoryInfo[lang]:unit==="pygame"?pygameInfo[lang]:unit==="django"?djangoInfo[lang]:unit==="gui"?guiInfo[lang]:weekInfo[lang][unit-1];}
-export function unitRanges(unit:UnitId){return unit==="ubuntu-deploy"?ubuntuRanges:unit==="databases"?databaseRanges:unit==="django-case"?djangoCaseRanges:unit==="pypi"?pypiRanges:unit===7?week7Ranges:unit===8?week8Ranges:unit===12?week12Ranges:unit==="memory"?memoryRanges:unit==="pygame"?pygameRanges:unit==="django"?djangoRanges:unit==="gui"?guiRanges:chapterRanges[unit-1];}
-export function unitChapters(lang:Language,unit:UnitId){return unit==="ubuntu-deploy"?ubuntuChapters[lang]:unit==="databases"?databaseChapters[lang]:unit==="django-case"?djangoCaseChapters[lang]:unit==="pypi"?pypiChapters[lang]:unit===7?week7Chapters[lang]:unit===8?week8Chapters[lang]:unit===12?week12Chapters[lang]:unit==="memory"?memoryChapters[lang]:unit==="pygame"?pygameChapters[lang]:unit==="django"?djangoChapters[lang]:unit==="gui"?guiChapters[lang]:chapterNames[lang][unit-1];}
+export function unitInfo(lang:Language,unit:UnitId){return unit==="testing"?testingInfo[lang]:unit==="ubuntu-deploy"?ubuntuInfo[lang]:unit==="databases"?databaseInfo[lang]:unit==="django-case"?djangoCaseInfo[lang]:unit==="pypi"?pypiInfo[lang]:unit===7?week7Info[lang]:unit===8?week8Info[lang]:unit===12?week12Info[lang]:unit==="memory"?memoryInfo[lang]:unit==="pygame"?pygameInfo[lang]:unit==="django"?djangoInfo[lang]:unit==="gui"?guiInfo[lang]:weekInfo[lang][unit-1];}
+export function unitRanges(unit:UnitId){return unit==="testing"?testingRanges:unit==="ubuntu-deploy"?ubuntuRanges:unit==="databases"?databaseRanges:unit==="django-case"?djangoCaseRanges:unit==="pypi"?pypiRanges:unit===7?week7Ranges:unit===8?week8Ranges:unit===12?week12Ranges:unit==="memory"?memoryRanges:unit==="pygame"?pygameRanges:unit==="django"?djangoRanges:unit==="gui"?guiRanges:chapterRanges[unit-1];}
+export function unitChapters(lang:Language,unit:UnitId){return unit==="testing"?testingChapters[lang]:unit==="ubuntu-deploy"?ubuntuChapters[lang]:unit==="databases"?databaseChapters[lang]:unit==="django-case"?djangoCaseChapters[lang]:unit==="pypi"?pypiChapters[lang]:unit===7?week7Chapters[lang]:unit===8?week8Chapters[lang]:unit===12?week12Chapters[lang]:unit==="memory"?memoryChapters[lang]:unit==="pygame"?pygameChapters[lang]:unit==="django"?djangoChapters[lang]:unit==="gui"?guiChapters[lang]:chapterNames[lang][unit-1];}

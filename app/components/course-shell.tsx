@@ -4,7 +4,7 @@ import {ubuntuInfo} from "../ubuntu-data";
 import {databaseInfo} from "../database-data";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { basePath, coursePath, languageNames, locales, ui, modernWeeks, unitInfo, weekLabel, guiInfo, djangoInfo, pygameInfo, memoryInfo, pypiInfo, djangoCaseInfo, type UnitId, type Language } from "../data";
+import { basePath, coursePath, languageNames, locales, ui, modernWeeks, unitInfo, weekLabel, guiInfo, djangoInfo, pygameInfo, memoryInfo, pypiInfo, djangoCaseInfo, testingInfo, type UnitId, type Language } from "../data";
 
 export default function CourseShell({lang,week,children}:{lang:Language;week?:UnitId;children:React.ReactNode}) {
   const t=ui[lang];
@@ -24,6 +24,7 @@ export default function CourseShell({lang,week,children}:{lang:Language;week?:Un
         <Link className={!week?"nav-home active":"nav-home"} href={coursePath(lang)} aria-current={!week?"page":undefined}><span aria-hidden="true">⌂</span>{t.home}</Link>
         <p className="nav-caption">{t.materials}<span>01–12</span></p>
         {modernWeeks.map(unit=>{const item=unitInfo(lang,unit);return <Link className={`nav-week ${week===unit?"active":""}`} key={item.title} href={coursePath(lang,unit)} aria-current={week===unit?"page":undefined}><span className="nav-number">{String(unit).padStart(2,"0")}</span><span><small>{item.tag}</small><b>{item.title}</b></span>{week===unit&&<i aria-hidden="true"/>}</Link>;})}
+        <Link className={`nav-week ${week==="testing"?"active":""}`} href={coursePath(lang,"testing")} aria-current={week==="testing"?"page":undefined}><span className="nav-number">TEST</span><span><small>{testingInfo[lang].tag}</small><b>{testingInfo[lang].title}</b></span></Link>
         <Link className={`nav-week ${week==="gui"?"active":""}`} href={coursePath(lang,"gui")} aria-current={week==="gui"?"page":undefined}><span className="nav-number">GUI</span><span><small>{guiInfo[lang].tag}</small><b>{guiInfo[lang].title}</b></span></Link>
         <Link className={`nav-week ${week==="django"?"active":""}`} href={coursePath(lang,"django")} aria-current={week==="django"?"page":undefined}><span className="nav-number">WEB</span><span><small>{djangoInfo[lang].tag}</small><b>{djangoInfo[lang].title}</b></span></Link>
         <Link className={`nav-week ${week==="django-case"?"active":""}`} href={coursePath(lang,"django-case")} aria-current={week==="django-case"?"page":undefined}><span className="nav-number">CASE</span><span><small>{djangoCaseInfo[lang].tag}</small><b>{djangoCaseInfo[lang].title}</b></span></Link>
