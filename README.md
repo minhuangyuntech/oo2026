@@ -2,7 +2,7 @@
 
 以 Python 為主要實作語言的 18 週物件導向程式設計教材網站。
 
-第 1–8 週與補充教材提供繁體中文、英文與日文完整網頁，共 16 個單元、664 個投影片主題、1992 個語言版本主題。第 9–18 週保留原有中文教材與網址。
+第 1–8 週、第 12 週與補充教材提供繁體中文、英文與日文完整網頁，共 17 個單元、753 個投影片主題、2259 個語言版本主題。其他週次保留原有中文教材與網址。
 
 「用 Python 直接存取 SQLite 與 MongoDB」位於 `/databases/`、`/en/databases/` 與 `/ja/databases/`。各語言均有 58 頁線上教材、PowerPoint 和可執行的讀書紀錄範例。SQL 指令入門位於第 20–32 頁。教材內容位於 `content/database-lessons.json`，下載檔位於 `public/materials/`。
 
@@ -29,6 +29,7 @@
 | 5–6 | 生命週期與 UML・學生版 UML 加強版 | 中文 30 頁；第 5 週 1–11 頁、第 6 週 12–30 頁 |
 | 7 | 繼承與類別階層；射擊遊戲延伸 | 中、英、日各 24 頁，含初始化、覆寫、super()、可替換性、MRO 與可執行範例 |
 | 8 | 多型、抽象化與介面；射擊遊戲延伸 | 中、英、日各 32 頁，含 ABC、Protocol、移動策略與可執行下載包 |
+| 12 | 物件導向分析與設計 × AI 輔助開發；教師修正版 | 中、英、日各 89 頁，含參考答案頁、教師備忘稿與 lab_monitor 範例專案 |
 | GUI | 五種常見做法・學生版 v2 | 中文 32 頁；五個工具家族與六個可執行範例 |
 | Django | 網站建立與專案檔案解析；中文 v3、英文 v2、日文 v3 | 各語言 53 頁，含對應語言的商品目錄專案 |
 | Pygame | 射擊遊戲、類別與物件觀察 | 中、英、日各 33 頁；第 31–33 頁為線上版連結、操作與暫停範例 |
@@ -55,6 +56,21 @@ Django 單元使用 `content/django-slide-sources.json`，由 `scripts/sync_djan
 `house_price_demo.zip` 包含完整 Python 模組與三語 README。CLI 保留中文標籤；英日文說明提供對照與可直接使用的程式。房價套件使用標準函式庫，透過 RateWise／HaoRate 取得臺銀資料快照，保留銀行掛牌時間。範例尚未發布到套件索引，學生須自行替換發布名稱與準備授權。
 
 `python scripts/check_pypi.py` 驗證 147 頁、93 段程式碼在 PPTX 與網頁間完全一致，並確認每段程式碼只在一個文字方塊、下載包可匯入、換算與錯誤輸入處理正確。
+
+## 第 12 週：物件導向分析與設計 × AI 輔助開發
+
+三語路徑為 `/week/12/`、`/en/week/12/`、`/ja/week/12/`，每種語言 89 頁、12 章，以實驗室環境監測站為案例，走過需求、名詞動詞分析、CRC 卡、職責分配、循序圖、Protocol 介面、AI 設計找碴與「規格 → 測試 → AI 實作 → 審查」流程。參考答案頁（第 18、53、67、88、89 頁）與備忘稿中的教師提示照原投影片公開；網頁不顯示「隱藏投影片」的操作說明。
+
+來源是教師修正過的三份投影片 `week12-ooad-ai.pptx`、`week12-ooad-ai-en.pptx`、`week12-ooad-ai-ja.pptx`（英日文為中文版的原位翻譯，版面與頁碼一致）及學生用 `lab_monitor.zip`。把四個檔案放在同一資料夾後執行：
+
+```bash
+pip install python-pptx pillow
+python scripts/sync_week12.py <來源資料夾>
+```
+
+腳本會重新擷取 `content/week12-slides.json`（標題、段落、表格、程式碼與教師提示依原投影片順序排列）與 18 張三語圖片 `public/materials/week-12-{zh,en,ja}-slide-N.png`，複製 `week-12-{zh,en,ja}.pptx`，在 `lab_monitor.zip` 加入 `README-en.md`、`README-ja.md`（來源 `content/week12-readme-{en,ja}.md`），並寫入 `content/week12-source-manifest.json`。不加資料夾時只更新 `content/lessons.json`；主同步腳本也會保留這個單元。
+
+`python scripts/check_week12_package.py` 從實際下載 ZIP 解壓縮，執行 27 項測試、`mypy --strict`、示範程式（輸出須與第 8 頁節錄一致），確認練習 A／B 起始檔分別有 13、10 項失敗，再把第 88、89 頁的參考解答放入練習檔，驗證 50 項測試全數通過。需要 pytest==9.2.0 與 mypy==2.4.0；GitHub Actions 也會執行。
 
 ## 本機預覽
 

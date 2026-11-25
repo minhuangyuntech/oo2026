@@ -1,0 +1,26 @@
+[
+  {
+    "week": 12,
+    "language": "zh",
+    "source": "week12-ooad-ai.pptx",
+    "download": "week-12-zh.pptx",
+    "slides": 89,
+    "sha256": "c8aa1eaf83a0fc7132a5ee2efe57798e4caba426107985b7c2ad8413906d44ac"
+  },
+  {
+    "week": 12,
+    "language": "en",
+    "source": "week12-ooad-ai-en.pptx",
+    "download": "week-12-en.pptx",
+    "slides": 89,
+    "sha256": "c5773aed0f9afb9d7ae2dc4872a8b50ef73acd46826ee8a49ab34bedacf34a75"
+  },
+  {
+    "week": 12,
+    "language": "ja",
+    "source": "week12-ooad-ai-ja.pptx",
+    "download": "week-12-ja.pptx",
+    "slides": 89,
+    "sha256": "ff0a5f0585e468cf3a72c701eaa22826ba69fe7c0ef842678c6be48b35a9bb4e"
+  }
+]

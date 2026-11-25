@@ -30,10 +30,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: python -m pip install pygame==2.6.1 mypy==2.4.0
+      - run: python -m pip install pygame==2.6.1 mypy==2.4.0 pytest==9.2.0
       - run: python scripts/check_memory_package.py
       - run: python scripts/check_week8_package.py
       - run: python scripts/check_week7_package.py
+      - run: python scripts/check_week12_package.py
       - run: python scripts/check_pypi.py
       - run: python -m pip install Django==5.2.18 requests==2.32.5 openai==2.29.0 python-dotenv==1.2.2
       - run: python scripts/check_django_case.py
